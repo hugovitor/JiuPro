@@ -1,39 +1,34 @@
 // app/dashboard/alunos/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-
-// Interface de tipos para garantir a segurança estrita do TypeScript
-interface IAtletaLista {
-  id: string
-  nome: string
-  faixa: string
-  graus: number
-  status: 'Ativo' | 'Inativo'
-  dataMatricula: string
-}
-
-// Dados fictícios simulando o banco de dados de alunos matriculados
-const bancoAlunos: IAtletaLista[] = [
-  { id: '1', nome: 'Carlos Silva', faixa: 'Azul', graus: 2, status: 'Ativo', dataMatricula: '12/03/2025' },
-  { id: '2', nome: 'Mariana Costa', faixa: 'Roxa', graus: 4, status: 'Ativo', dataMatricula: '10/07/2024' },
-  { id: '3', nome: 'Rodrigo Lima', faixa: 'Branca', graus: 1, status: 'Ativo', dataMatricula: '05/01/2026' },
-  { id: '4', nome: 'Marcos Oliveira', faixa: 'Roxa', graus: 2, status: 'Inativo', dataMatricula: '15/02/2024' },
-  { id: '5', nome: 'Felipe Melo', faixa: 'Branca', graus: 0, status: 'Ativo', dataMatricula: '22/11/2025' },
-  { id: '6', nome: 'Beatriz Santos', faixa: 'Preta', graus: 1, status: 'Ativo', dataMatricula: '09/09/2022' },
-]
+import { db, Student } from '../../lib/db'
 
 export default function ListagemAlunosPage() {
   const [busca, setBusca] = useState('')
   const [filtroFaixa, setFiltroFaixa] = useState('Todas')
+  const [alunos, setAlunos] = useState<Student[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loggedUser = db.getLoggedInUser()
+    if (loggedUser) {
+      setAlunos(db.getStudents(loggedUser.academyId))
+    }
+    setIsLoading(false)
+  }, [])
 
   // Lógica combinada de busca por texto e filtro por faixa
-  const alunosFiltrados = bancoAlunos.filter((aluno) => {
+  const alunosFiltrados = alunos.filter((aluno) => {
     const matchesBusca = aluno.nome.toLowerCase().includes(busca.toLowerCase())
     const matchesFaixa = filtroFaixa === 'Todas' || aluno.faixa === filtroFaixa
     return matchesBusca && matchesFaixa
   })
+
+  if (isLoading) {
+    return <div className="text-xs font-semibold text-slate-400">Carregando tatame...</div>
+  }
 
   return (
     <div className="space-y-6">

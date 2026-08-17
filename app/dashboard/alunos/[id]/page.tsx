@@ -1,63 +1,9 @@
 // app/dashboard/alunos/[id]/page.tsx
 'use client'
 
-import { useState, use } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-
-// Interfaces de Tipo Estrritas (Zero any)
-interface ILinhagem {
-  graduadoPor: string
-  mestreOriginal: string
-}
-
-interface IFinanceiro {
-  mes: string
-  vencimento: string
-  valor: string
-  status: 'Pago' | 'Atrasado'
-}
-
-interface IPresenca {
-  data: string
-  horario: string
-  treino: string
-}
-
-interface IAlunoPro {
-  nome: string
-  faixa: string
-  graus: number
-  dataMatricula: string
-  status: 'Ativo' | 'Inativo'
-  chavePix: string
-  linhagem: ILinhagem
-  financeiro: IFinanceiro[]
-  presencas: IPresenca[]
-}
-
-// Banco de dados simulado com os novos recursos comerciais
-const databaseAlunos: Record<string, IAlunoPro> = {
-  '1': {
-    nome: 'Carlos Silva',
-    faixa: 'Azul',
-    graus: 2,
-    dataMatricula: '12/03/2025',
-    status: 'Ativo',
-    chavePix: 'financeiro@jiuproacademia.com',
-    linhagem: {
-      graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-      mestreOriginal: 'Mestre Carlos Gracie Jr.'
-    },
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '10/08/2026', valor: '150,00', status: 'Atrasado' },
-      { mes: 'Julho/2026', vencimento: '10/07/2026', valor: '150,00', status: 'Pago' },
-    ],
-    presencas: [
-      { data: '12/08/2026', horario: '19:30h', treino: 'Avançado' },
-      { data: '10/08/2026', horario: '19:30h', treino: 'Avançado' },
-    ]
-  }
-}
+import { db, Student, User, Invoice } from '../../../lib/db'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -68,24 +14,68 @@ export default function FichaAlunoPage({ params }: PageProps) {
   const resolvedParams = use(params)
   const alunoId = resolvedParams.id
 
-  const aluno: IAlunoPro = databaseAlunos[alunoId] || {
-    nome: 'Aluno Não Encontrado',
-    faixa: 'Branca',
-    graus: 0,
-    dataMatricula: '--/--/----',
-    status: 'Inativo',
-    chavePix: '',
-    linhagem: { graduadoPor: 'Não informada', mestreOriginal: 'Não informado' },
-    financeiro: [],
-    presencas: []
-  }
-
+  const [user, setUser] = useState<User | null>(null)
+  const [aluno, setAluno] = useState<Student | null>(null)
+  const [loading, setLoading] = useState(true)
   const [abaAtiva, setAbaAtiva] = useState<'financeiro' | 'presencas' | 'tradicao'>('financeiro')
 
-  // Recurso Comercial: Disparar cobrança inteligente via WhatsApp (Sintaxe Corrigida)
-  const handleCobrancaWhatsapp = (f: IFinanceiro) => {
+  const loadData = () => {
+    const loggedUser = db.getLoggedInUser()
+    if (!loggedUser) {
+      router.push('/login')
+      return
+    }
+    setUser(loggedUser)
+
+    const athlete = db.getStudent(alunoId)
+    // Check tenant boundary
+    if (athlete && athlete.academyId === loggedUser.academyId) {
+      setAluno(athlete)
+    } else {
+      setAluno(null)
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [alunoId])
+
+  // Mark invoice as paid
+  const handleDarBaixa = (invoiceIndex: number) => {
+    if (!aluno) return
+    const updatedInvoices = [...aluno.financeiro]
+    updatedInvoices[invoiceIndex] = {
+      ...updatedInvoices[invoiceIndex],
+      status: 'Pago' as const
+    }
+    
+    db.updateStudentInvoices(aluno.id, updatedInvoices)
+    loadData()
+  }
+
+  // Disparar cobrança inteligente via WhatsApp
+  const handleCobrancaWhatsapp = (f: Invoice) => {
+    if (!aluno) return
     const texto = `Olá, ${aluno.nome}! Verificamos no sistema JiuPro que a mensalidade de ${f.mes} (Vencimento: ${f.vencimento}) no valor de R$ ${f.valor} consta em aberto.\n\nPara facilitar, você pode efetuar o pagamento via PIX.\nChave PIX: ${aluno.chavePix}\n\nApós o envio, o sistema dará a baixa automaticamente. Obrigado! Oss.`
-    window.open(`https://wa.me{encodeURIComponent(texto)}`, '_blank')
+    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank')
+  }
+
+  if (loading) {
+    return <div className="text-xs font-semibold text-slate-400">Carregando ficha...</div>
+  }
+
+  if (!aluno) {
+    return (
+      <div className="space-y-4">
+        <button onClick={() => router.back()} className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+          ← Voltar
+        </button>
+        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-sm text-zinc-400">
+          Atleta não encontrado ou acesso não autorizado para esta unidade.
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -113,7 +103,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
 
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">{aluno.nome}</h1>
-            <p className="text-xs text-slate-400 font-medium">Matrícula realizada em {aluno.dataMatricula}</p>
+            <p className="text-xs text-slate-400 font-medium">Matrícula realizada em {new Date(aluno.dataMatricula + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
           </div>
         </div>
 
@@ -174,12 +164,20 @@ export default function FichaAlunoPage({ params }: PageProps) {
                   </td>
                   <td className="p-4 text-right">
                     {f.status === 'Atrasado' && (
-                      <button
-                        onClick={() => handleCobrancaWhatsapp(f)}
-                        className="text-xs bg-slate-950 text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-all shadow-sm"
-                      >
-                        ⚡ Cobrar PIX
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleDarBaixa(idx)}
+                          className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-all shadow-sm"
+                        >
+                          ✓ Baixa
+                        </button>
+                        <button
+                          onClick={() => handleCobrancaWhatsapp(f)}
+                          className="text-xs bg-slate-950 text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-all shadow-sm"
+                        >
+                          ⚡ Cobrar PIX
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -196,10 +194,10 @@ export default function FichaAlunoPage({ params }: PageProps) {
             aluno.presencas.map((p, idx) => (
               <div key={idx} className="py-3 flex justify-between text-sm items-center">
                 <div>
-                  <p className="font-semibold text-slate-900">Treino {p.treino}</p>
+                  <p className="font-semibold text-slate-900">{p.treino}</p>
                   <p className="text-xs text-slate-400 mt-0.5">Frequência registrada às {p.horario}</p>
                 </div>
-                <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">{p.data}</span>
+                <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">{new Date(p.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
               </div>
             ))
           ) : (
@@ -213,11 +211,11 @@ export default function FichaAlunoPage({ params }: PageProps) {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Instrutor Responsável</h3>
-            <p className="text-sm font-semibold text-slate-800 mt-1">{aluno.linhagem.graduadoPor}</p>
+            <p className="text-sm font-semibold text-slate-800 mt-1">{aluno.graduadoPor}</p>
           </div>
           <div className="pt-4 border-t border-slate-100">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Raiz / Linhagem de Mestre</h3>
-            <p className="text-sm font-semibold text-slate-800 mt-1">{aluno.linhagem.mestreOriginal}</p>
+            <p className="text-sm font-semibold text-slate-800 mt-1">{aluno.mestreOriginal}</p>
           </div>
         </div>
       )}

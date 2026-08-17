@@ -1,29 +1,31 @@
 // app/dashboard/exames/page.tsx
 'use client'
 
-import { useState } from 'react'
-
-interface IAtletaExame {
-  id: string
-  nome: string
-  faixaAtual: string
-  grausAtuais: number
-  aulasConcluidas: number
-}
+import { useState, useEffect } from 'react'
+import { db, Student, User, Academy } from '../../lib/db'
 
 export default function ExameGraduacaoPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [academy, setAcademy] = useState<Academy | null>(null)
+  const [listaAlunos, setListaAlunos] = useState<Student[]>([])
+  
   const [alunoSelecionadoId, setAlunoSelecionadoId] = useState('')
   const [novaFaixa, setNovaFaixa] = useState('Azul')
   const [dataExame, setDataExame] = useState(
     new Date().toISOString().split('T')[0]
   )
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Mock de atletas aptos para avaliação técnica
-  const listaAlunos: IAtletaExame[] = [
-    { id: '1', nome: 'Carlos Silva', faixaAtual: 'Branca', grausAtuais: 4, aulasConcluidas: 42 },
-    { id: '2', nome: 'Mariana Costa', faixaAtual: 'Azul', grausAtuais: 3, aulasConcluidas: 68 },
-    { id: '3', nome: 'Rodrigo Lima', faixaAtual: 'Roxa', grausAtuais: 4, aulasConcluidas: 95 },
-  ]
+  useEffect(() => {
+    const loggedUser = db.getLoggedInUser()
+    if (loggedUser) {
+      setUser(loggedUser)
+      const currentAcademy = db.getAcademy(loggedUser.academyId)
+      if (currentAcademy) setAcademy(currentAcademy)
+      setListaAlunos(db.getStudents(loggedUser.academyId))
+    }
+    setIsLoading(false)
+  }, [])
 
   const alunoAtivo = listaAlunos.find((a) => a.id === alunoSelecionadoId)
 
@@ -34,6 +36,10 @@ export default function ExameGraduacaoPage() {
       return
     }
     window.print()
+  }
+
+  if (isLoading || !user) {
+    return <div className="text-xs font-semibold text-slate-400">Carregando tatame...</div>
   }
 
   return (
@@ -56,7 +62,7 @@ export default function ExameGraduacaoPage() {
             >
               <option value="">-- Escolha o aluno --</option>
               {listaAlunos.map((a) => (
-                <option key={a.id} value={a.id}>{a.nome}</option>
+                <option key={a.id} value={a.id}>{a.nome} ({a.faixa})</option>
               ))}
             </select>
           </div>
@@ -81,7 +87,7 @@ export default function ExameGraduacaoPage() {
 
           <button
             onClick={handleImprimir}
-            className="w-full px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px]"
+            className="w-full px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px] font-bold"
           >
             🖨️ Imprimir Ficha de Exame
           </button>
@@ -95,7 +101,7 @@ export default function ExameGraduacaoPage() {
           {/* Cabeçalho da Ficha */}
           <div className="text-center space-y-2 border-b-2 border-zinc-900 pb-6">
             <h2 className="text-2xl font-black tracking-tight font-sans uppercase">
-              Jiu<span className="text-red-600">Pro</span> Academia
+              {academy?.name || 'JiuPro'}
             </h2>
             <h3 className="text-lg font-bold uppercase tracking-widest font-sans text-zinc-700">
               Ficha de Avaliação Oficial de Graduação
@@ -111,11 +117,11 @@ export default function ExameGraduacaoPage() {
             </div>
             <div>
               <span className="block text-[10px] font-sans font-bold uppercase text-zinc-400">Data do Exame:</span>
-              <span className="font-medium font-sans">{new Date(dataExame).toLocaleDateString('pt-BR')}</span>
+              <span className="font-medium font-sans">{new Date(dataExame + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
             </div>
             <div>
               <span className="block text-[10px] font-sans font-bold uppercase text-zinc-400">Graduação Atual:</span>
-              <span className="font-medium font-sans">Faixa {alunoAtivo.faixaAtual} ({alunoAtivo.grausAtuais} Graus)</span>
+              <span className="font-medium font-sans">Faixa {alunoAtivo.faixa} ({alunoAtivo.graus} Graus)</span>
             </div>
             <div>
               <span className="block text-[10px] font-sans font-bold uppercase text-zinc-400">Exame para:</span>
@@ -123,7 +129,7 @@ export default function ExameGraduacaoPage() {
             </div>
             <div className="col-span-2">
               <span className="block text-[10px] font-sans font-bold uppercase text-zinc-400">Histórico de Assiduidade:</span>
-              <span className="font-medium font-sans text-xs text-zinc-600">Registrado um total de {alunoAtivo.aulasConcluidas} treinos validados neste ciclo técnico.</span>
+              <span className="font-medium font-sans text-xs text-zinc-600">Registrado um total de {alunoAtivo.presencas.length} treinos validados neste ciclo técnico.</span>
             </div>
           </div>
 

@@ -1,27 +1,16 @@
 // app/dashboard/promocoes/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-
-// Interfaces de tipos
-interface IAtletaGraduacao {
-  id: string
-  nome: string
-  faixaAtual: string
-  grausAtuais: number
-}
-
-// Mock de alunos que estão aptos ou próximos da promoção
-const listaAlunos: IAtletaGraduacao[] = [
-  { id: '1', nome: 'Carlos Silva', faixaAtual: 'Azul', grausAtuais: 2 },
-  { id: '2', nome: 'Mariana Costa', faixaAtual: 'Roxa', grausAtuais: 4 },
-  { id: '3', nome: 'Rodrigo Lima', faixaAtual: 'Branca', grausAtuais: 1 },
-]
+import { db, Student, User } from '../../lib/db'
 
 export default function PromocoesPage() {
   const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [listaAlunos, setListaAlunos] = useState<Student[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   
   // Estados do formulário de promoção
   const [alunoSelecionadoId, setAlunoSelecionadoId] = useState('')
@@ -30,6 +19,15 @@ export default function PromocoesPage() {
   const [dataPromocao, setDataPromocao] = useState(
     new Date().toISOString().split('T')[0]
   )
+
+  useEffect(() => {
+    const loggedUser = db.getLoggedInUser()
+    if (loggedUser) {
+      setUser(loggedUser)
+      setListaAlunos(db.getStudents(loggedUser.academyId))
+    }
+    setIsPageLoading(false)
+  }, [])
 
   // Encontra os dados do aluno atualmente selecionado para exibir um resumo na tela
   const alunoAtual = listaAlunos.find(a => a.id === alunoSelecionadoId)
@@ -43,23 +41,18 @@ export default function PromocoesPage() {
 
     setIsLoading(true)
 
-    const dadosPromocao = {
-      alunoId: alunoSelecionadoId,
-      faixaAnterior: alunoAtual?.faixaAtual,
-      grausAnteriores: alunoAtual?.grausAtuais,
-      novaFaixa,
-      novosGraus,
-      dataPromocao
-    }
-
-    // Local para integrar futuramente com sua API/Banco de dados
-    console.log('Registrando promoção no JiuPro:', dadosPromocao)
+    // Save in Mock DB
+    db.updateStudentBelt(alunoSelecionadoId, novaFaixa, novosGraus)
 
     setTimeout(() => {
       setIsLoading(false)
       alert(`Graduação de ${alunoAtual?.nome} atualizada com sucesso!`)
-      router.push('/dashboard')
-    }, 1000)
+      router.push('/dashboard/alunos')
+    }, 800)
+  }
+
+  if (isPageLoading || !user) {
+    return <div className="text-xs font-semibold text-slate-400">Carregando tatame...</div>
   }
 
   return (
@@ -90,8 +83,8 @@ export default function PromocoesPage() {
                   // Ao mudar o aluno, preenche o formulário com a faixa atual dele por padrão
                   const selecionado = listaAlunos.find(a => a.id === e.target.value)
                   if (selecionado) {
-                    setNovaFaixa(selecionado.faixaAtual)
-                    setNovosGraus(selecionado.grausAtuais)
+                    setNovaFaixa(selecionado.faixa)
+                    setNovosGraus(selecionado.graus)
                   }
                 }}
                 className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors text-zinc-800"
@@ -99,7 +92,7 @@ export default function PromocoesPage() {
                 <option value="">-- Escolha um aluno da lista --</option>
                 {listaAlunos.map((aluno) => (
                   <option key={aluno.id} value={aluno.id}>
-                    {aluno.nome} ({aluno.faixaAtual})
+                    {aluno.nome} (Faixa {aluno.faixa})
                   </option>
                 ))}
               </select>
@@ -190,10 +183,10 @@ export default function PromocoesPage() {
               <div className="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100">
                 <div>
                   <p className="text-[11px] text-zinc-400 font-medium uppercase">Graduação Atual</p>
-                  <p className="text-sm font-bold text-zinc-800 mt-0.5">Faixa {alunoAtual.faixaAtual}</p>
+                  <p className="text-sm font-bold text-zinc-800 mt-0.5">Faixa {alunoAtual.faixa}</p>
                 </div>
                 <span className="text-xs font-semibold bg-zinc-200 px-2 py-0.5 rounded text-zinc-600">
-                  {alunoAtual.grausAtuais}G
+                  {alunoAtual.graus}G
                 </span>
               </div>
 

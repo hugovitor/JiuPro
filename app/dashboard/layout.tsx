@@ -2,6 +2,8 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { db, User, Academy } from '../lib/db'
 
 export default function DashboardLayout({
   children,
@@ -11,9 +13,101 @@ export default function DashboardLayout({
   const router = useRouter()
   const pathname = usePathname()
 
+  const [user, setUser] = useState<User | null>(null)
+  const [academy, setAcademy] = useState<Academy | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isReactivating, setIsReactivating] = useState(false)
+
+  const loadSession = () => {
+    const loggedUser = db.getLoggedInUser()
+    if (!loggedUser) {
+      router.push('/login')
+      return
+    }
+    setUser(loggedUser)
+    const currentAcademy = db.getAcademy(loggedUser.academyId)
+    if (currentAcademy) {
+      setAcademy(currentAcademy)
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    loadSession()
+  }, [])
+
   const handleLogout = () => {
     document.cookie = "jiupro_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;"
     router.push('/login')
+  }
+
+  const handleSimulatePayment = () => {
+    if (!academy) return
+    setIsReactivating(true)
+    setTimeout(() => {
+      db.reactivateAcademy(academy.id)
+      setIsReactivating(false)
+      // Reload session
+      loadSession()
+    }, 1000)
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-9 w-9 bg-zinc-950 rounded-xl flex items-center justify-center border-r-[3px] border-red-600 animate-pulse">
+            <span className="text-white font-black text-xs italic tracking-tighter">JP</span>
+          </div>
+          <span className="text-xs font-semibold text-slate-400">Verificando credenciais...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Multi-tenant Billing Lock: Account Suspended
+  if (academy && academy.status === 'Suspenso') {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans px-4 antialiased">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-lg text-center space-y-6">
+          <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-rose-100">
+            ⚠️
+          </div>
+          
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-slate-900">Acesso Suspenso</h2>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              O acesso à conta administrativa da **{academy.name}** está suspenso devido a pendências no pagamento da assinatura do plano **JiuPro {academy.plan}**.
+            </p>
+          </div>
+
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-left text-xs space-y-1.5 text-slate-600">
+            <div className="flex justify-between font-semibold text-slate-800">
+              <span>Fatura pendente:</span>
+              <span className="text-rose-600">R$ {academy.plan === 'BlackBelt' ? '349,00' : academy.plan === 'Ouro' ? '199,00' : '99,00'}</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Vencimento original: 10 dias atrás</p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={handleSimulatePayment}
+              disabled={isReactivating}
+              className="w-full py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow transition-colors disabled:opacity-50"
+            >
+              {isReactivating ? 'Confirmando PIX...' : '⚡ Simular Pagamento da Fatura'}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full py-2 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
+            >
+              Fazer Logout / Alternar Conta
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Itens do menu com os caminhos e os ícones em formato SVG (traços finos de 1.5px)
@@ -59,7 +153,7 @@ export default function DashboardLayout({
       path: '/dashboard/promocoes', 
       icon: (
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.75a1.125 1.125 0 0 1-1.125-1.125V3.375c0-.621-.503-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 0-1.125 1.125v3.375c0 .621-.503 1.125-1.125 1.125h-.75a1.125 1.125 0 0 0-1.125 1.125v3.375M16.5 18.75V15.75M12 3v1.5m0 3v1.5m0 3v1.5m-3-6h6m-6 3h6" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.75a1.125 1.125 0 0 1-1.125-1.125V3.375c0-.621-.503-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 0-1.125 1.125v3.375M16.5 18.75V15.75M12 3v1.5m0 3v1.5m0 3v1.5m-3-6h6m-6 3h6" />
         </svg>
       )
     },
@@ -84,20 +178,29 @@ export default function DashboardLayout({
     },
   ]
 
+  const initials = user?.name ? user.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : 'JP'
+
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans antialiased text-slate-900">
       
       {/* 1. SIDEBAR ULTRA CLEAN (Fundo Branco + Tons de Cinza) */}
       <aside className="w-64 bg-white text-slate-500 flex flex-col justify-between border-r border-slate-200/80 sticky top-0 h-screen hidden md:flex">
         <div>
-          {/* Logo Minimalista */}
+          {/* Logo Minimalista da Academia */}
           <div className="p-6 h-16 flex items-center gap-2.5 border-b border-slate-100">
-            <div className="h-5 w-5 bg-slate-950 rounded flex items-center justify-center border-r-[3px] border-red-600 shadow-sm">
-              <span className="text-white font-black text-[9px] italic tracking-tighter">J</span>
+            <div className="h-6 w-6 bg-slate-950 rounded flex items-center justify-center border-r-[3px] border-red-600 shadow-sm">
+              <span className="text-white font-black text-[10px] italic tracking-tighter">
+                {academy?.name ? academy.name[0] : 'J'}
+              </span>
             </div>
-            <span className="text-sm font-semibold tracking-tight text-slate-900">
-              Jiu<span className="text-red-600 font-bold">Pro</span>
-            </span>
+            <div className="min-w-0">
+              <span className="text-xs font-bold tracking-tight text-slate-900 truncate block">
+                {academy?.name || 'JiuPro'}
+              </span>
+              <span className="text-[9px] text-slate-400 font-semibold block leading-none">
+                Plano {academy?.plan || 'Ouro'}
+              </span>
+            </div>
           </div>
 
           {/* Links de Navegação Suaves */}
@@ -128,11 +231,11 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-slate-100 space-y-3">
           <div className="flex items-center gap-3 px-1">
             <div className="h-7 w-7 bg-slate-900 text-white font-bold rounded-full flex items-center justify-center text-[10px] shadow-sm">
-              PR
+              {initials}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-800 truncate leading-none">Prof. Ricardo</p>
-              <p className="text-[10px] text-slate-400 mt-1 truncate">Faixa Preta 3º Grau</p>
+              <p className="text-xs font-semibold text-slate-800 truncate leading-none">{user?.name || 'Professor'}</p>
+              <p className="text-[10px] text-slate-400 mt-1 truncate">{user?.grade || 'Faixa Preta'}</p>
             </div>
           </div>
           
@@ -155,15 +258,17 @@ export default function DashboardLayout({
         <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 md:hidden">
           <div className="flex items-center gap-2">
             <div className="h-6 w-6 bg-slate-950 rounded flex items-center justify-center border-r-2 border-red-600">
-              <span className="text-white font-black text-[10px] italic tracking-tighter">J</span>
+              <span className="text-white font-black text-[10px] italic tracking-tighter">
+                {academy?.name ? academy.name[0] : 'J'}
+              </span>
             </div>
-            <span className="text-sm font-bold tracking-tight">
-              Jiu<span className="text-red-600 font-extrabold">Pro</span>
+            <span className="text-sm font-bold tracking-tight text-slate-950">
+              {academy?.name || 'JiuPro'}
             </span>
           </div>
           <button 
             onClick={handleLogout}
-            className="text-xs font-medium text-red-600 bg-red-50/60 px-3 py-1.5 rounded"
+            className="text-xs font-semibold text-red-600 bg-red-50/60 px-3 py-1.5 rounded"
           >
             Sair
           </button>

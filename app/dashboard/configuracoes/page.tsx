@@ -1,75 +1,95 @@
 // app/dashboard/configuracoes/page.tsx
 'use client'
 
-import { useState } from 'react'
-
-// Interfaces de Tipo
-interface ITurma {
-  id: string
-  horario: string
-  nome: string
-  dias: string
-}
+import { useState, useEffect } from 'react'
+import { db, User, Academy, ClassSession } from '../../lib/db'
 
 export default function ConfiguracoesPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [academy, setAcademy] = useState<Academy | null>(null)
+  const [turmas, setTurmas] = useState<ClassSession[]>([])
+
   const [isLoading, setIsLoading] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   
   // Estado Financeiro da Academia
   const [mensalidadePadrao, setMensalidadePadrao] = useState('150,00')
   const [diaVencimento, setDiaVencimento] = useState('10')
 
-  // Estado das Turmas / Grade de Horários
-  const [turmas, setTurmas] = useState<ITurma[]>([
-    { id: '1', horario: '07:00', nome: 'Matinal — Todos os Níveis', dias: 'Seg, Qua, Sex' },
-    { id: '2', horario: '12:00', nome: 'Meio-dia — Sem Kimono (NoGi)', dias: 'Ter, Qui' },
-    { id: '3', horario: '18:30', nome: 'Infantil — Até 12 anos', dias: 'Seg, Qua, Sex' },
-    { id: '4', horario: '19:30', nome: 'Avançado — Foco em Competição', dias: 'Ter, Qui' },
-    { id: '5', horario: '21:00', nome: 'Iniciantes — Fundamentos', dias: 'Seg, Qua' },
-  ])
   // Estados para adicionar uma nova turma
   const [novoHorario, setNovoHorario] = useState('')
   const [novoNomeTurma, setNovoNomeTurma] = useState('')
   const [novosDias, setNovosDias] = useState('Seg, Qua, Sex')
 
+  const loadData = (academyId: string) => {
+    const currentAcademy = db.getAcademy(academyId)
+    if (currentAcademy) {
+      setAcademy(currentAcademy)
+      setMensalidadePadrao(currentAcademy.mensalidadePadrao)
+      setDiaVencimento(currentAcademy.diaVencimento)
+    }
+
+    const classList = db.getClasses(academyId)
+    setTurmas(classList)
+    setIsPageLoading(false)
+  }
+
+  useEffect(() => {
+    const loggedUser = db.getLoggedInUser()
+    if (loggedUser) {
+      setUser(loggedUser)
+      loadData(loggedUser.academyId)
+    } else {
+      setIsPageLoading(false)
+    }
+  }, [])
+
   // Função para adicionar nova turma na lista
   const handleAdicionarTurma = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!novoHorario || !novoNomeTurma) return
+    if (!user || !novoHorario || !novoNomeTurma) return
 
-    const nova: ITurma = {
-      id: Date.now().toString(),
+    const novaTurma = {
       horario: novoHorario,
       nome: novoNomeTurma,
       dias: novosDias
     }
 
-    // Ordena as turmas por horário automaticamente
-    setTurmas([...turmas, nova].sort((a, b) => a.horario.localeCompare(b.horario)))
+    db.saveClass(user.academyId, novaTurma)
+    
+    // Refresh turmas list and sort by time
+    const updatedClasses = db.getClasses(user.academyId)
+    setTurmas(updatedClasses.sort((a, b) => a.horario.localeCompare(b.horario)))
+
     setNovoHorario('')
     setNovoNomeTurma('')
   }
 
   // Função para remover uma turma da grade
   const handleRemoverTurma = (id: string) => {
+    if (!user) return
+    db.removeClass(user.academyId, id)
     setTurmas(turmas.filter((t) => t.id !== id))
   }
 
   // Função para salvar as configurações gerais
   const handleSalvarConfiguracoes = () => {
+    if (!user) return
     setIsLoading(true)
-    
-    const dadosConfig = {
-      mensalidadePadrao,
-      diaVencimento,
-      gradeTurmas: turmas
-    }
 
-    console.log('Salvando configurações do JiuPro:', dadosConfig)
+    db.updateAcademySettings(user.academyId, {
+      mensalidadePadrao,
+      diaVencimento
+    })
 
     setTimeout(() => {
       setIsLoading(false)
       alert('Configurações da academia salvas com sucesso!')
-    }, 1000)
+    }, 800)
+  }
+
+  if (isPageLoading || !user) {
+    return <div className="text-xs font-semibold text-slate-400">Carregando configurações...</div>
   }
 
   return (
@@ -79,7 +99,7 @@ export default function ConfiguracoesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Configurações da Academia</h1>
-          <p className="text-sm text-zinc-500">Gerencie os valores de planos, mensalidades e a grade horária de treinos.</p>
+          <p className="text-sm text-zinc-500">Gerencie os valores de planos, mensalidades e a grade horária de treinos da filial **{academy?.name}**.</p>
         </div>
         <button
           onClick={handleSalvarConfiguracoes}
@@ -131,6 +151,11 @@ export default function ConfiguracoesPage() {
                 <option value="20">Dia 20</option>
               </select>
             </div>
+
+            <div className="pt-2 border-t border-zinc-100">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase">Assinatura Ativa</span>
+              <p className="text-xs font-bold text-slate-700 mt-1">Plano JiuPro {academy?.plan}</p>
+            </div>
           </div>
         </div>
 
@@ -146,24 +171,33 @@ export default function ConfiguracoesPage() {
               <p className="text-xs text-zinc-500 mt-0.5">Estes horários aparecerão na tela de chamada diária.</p>
             </div>
 
-            <div className="divide-y divide-zinc-100">
-              {turmas.map((turma) => (
-                <div key={turma.id} className="p-4 flex items-center justify-between hover:bg-zinc-50/40 transition-colors text-sm">
-                  <div className="flex items-center gap-4">
-                    <span className="font-bold text-zinc-900 bg-zinc-100 px-2 py-1 rounded border border-zinc-200">
-                      {turma.horario}h
-                    </span>
-                    <span className="font-medium text-zinc-700">{turma.nome}</span>
+            <div className="divide-y divide-zinc-100 min-h-[100px]">
+              {turmas.length > 0 ? (
+                turmas.map((turma) => (
+                  <div key={turma.id} className="p-4 flex items-center justify-between hover:bg-zinc-50/40 transition-colors text-sm">
+                    <div className="flex items-center gap-4">
+                      <span className="font-bold text-zinc-900 bg-zinc-100 px-2 py-1 rounded border border-zinc-200">
+                        {turma.horario}h
+                      </span>
+                      <div>
+                        <span className="font-semibold text-zinc-700 block">{turma.nome}</span>
+                        <span className="text-[10px] text-zinc-400">{turma.dias}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoverTurma(turma.id)}
+                      className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/60 px-2.5 py-1 rounded transition-colors"
+                    >
+                      Remover
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoverTurma(turma.id)}
-                    className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/60 px-2.5 py-1 rounded transition-colors"
-                  >
-                    Remover
-                  </button>
+                ))
+              ) : (
+                <div className="p-8 text-center text-xs text-zinc-400">
+                  Nenhuma turma criada. Adicione uma classe abaixo!
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -183,7 +217,7 @@ export default function ConfiguracoesPage() {
                   className="w-full px-3 py-1.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
                 />
               </div>
-              <div className="sm:col-span-1">
+              <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
                   Nome da Classe / Turma
                 </label>
