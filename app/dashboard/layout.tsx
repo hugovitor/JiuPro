@@ -18,6 +18,9 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true)
   const [isReactivating, setIsReactivating] = useState(false)
 
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
+
   const loadSession = () => {
     const loggedUser = db.getLoggedInUser()
     if (!loggedUser) {
@@ -34,7 +37,24 @@ export default function DashboardLayout({
 
   useEffect(() => {
     loadSession()
+    
+    // Load notifications if user is logged in
+    const loggedUser = db.getLoggedInUser()
+    if (loggedUser) {
+      setNotifications(db.getNotifications(loggedUser.id))
+      
+      const interval = setInterval(() => {
+        setNotifications(db.getNotifications(loggedUser.id))
+      }, 10000)
+      return () => clearInterval(interval)
+    }
   }, [])
+
+  const handleMarkNotificationsRead = () => {
+    if (!user) return
+    db.markNotificationsRead(user.id)
+    setNotifications(db.getNotifications(user.id))
+  }
 
   const handleLogout = () => {
     document.cookie = "jiupro_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;"
@@ -71,8 +91,10 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans px-4 antialiased">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-lg text-center space-y-6">
-          <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-rose-100">
-            ⚠️
+          <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto border border-rose-100">
+            <svg className="h-8 w-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
           </div>
           
           <div className="space-y-2">
@@ -94,9 +116,18 @@ export default function DashboardLayout({
             <button
               onClick={handleSimulatePayment}
               disabled={isReactivating}
-              className="w-full py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow transition-colors disabled:opacity-50"
+              className="w-full py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
             >
-              {isReactivating ? 'Confirmando PIX...' : '⚡ Simular Pagamento da Fatura'}
+              {isReactivating ? (
+                'Confirmando PIX...'
+              ) : (
+                <>
+                  <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                  </svg>
+                  Simular Pagamento da Fatura
+                </>
+              )}
             </button>
             <button
               onClick={handleLogout}
@@ -167,6 +198,15 @@ export default function DashboardLayout({
       )
     },
     { 
+      name: 'Loja & Cantina', 
+      path: '/dashboard/loja', 
+      icon: (
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+        </svg>
+      )
+    },
+    { 
       name: 'Configurações', 
       path: '/dashboard/configuracoes', 
       icon: (
@@ -187,20 +227,69 @@ export default function DashboardLayout({
       <aside className="w-64 bg-white text-slate-500 flex flex-col justify-between border-r border-slate-200/80 sticky top-0 h-screen hidden md:flex">
         <div>
           {/* Logo Minimalista da Academia */}
-          <div className="p-6 h-16 flex items-center gap-2.5 border-b border-slate-100">
-            <div className="h-6 w-6 bg-slate-950 rounded flex items-center justify-center border-r-[3px] border-red-600 shadow-sm">
-              <span className="text-white font-black text-[10px] italic tracking-tighter">
-                {academy?.name ? academy.name[0] : 'J'}
-              </span>
+          <div className="p-6 h-16 flex items-center justify-between border-b border-slate-100">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-6 w-6 bg-slate-950 rounded flex items-center justify-center border-r-[3px] border-red-600 shadow-sm flex-shrink-0">
+                <span className="text-white font-black text-[10px] italic tracking-tighter">
+                  {academy?.name ? academy.name[0] : 'J'}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs font-bold tracking-tight text-slate-900 truncate block">
+                  {academy?.name || 'JiuPro'}
+                </span>
+                <span className="text-[9px] text-slate-400 font-semibold block leading-none">
+                  Plano {academy?.plan || 'Ouro'}
+                </span>
+              </div>
             </div>
-            <div className="min-w-0">
-              <span className="text-xs font-bold tracking-tight text-slate-900 truncate block">
-                {academy?.name || 'JiuPro'}
-              </span>
-              <span className="text-[9px] text-slate-400 font-semibold block leading-none">
-                Plano {academy?.plan || 'Ouro'}
-              </span>
+
+            {/* Bell sininho dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-950 hover:bg-slate-50 transition-all relative flex items-center justify-center"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a9.013 9.013 0 0 1-2.355-1.147M9.143 17.082a9.013 9.013 0 0 0 2.355-1.147m0 0a8.966 8.966 0 0 1-5.127-5.02L5.25 7.5A4.5 4.5 0 0 1 9.75 3h4.5a4.5 4.5 0 0 1 4.5 4.5l-.216 3.415a8.967 8.967 0 0 1-5.127 5.02m0 0V21m-2.102-1.378a1.5 1.5 0 0 0 4.204 0M8.625 12h7.5" />
+                </svg>
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-600 ring-2 ring-white" />
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg py-2.5 z-20 space-y-2">
+                  <div className="flex justify-between items-center px-3 border-b border-slate-100 pb-1.5">
+                    <span className="text-[10px] font-bold text-slate-900 uppercase">Alertas</span>
+                    {notifications.some(n => !n.read) && (
+                      <button
+                        onClick={handleMarkNotificationsRead}
+                        className="text-[9px] font-bold text-red-600 hover:underline"
+                      >
+                        Limpar
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-48 overflow-y-auto px-1 divide-y divide-slate-50">
+                    {notifications.length > 0 ? (
+                      notifications.map(n => (
+                        <div key={n.id} className={`p-2 rounded text-[10px] leading-relaxed transition-all ${n.read ? 'text-slate-450' : 'bg-red-50/20 text-slate-800 font-medium'}`}>
+                          <p className="font-bold text-slate-900">{n.title}</p>
+                          <p className="mt-0.5">{n.description}</p>
+                          <span className="text-[8px] text-slate-400 font-semibold block mt-0.5">
+                            {new Date(n.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[10px] text-slate-400 text-center py-4">Nenhum alerta recente.</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+
           </div>
 
           {/* Links de Navegação Suaves */}

@@ -87,7 +87,12 @@ export default function RelatoriosPage() {
           <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Presença Semanal</span>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-3xl font-bold tracking-tight text-zinc-950">84%</span>
-            <span className="text-emerald-600 text-xs font-medium">↑ 2.3% vs. mês passado</span>
+            <span className="text-emerald-600 text-xs font-bold flex items-center gap-0.5">
+              <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+              </svg>
+              2.3% vs. mês passado
+            </span>
           </div>
         </div>
 
@@ -166,9 +171,12 @@ export default function RelatoriosPage() {
                     <td className="p-4 text-right">
                       <button
                         onClick={() => handleNotificarAluno(aluno.nome)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-zinc-950 text-white rounded-md hover:bg-zinc-850 transition-colors shadow-sm font-bold"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-zinc-950 text-white rounded-md hover:bg-zinc-850 transition-colors shadow-sm"
                       >
-                        💬 Resgatar Atleta
+                        <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                        </svg>
+                        Resgatar Atleta
                       </button>
                     </td>
                   </tr>

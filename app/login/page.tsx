@@ -83,7 +83,7 @@ export default function LoginPage() {
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Senha
               </label>
-              <a href="#" className="text-[10px] font-medium text-slate-400 hover:text-slate-900 transition-colors">
+              <a href="/login/recuperar-senha" className="text-[10px] font-medium text-slate-400 hover:text-slate-900 transition-colors">
                 Esqueceu a senha?
               </a>
             </div>

@@ -117,7 +117,7 @@ export default function PromocoesPage() {
                   <option value="Azul">Azul</option>
                   <option value="Roxa">Roxa</option>
                   <option value="Marrom">Marrom</option>
-                  <option value="Preta">Preta 🥋</option>
+                  <option value="Preta">Preta</option>
                 </select>
               </div>
 

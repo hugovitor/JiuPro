@@ -8,6 +8,7 @@ import { db, Student } from '../../lib/db'
 export default function ListagemAlunosPage() {
   const [busca, setBusca] = useState('')
   const [filtroFaixa, setFiltroFaixa] = useState('Todas')
+  const [filtroStatus, setFiltroStatus] = useState('Todos')
   const [alunos, setAlunos] = useState<Student[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -19,11 +20,12 @@ export default function ListagemAlunosPage() {
     setIsLoading(false)
   }, [])
 
-  // Lógica combinada de busca por texto e filtro por faixa
+  // Lógica combinada de busca por texto, faixa e status
   const alunosFiltrados = alunos.filter((aluno) => {
     const matchesBusca = aluno.nome.toLowerCase().includes(busca.toLowerCase())
     const matchesFaixa = filtroFaixa === 'Todas' || aluno.faixa === filtroFaixa
-    return matchesBusca && matchesFaixa
+    const matchesStatus = filtroStatus === 'Todos' || aluno.status === filtroStatus
+    return matchesBusca && matchesFaixa && matchesStatus
   })
 
   if (isLoading) {
@@ -41,9 +43,12 @@ export default function ListagemAlunosPage() {
         </div>
         <Link
           href="/dashboard/alunos/novo"
-          className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors"
+          className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors gap-1.5"
         >
-          + Novo Aluno
+          <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Novo Aluno
         </Link>
       </div>
 
@@ -52,29 +57,48 @@ export default function ListagemAlunosPage() {
         
         {/* Barra de Pesquisa por Nome */}
         <div className="w-full sm:flex-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.602 10.602z" />
+            </svg>
+          </div>
           <input
             type="text"
-            placeholder="🔍 Buscar atleta por nome..."
+            placeholder="Buscar atleta por nome..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
           />
         </div>
 
         {/* Seletor de Filtro de Faixa */}
-        <div className="w-full sm:w-48 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
+        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
           <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Faixa:</span>
           <select
             value={filtroFaixa}
             onChange={(e) => setFiltroFaixa(e.target.value)}
-            className="w-full text-sm font-semibold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-800"
+            className="w-full text-xs font-bold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-800"
           >
             <option value="Todas">Todas</option>
             <option value="Branca">Branca</option>
             <option value="Azul">Azul</option>
             <option value="Roxa">Roxa</option>
             <option value="Marrom">Marrom</option>
-            <option value="Preta">Preta 🥋</option>
+            <option value="Preta">Preta</option>
+          </select>
+        </div>
+
+        {/* Seletor de Filtro de Status (Novo!) */}
+        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Status:</span>
+          <select
+            value={filtroStatus}
+            onChange={(e) => setFiltroStatus(e.target.value)}
+            className="w-full text-xs font-bold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-800"
+          >
+            <option value="Todos">Todos</option>
+            <option value="Ativo">Ativos</option>
+            <option value="Inativo">Inativos</option>
           </select>
         </div>
 

@@ -88,7 +88,10 @@ export default function SaaSLandingPage() {
         <section className="py-20 px-6 sm:px-8 bg-white border-b border-slate-200/50">
           <div className="max-w-5xl mx-auto text-center space-y-6">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-100">
-              ⚡ GESTÃO DE ACADEMIAS DE JIU-JITSU B2B
+              <svg className="h-3 w-3 text-red-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+              </svg>
+              GESTÃO DE ACADEMIAS DE JIU-JITSU B2B
             </span>
             <h1 className="text-4xl sm:text-5xl font-black text-slate-950 tracking-tight leading-[1.1]">
               A Solução Definitiva para Gerenciar e <br />
@@ -117,28 +120,44 @@ export default function SaaSLandingPage() {
         {/* 3. Recursos Principais */}
         <section className="py-16 px-6 sm:px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
-            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold text-lg">💰</div>
+            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879-.659c1.546-1.16 4.697-1.16 6.243 0zM12 6V4m0 16v-2m-3-2.818.879-.659c1.546-1.16 4.697-1.16 6.243 0zM15 8.25c-1.546-1.16-4.697-1.16-6.243 0l-.879.66" />
+              </svg>
+            </div>
             <h3 className="font-bold text-sm text-slate-950">Mensalidades e PIX</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Envie lembretes inteligentes via WhatsApp com chave PIX e texto dinâmico. Dê baixa e acompanhe a adimplência geral.
             </p>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
-            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold text-lg">📅</div>
+            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+              </svg>
+            </div>
             <h3 className="font-bold text-sm text-slate-950">Chamada Inteligente</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Alunos agendam treinos via app do aluno. Professores confirmam ou registram faltas direto no painel principal.
             </p>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
-            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold text-lg">🥋</div>
+            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122A3 3 0 0 0 12 18.75h9m-9-9.75h9M3 9.75h6.75M3 14.25h6.75M9.75 9.75v4.5m0-4.5H12a3 3 0 0 1 3 3v2.25H9.75v-5.25Z" />
+              </svg>
+            </div>
             <h3 className="font-bold text-sm text-slate-950">Evolução Técnica</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Gamificação baseada em frequência. Controle de graus e faixas com históricos completos de linhagem marcial.
             </p>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
-            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold text-lg">📄</div>
+            <div className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              </svg>
+            </div>
             <h3 className="font-bold text-sm text-slate-950">Exames & Relatórios</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Gere folhas de avaliação técnica padronizadas prontas para impressão no A4. Identifique alunos sumidos e evite Churn.
@@ -187,7 +206,21 @@ export default function SaaSLandingPage() {
                             : 'bg-zinc-950 hover:bg-zinc-850 text-white'
                         }`}
                       >
-                        {ac.status === 'Suspenso' ? '⚠️ Logar (Conta Suspensa)' : 'Simular Login →'}
+                        {ac.status === 'Suspenso' ? (
+                          <>
+                            <svg className="h-3.5 w-3.5 text-white animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                            Logar (Conta Suspensa)
+                          </>
+                        ) : (
+                          <>
+                            <span>Simular Login</span>
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -276,20 +309,35 @@ export default function SaaSLandingPage() {
                 <h3 className="font-bold text-xs uppercase tracking-widest text-red-500 border-b border-zinc-800 pb-2">Planos Comerciais</h3>
                 
                 <div className="space-y-3 text-xs">
-                  <div className="flex justify-between border-b border-zinc-800 pb-2">
-                    <span>🥈 Plano Prata</span>
+                  <div className="flex justify-between border-b border-zinc-800 pb-2 items-center">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.75a1.125 1.125 0 0 1-1.125-1.125V3.375c0-.621-.503-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 0-1.125 1.125v3.375" />
+                      </svg>
+                      Plano Prata
+                    </span>
                     <span className="font-bold">R$ 99/mês</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-2">Até 50 atletas matriculados, grade horária e chamada.</p>
                   
-                  <div className="flex justify-between border-b border-zinc-800 pb-2">
-                    <span>🥇 Plano Ouro</span>
+                  <div className="flex justify-between border-b border-zinc-800 pb-2 items-center">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.75a1.125 1.125 0 0 1-1.125-1.125V3.375c0-.621-.503-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 0-1.125 1.125v3.375" />
+                      </svg>
+                      Plano Ouro
+                    </span>
                     <span className="font-bold">R$ 199/mês</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-2">Até 150 atletas matriculados, suporte financeiro por WhatsApp, controle de graduações e exames.</p>
 
-                  <div className="flex justify-between border-b border-zinc-800 pb-2">
-                    <span>🥋 Plano BlackBelt</span>
+                  <div className="flex justify-between border-b border-zinc-800 pb-2 items-center">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122A3 3 0 0 0 12 18.75h9m-9-9.75h9M3 9.75h6.75M3 14.25h6.75M9.75 9.75v4.5m0-4.5H12a3 3 0 0 1 3 3v2.25H9.75v-5.25ZM16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3" />
+                      </svg>
+                      Plano BlackBelt
+                    </span>
                     <span className="font-bold">R$ 349/mês</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-2">Atletas ilimitados, multi-unidades unificadas, exportações completas e suporte prioritário.</p>
@@ -297,7 +345,12 @@ export default function SaaSLandingPage() {
               </div>
 
               <div className="bg-zinc-800 p-4 rounded-xl border border-zinc-700/50 space-y-1.5">
-                <h4 className="text-[10px] font-bold text-red-500 uppercase">🛡️ SIMULAÇÃO PROTEGIDA</h4>
+                <h4 className="text-[10px] font-bold text-red-500 uppercase flex items-center gap-1">
+                  <svg className="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                  </svg>
+                  SIMULAÇÃO PROTEGIDA
+                </h4>
                 <p className="text-[10px] text-zinc-300 leading-relaxed">
                   O cadastro criará a sua academia isolada no banco de dados local. Você poderá criar alunos, treinos e exames específicos sem interferir nas outras contas de demonstração.
                 </p>

@@ -114,8 +114,10 @@ export default function ConfirmacaoFrequenciaPage() {
                 
                 {/* Informações do Aluno */}
                 <div className="flex items-center gap-3">
-                  <div className="h-4 w-4 rounded-full flex items-center justify-center border text-[9px] border-slate-300 bg-slate-100 text-slate-600 font-bold">
-                    🥋
+                  <div className="h-6 w-6 rounded-full flex items-center justify-center border border-slate-200 bg-slate-50 text-slate-500">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">{aluno.nome}</p>
@@ -145,8 +147,11 @@ export default function ConfirmacaoFrequenciaPage() {
                   )}
 
                   {aluno.status === 'Confirmado' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                      ✓ Presença Confirmada
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                      </svg>
+                      Presença Confirmada
                     </span>
                   )}
 

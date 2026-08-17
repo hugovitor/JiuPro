@@ -15,11 +15,22 @@ export default function ConfiguracoesPage() {
   // Estado Financeiro da Academia
   const [mensalidadePadrao, setMensalidadePadrao] = useState('150,00')
   const [diaVencimento, setDiaVencimento] = useState('10')
+  const [whatsappTemplate, setWhatsappTemplate] = useState('')
 
   // Estados para adicionar uma nova turma
   const [novoHorario, setNovoHorario] = useState('')
   const [novoNomeTurma, setNovoNomeTurma] = useState('')
   const [novosDias, setNovosDias] = useState('Seg, Qua, Sex')
+
+  const [linkCopiado, setLinkCopiado] = useState(false)
+
+  const handleCopiarLink = () => {
+    if (!user) return
+    const url = `${window.location.origin}/aluno/cadastro?academyId=${user.academyId}`
+    navigator.clipboard.writeText(url)
+    setLinkCopiado(true)
+    setTimeout(() => setLinkCopiado(false), 2000)
+  }
 
   const loadData = (academyId: string) => {
     const currentAcademy = db.getAcademy(academyId)
@@ -27,6 +38,7 @@ export default function ConfiguracoesPage() {
       setAcademy(currentAcademy)
       setMensalidadePadrao(currentAcademy.mensalidadePadrao)
       setDiaVencimento(currentAcademy.diaVencimento)
+      setWhatsappTemplate(currentAcademy.whatsappTemplate || '')
     }
 
     const classList = db.getClasses(academyId)
@@ -79,7 +91,8 @@ export default function ConfiguracoesPage() {
 
     db.updateAcademySettings(user.academyId, {
       mensalidadePadrao,
-      diaVencimento
+      diaVencimento,
+      whatsappTemplate
     })
 
     setTimeout(() => {
@@ -155,6 +168,65 @@ export default function ConfiguracoesPage() {
             <div className="pt-2 border-t border-zinc-100">
               <span className="text-[10px] font-bold text-zinc-400 uppercase">Assinatura Ativa</span>
               <p className="text-xs font-bold text-slate-700 mt-1">Plano JiuPro {academy?.plan}</p>
+            </div>
+          </div>
+
+          {/* Card: Template WhatsApp (Novo!) */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+            <h2 className="font-bold text-sm uppercase tracking-wider text-zinc-800 border-b border-zinc-100 pb-2 flex items-center gap-1.5">
+              <svg className="h-4 w-4 text-zinc-650" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+              </svg>
+              Template WhatsApp
+            </h2>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                Texto de Cobrança PIX
+              </label>
+              <textarea
+                value={whatsappTemplate}
+                onChange={(e) => setWhatsappTemplate(e.target.value)}
+                rows={5}
+                className="w-full px-3 py-2 mt-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 transition-colors text-zinc-800 font-semibold"
+                placeholder="Olá, {aluno}! Mensalidade de {mes}..."
+              />
+              <p className="text-[9px] text-zinc-400 mt-1 leading-relaxed">
+                Variáveis dinâmicas:<br />
+                <span className="font-mono text-red-600 font-bold">{`{aluno}`}</span>, <span className="font-mono text-red-600 font-bold">{`{mes}`}</span>, <span className="font-mono text-red-600 font-bold">{`{vencimento}`}</span>, <span className="font-mono text-red-600 font-bold">{`{valor}`}</span>, <span className="font-mono text-red-600 font-bold">{`{chavePix}`}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Card: Auto-cadastro (Novo!) */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+            <h2 className="font-bold text-sm uppercase tracking-wider text-zinc-800 border-b border-zinc-100 pb-2 flex items-center gap-1.5">
+              <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+              </svg>
+              Auto-Matrícula de Alunos
+            </h2>
+            <div className="space-y-3">
+              <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
+                Envie o link abaixo para seus alunos se cadastrarem e se vincularem a esta filial de forma automática.
+              </p>
+              
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={user ? `${window.location.origin}/aluno/cadastro?academyId=${user.academyId}` : ''}
+                  className="flex-1 px-2.5 py-2 text-[10px] bg-slate-50 border border-slate-200 rounded-lg text-zinc-500 font-mono focus:outline-none select-all"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopiarLink}
+                  className={`px-3 py-2 text-xs font-bold text-white rounded-lg transition-all ${
+                    linkCopiado ? 'bg-emerald-650 hover:bg-emerald-755' : 'bg-zinc-950 hover:bg-zinc-850'
+                  }`}
+                >
+                  {linkCopiado ? 'Copiado!' : 'Copiar'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

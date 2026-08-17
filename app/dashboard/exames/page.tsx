@@ -81,15 +81,18 @@ export default function ExameGraduacaoPage() {
               <option value="Azul">Azul</option>
               <option value="Roxa">Roxa</option>
               <option value="Marrom">Marrom</option>
-              <option value="Preta">Preta 🥋</option>
+              <option value="Preta">Preta</option>
             </select>
           </div>
 
           <button
             onClick={handleImprimir}
-            className="w-full px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px] font-bold"
+            className="w-full px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px] font-bold flex items-center justify-center gap-1.5"
           >
-            🖨️ Imprimir Ficha de Exame
+            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12h10.5M18 15.75h-12a1.5 1.5 0 01-1.5-1.5v-6a1.5 1.5 0 011.5-1.5h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5zm-3-8.25v-3H9v3" />
+            </svg>
+            Imprimir Ficha de Exame
           </button>
         </div>
       </div>
