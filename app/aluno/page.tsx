@@ -374,8 +374,23 @@ function AreaDoAlunoContent() {
   if (!student || !academy) return null
 
   // Evolução do aluno
+  const getMetaAulas = (faixa: string) => {
+    const metaMap: Record<string, number> = {
+      'Branca': 50,
+      'Cinza': 60,
+      'Amarela': 60,
+      'Laranja': 60,
+      'Verde': 60,
+      'Azul': 100,
+      'Roxa': 150,
+      'Marrom': 200,
+      'Preta': 250
+    }
+    return metaMap[faixa] || 50
+  }
+
   const aulasConcluidas = student.presencas.length
-  const aulasParaProximoGrau = 40
+  const aulasParaProximoGrau = getMetaAulas(student.faixa)
   const percentualProgresso = Math.min(
     Math.round((aulasConcluidas / aulasParaProximoGrau) * 100),
     100

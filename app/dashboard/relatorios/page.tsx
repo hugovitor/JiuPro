@@ -134,6 +134,49 @@ export default function RelatoriosPage() {
     window.open(url, '_blank')
   }
 
+  // Export functions to CSV format
+  const handleExportFrequencyCSV = () => {
+    const headers = ['Atleta', 'Faixa', 'Graus', 'Treinos (30 dias)', 'Tempo Afastado (dias)', 'Status de Risco']
+    const rows = alunosSumidos.map(a => [
+      a.nome,
+      a.faixa,
+      a.graus,
+      a.ultimos30Dias,
+      a.diasAfastado,
+      a.status
+    ])
+    
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([`\ufeff${csvContent}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `jiupro_alunos_afastados_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const handleExportFinanceCSV = () => {
+    const headers = ['Data', 'Tipo', 'Descricao', 'Valor (R$)']
+    const rows = ledgerEntries.map(e => [
+      new Date(e.data).toLocaleDateString('pt-BR'),
+      e.tipo,
+      e.descricao.replace(/,/g, ' '),
+      e.valor.toFixed(2)
+    ])
+    
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([`\ufeff${csvContent}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `jiupro_caixa_transacoes_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (isLoading || !user) {
     return <div className="text-xs font-semibold text-slate-400">Carregando relatórios...</div>
   }
@@ -207,14 +250,22 @@ export default function RelatoriosPage() {
 
           {/* Tabela de Alunos Sumidos do Tatame */}
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-zinc-200 bg-zinc-50/50 flex items-center justify-between">
+            <div className="p-5 border-b border-zinc-200 bg-zinc-50/50 flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h2 className="font-semibold text-zinc-900 text-xs uppercase tracking-wider">Alunos Sumidos (Risco de Evasão)</h2>
                 <p className="text-xs text-zinc-500 mt-0.5">Atletas que reduziram a frequência de treinos.</p>
               </div>
-              <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
-                Ação Recomendada
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportFrequencyCSV}
+                  className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-250 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  📥 Exportar CSV
+                </button>
+                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-100 uppercase tracking-wider leading-none flex items-center">
+                  Ação Recomendada
+                </span>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -331,14 +382,21 @@ export default function RelatoriosPage() {
                 <p className="text-xs text-zinc-500 mt-0.5">Todas as conciliações financeiras de planos e cantina.</p>
               </div>
               
-              {/* Filtro de Busca */}
-              <input
-                type="text"
-                placeholder="Filtrar por nome ou item..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-zinc-950 transition-colors w-full sm:max-w-xs font-semibold"
-              />
+              <div className="flex gap-2 w-full sm:max-w-md items-center">
+                <input
+                  type="text"
+                  placeholder="Filtrar por nome ou item..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-zinc-950 transition-colors flex-1 font-semibold"
+                />
+                <button
+                  onClick={handleExportFinanceCSV}
+                  className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0"
+                >
+                  📥 Exportar CSV
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto">

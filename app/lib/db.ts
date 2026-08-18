@@ -223,7 +223,7 @@ const DEFAULT_STUDENTS: Student[] = [
     academyId: 'gb-centro',
     nome: 'Carlos Silva',
     faixa: 'Azul',
-    graus: 2,
+    graus: 3,
     status: 'Ativo',
     dataMatricula: '2025-03-12',
     mensalidade: '150,00',
@@ -417,7 +417,7 @@ const DEFAULT_TURMAS: Record<string, ClassSession[]> = {
 
 const DEFAULT_CHECKINS: Record<string, CheckIn[]> = {
   'gb-centro': [
-    { id: '1', nome: 'Carlos Silva', faixa: 'Azul', graus: 2, status: 'Pendente', horario: '19:30' },
+    { id: '1', nome: 'Carlos Silva', faixa: 'Azul', graus: 4, status: 'Pendente', horario: '19:30' },
     { id: '2', nome: 'Mariana Costa', faixa: 'Roxa', graus: 4, status: 'Pendente', horario: '19:30' },
     { id: '3', nome: 'Rodrigo Lima', faixa: 'Branca', graus: 1, status: 'Confirmado', horario: '19:30' }
   ],

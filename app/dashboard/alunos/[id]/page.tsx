@@ -717,6 +717,60 @@ export default function FichaAlunoPage({ params }: PageProps) {
               </div>
             </div>
 
+            {/* Progresso de Graduação */}
+            {(() => {
+              const getMetaAulas = (faixa: string) => {
+                const metaMap: Record<string, number> = {
+                  'Branca': 50,
+                  'Cinza': 60,
+                  'Amarela': 60,
+                  'Laranja': 60,
+                  'Verde': 60,
+                  'Azul': 100,
+                  'Roxa': 150,
+                  'Marrom': 200,
+                  'Preta': 250
+                }
+                return metaMap[faixa] || 50
+              }
+
+              const aulasConcluidas = aluno.presencas.length
+              const aulasMeta = getMetaAulas(aluno.faixa)
+              const pct = Math.min(100, Math.round((aulasConcluidas / aulasMeta) * 100))
+
+              return (
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3.5 h-fit">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-1.5 flex items-center gap-1.5">
+                    <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                    </svg>
+                    Frequência para Graduação
+                  </h3>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                      <span>Meta de Aulas: {aulasConcluidas}/{aulasMeta}</span>
+                      <span className="text-slate-800">{pct}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-emerald-600 h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-450 font-medium leading-relaxed">
+                    {aulasConcluidas >= aulasMeta ? (
+                      <span className="text-emerald-600 font-bold block">✓ Requisito mínimo de aulas atingido! Aluno pronto para exame técnico de graduação.</span>
+                    ) : (
+                      <>Faltam <span className="font-bold text-slate-700">{aulasMeta - aulasConcluidas} aulas</span> recomendadas para a próxima graduação nesta faixa.</>
+                    )}
+                  </p>
+                </div>
+              )
+            })()}
+
             {/* Calendário de Frequência Mensal (Habit Tracker) */}
             {(() => {
               const today = new Date()
