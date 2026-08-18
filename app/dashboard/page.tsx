@@ -17,6 +17,12 @@ export default function DashboardPage() {
       setUser(loggedUser)
       setAlunos(db.getStudents(loggedUser.academyId))
       setAnnouncements(db.getAnnouncements(loggedUser.academyId))
+
+      // Sincroniza em segundo plano com o Supabase
+      db.syncWithSupabase(loggedUser.academyId).then(() => {
+        setAlunos(db.getStudents(loggedUser.academyId))
+        setAnnouncements(db.getAnnouncements(loggedUser.academyId))
+      })
     }
     setIsLoading(false)
   }, [])

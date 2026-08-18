@@ -1,4 +1,5 @@
 // app/lib/db.ts
+import { supabase } from './supabase'
 
 export interface Academy {
   id: string
@@ -614,6 +615,263 @@ function initializeStorage() {
 
 // Expose APIs
 export const db = {
+  async seedDatabase() {
+    try {
+      const { count } = await supabase.from('academies').select('*', { count: 'exact', head: true })
+      if (count === 0) {
+        console.log('Populando banco de dados Supabase com dados padrão...')
+        
+        // 1. Seed Academies
+        const academiesList = this.getAcademies()
+        for (const a of academiesList) {
+          await supabase.from('academies').upsert({
+            id: a.id,
+            name: a.name,
+            mensalidade_padrao: a.mensalidadePadrao,
+            dia_vencimento: a.diaVencimento,
+            whatsapp_template: a.whatsappTemplate || ''
+          })
+        }
+
+        // 2. Seed Users
+        const usersList = this.getUsers()
+        for (const u of usersList) {
+          await supabase.from('users').upsert({
+            id: u.id,
+            academy_id: u.academyId,
+            name: u.name,
+            email: u.email,
+            password: u.password || '123456',
+            role: u.role,
+            grade: u.grade || ''
+          })
+        }
+
+        // 3. Seed Students
+        const studentsList = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+        for (const s of studentsList) {
+          await supabase.from('students').upsert({
+            id: s.id,
+            academy_id: s.academyId,
+            nome: s.nome,
+            email: s.email,
+            password: s.password || '123456',
+            faixa: s.faixa,
+            graus: s.graus,
+            status: s.status,
+            data_matricula: s.dataMatricula,
+            mensalidade: s.mensalidade,
+            dia_vencimento: s.diaVencimento || '10',
+            chave_pix: s.chavePix,
+            peso: s.peso || '',
+            altura: s.altura || '',
+            graduado_por: s.graduadoPor || '',
+            mestre_original: s.mestreOriginal || '',
+            badges: s.badges || []
+          })
+
+          // Invoices
+          if (s.financeiro) {
+            for (const f of s.financeiro) {
+              await supabase.from('invoices').insert({
+                student_id: s.id,
+                mes: f.mes,
+                vencimento: f.vencimento,
+                valor: f.valor,
+                status: f.status
+              })
+            }
+          }
+
+          // Attendances
+          if (s.presencas) {
+            for (const p of s.presencas) {
+              await supabase.from('attendances').insert({
+                student_id: s.id,
+                data: p.data,
+                horario: p.horario,
+                treino: p.treino
+              })
+            }
+          }
+
+          // Tournaments
+          if (s.tournaments) {
+            for (const t of s.tournaments) {
+              await supabase.from('tournaments').insert({
+                id: t.id,
+                student_id: s.id,
+                campeonato: t.campeonato,
+                data: t.data,
+                categoria: t.categoria,
+                resultado: t.resultado
+              })
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  },
+
+  async syncWithSupabase(academyId: string) {
+    if (typeof window === 'undefined') return
+    try {
+      await this.seedDatabase()
+
+      // 1. Sync Academy
+      const { data: acData } = await supabase.from('academies').select('*').eq('id', academyId).single()
+      if (acData) {
+        const academies = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
+        const idx = academies.findIndex((a: any) => a.id === academyId)
+        if (idx !== -1) {
+          academies[idx] = {
+            id: acData.id,
+            name: acData.name,
+            mensalidadePadrao: acData.mensalidade_padrao,
+            diaVencimento: acData.dia_vencimento,
+            whatsappTemplate: acData.whatsapp_template,
+            logoUrl: acData.logo_url
+          }
+          localStorage.setItem('jiupro_academies', JSON.stringify(academies))
+        }
+      }
+
+      // 2. Sync Students
+      const { data: stdData } = await supabase
+        .from('students')
+        .select('*, invoices(*), attendances(*), tournaments(*)')
+        .eq('academy_id', academyId)
+
+      if (stdData) {
+        const mapped: Student[] = stdData.map((s: any) => ({
+          id: s.id,
+          academyId: s.academy_id,
+          nome: s.nome,
+          email: s.email,
+          password: s.password,
+          faixa: s.faixa,
+          graus: s.graus,
+          status: s.status,
+          dataMatricula: s.data_matricula,
+          mensalidade: s.mensalidade,
+          diaVencimento: s.dia_vencimento || '10',
+          chavePix: s.chave_pix,
+          peso: s.peso || '',
+          altura: s.altura || '',
+          graduadoPor: s.graduado_por || '',
+          mestreOriginal: s.mestre_original || '',
+          badges: s.badges || [],
+          financeiro: (s.invoices || []).map((i: any) => ({ mes: i.mes, vencimento: i.vencimento, valor: i.valor, status: i.status })),
+          presencas: (s.attendances || []).map((a: any) => ({ data: a.data, horario: a.horario, treino: a.treino })),
+          tournaments: (s.tournaments || []).map((t: any) => ({ id: t.id, campeonato: t.campeonato, data: t.data, categoria: t.categoria, resultado: t.resultado }))
+        }))
+        localStorage.setItem('jiupro_students', JSON.stringify(mapped))
+      }
+
+      // 3. Sync Checkins
+      const { data: chkData } = await supabase.from('checkins').select('*').eq('academy_id', academyId)
+      if (chkData) {
+        const chks = JSON.parse(localStorage.getItem('jiupro_checkins') || '{}')
+        chks[academyId] = chkData.map((c: any) => ({
+          id: c.student_id,
+          nome: c.nome,
+          faixa: c.faixa,
+          graus: c.graus,
+          status: c.status,
+          horario: c.horario,
+          data: c.data
+        }))
+        localStorage.setItem('jiupro_checkins', JSON.stringify(chks))
+      }
+
+      // 4. Sync Announcements
+      const { data: annData } = await supabase.from('announcements').select('*').eq('academy_id', academyId)
+      if (annData) {
+        const anns = JSON.parse(localStorage.getItem('jiupro_announcements') || '{}')
+        anns[academyId] = annData.map(a => ({
+          id: a.id,
+          academyId: a.academy_id,
+          titulo: a.titulo,
+          conteudo: a.conteudo,
+          categoria: a.categoria,
+          data: a.data
+        }))
+        localStorage.setItem('jiupro_announcements', JSON.stringify(anns))
+      }
+
+      // 5. Sync Journals
+      if (stdData) {
+        const ids = stdData.map((s: any) => s.id)
+        if (ids.length > 0) {
+          const { data: jData } = await supabase.from('journals').select('*').in('student_id', ids)
+          if (jData) {
+            const journs = JSON.parse(localStorage.getItem('jiupro_journals') || '{}')
+            ids.forEach(id => { journs[id] = [] })
+            jData.forEach((j: any) => {
+              if (!journs[j.student_id]) journs[j.student_id] = []
+              journs[j.student_id].push({
+                id: j.id,
+                studentId: j.student_id,
+                data: j.data,
+                categoria: j.categoria,
+                posicao: j.posicao,
+                notas: j.notas
+              })
+            })
+            localStorage.setItem('jiupro_journals', JSON.stringify(journs))
+          }
+        }
+      }
+
+      // 6. Sync Products
+      const { data: pData } = await supabase.from('products').select('*').eq('academy_id', academyId)
+      if (pData) {
+        localStorage.setItem('jiupro_products', JSON.stringify(pData))
+      }
+
+      // 7. Sync Sales
+      const { data: sData } = await supabase.from('sales').select('*').eq('academy_id', academyId)
+      if (sData) {
+        localStorage.setItem('jiupro_sales', JSON.stringify(sData.map((s: any) => ({
+          id: s.id,
+          academyId: s.academy_id,
+          studentId: s.student_id || undefined,
+          studentName: s.student_name,
+          productId: s.product_id || undefined,
+          productName: s.product_name,
+          valor: s.valor,
+          data: s.data
+        }))))
+      }
+
+      // 8. Sync Social Posts
+      const { data: postData } = await supabase.from('posts').select('*').eq('academy_id', academyId)
+      if (postData) {
+        localStorage.setItem('jiupro_posts', JSON.stringify(postData.map((p: any) => ({
+          id: p.id,
+          academyId: p.academy_id,
+          authorId: p.author_id,
+          authorName: p.author_name,
+          authorFaixa: p.author_faixa,
+          content: p.content,
+          timestamp: p.timestamp,
+          likes: p.likes || [],
+          comments: p.comments || []
+        }))))
+      }
+
+      // 9. Sync Notifications
+      const { data: notifData } = await supabase.from('notifications').select('*')
+      if (notifData) {
+        localStorage.setItem('jiupro_notifications', JSON.stringify(notifData))
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  },
+
   // Read Lists
   getAcademies(): Academy[] {
     initializeStorage()
@@ -688,6 +946,30 @@ export const db = {
     }
 
     localStorage.setItem('jiupro_students', JSON.stringify(all))
+
+    // Background push to Supabase
+    supabase.from('students').upsert({
+      id: target.id,
+      academy_id: target.academyId,
+      nome: target.nome,
+      email: target.email,
+      password: target.password || '123456',
+      faixa: target.faixa,
+      graus: target.graus,
+      status: target.status,
+      data_matricula: target.dataMatricula,
+      mensalidade: target.mensalidade,
+      dia_vencimento: '10',
+      chave_pix: target.chavePix,
+      peso: target.peso || '',
+      altura: target.altura || '',
+      graduado_por: target.graduadoPor || '',
+      mestre_original: target.mestreOriginal || '',
+      badges: target.badges || []
+    }).then(({ error }) => {
+      if (error) console.error('Erro ao salvar atleta no Supabase:', error)
+    })
+
     return target
   },
 
@@ -700,6 +982,10 @@ export const db = {
       all[idx].graus = degrees
       localStorage.setItem('jiupro_students', JSON.stringify(all))
     }
+    // Background push to Supabase
+    supabase.from('students').update({ faixa: belt, graus: degrees }).eq('id', id).then(({ error }) => {
+      if (error) console.error('Erro ao salvar faixa no Supabase:', error)
+    })
   },
 
   updateStudentInvoices(id: string, invoices: Invoice[]) {
@@ -710,6 +996,20 @@ export const db = {
       all[idx].financeiro = invoices
       localStorage.setItem('jiupro_students', JSON.stringify(all))
     }
+    // Background push to Supabase
+    supabase.from('invoices').delete().eq('student_id', id).then(() => {
+      if (invoices.length > 0) {
+        supabase.from('invoices').insert(invoices.map(inv => ({
+          student_id: id,
+          mes: inv.mes,
+          vencimento: inv.vencimento,
+          valor: inv.valor,
+          status: inv.status
+        }))).then(({ error }) => {
+          if (error) console.error('Erro ao inserir faturas no Supabase:', error)
+        })
+      }
+    })
   },
 
   saveClass(academyId: string, classData: Omit<ClassSession, 'id'> & { id?: string }): ClassSession {
@@ -753,24 +1053,40 @@ export const db = {
       }
     }
 
+    const today = new Date().toISOString().split('T')[0]
+    // Supabase check-in status update
+    supabase.from('checkins').update({ status }).eq('student_id', studentId).eq('data', today).then(() => {
+      console.log('Sync checkin status success')
+    })
+
     // If confirmed, add presence to student record
     if (status === 'Confirmado') {
       const students: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
       const sIdx = students.findIndex(s => s.id === studentId)
       if (sIdx !== -1) {
         const student = students[sIdx]
-        const today = new Date().toISOString().split('T')[0]
         
         // Avoid duplicate presences on the same day/time
         const alreadyRegistered = student.presencas.some(p => p.data === today)
         if (!alreadyRegistered) {
-          student.presencas.unshift({
+          const newAtt = {
             data: today,
             horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + 'h',
             treino: 'Treino Validado'
-          })
+          }
+          student.presencas.unshift(newAtt)
           localStorage.setItem('jiupro_students', JSON.stringify(students))
           this.checkAndAwardBadges(studentId)
+
+          // Supabase attendance insert
+          supabase.from('attendances').insert({
+            student_id: studentId,
+            data: newAtt.data,
+            horario: newAtt.horario,
+            treino: newAtt.treino
+          }).then(({ error }) => {
+            if (error) console.error('Erro ao salvar presença no Supabase:', error)
+          })
         }
       }
     }
@@ -787,6 +1103,7 @@ export const db = {
     // Avoid duplicate checkins for same student in the check-in list
     const exists = allCheckins[academyId].some(c => c.id === studentId)
     if (!exists) {
+      const today = new Date().toISOString().split('T')[0]
       allCheckins[academyId].push({
         id: studentId,
         nome: student.nome,
@@ -796,6 +1113,20 @@ export const db = {
         horario: classTime
       })
       localStorage.setItem('jiupro_checkins', JSON.stringify(allCheckins))
+
+      // Supabase Check-in insert
+      supabase.from('checkins').insert({
+        academy_id: academyId,
+        student_id: studentId,
+        nome: student.nome,
+        faixa: student.faixa,
+        graus: student.graus,
+        status: 'Pendente',
+        horario: classTime,
+        data: today
+      }).then(({ error }) => {
+        if (error) console.error('Erro ao fazer checkin no Supabase:', error)
+      })
     }
   },
 
@@ -806,6 +1137,12 @@ export const db = {
       allCheckins[academyId] = allCheckins[academyId].filter(c => c.id !== studentId)
       localStorage.setItem('jiupro_checkins', JSON.stringify(allCheckins))
     }
+
+    const today = new Date().toISOString().split('T')[0]
+    // Supabase delete check-in
+    supabase.from('checkins').delete().eq('student_id', studentId).eq('data', today).then(({ error }) => {
+      if (error) console.error('Erro ao cancelar checkin no Supabase:', error)
+    })
   },
 
   updateAcademySettings(academyId: string, settings: { mensalidadePadrao: string; diaVencimento: string; whatsappTemplate?: string }) {
@@ -820,6 +1157,15 @@ export const db = {
       }
       localStorage.setItem('jiupro_academies', JSON.stringify(academies))
     }
+
+    // Supabase update academy settings
+    supabase.from('academies').update({
+      mensalidade_padrao: settings.mensalidadePadrao,
+      dia_vencimento: settings.diaVencimento,
+      whatsapp_template: settings.whatsappTemplate || ''
+    }).eq('id', academyId).then(({ error }) => {
+      if (error) console.error('Erro ao salvar configurações no Supabase:', error)
+    })
   },
 
   addManualPresence(studentId: string, date: string, classTitle: string) {

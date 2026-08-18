@@ -196,6 +196,12 @@ function AreaDoAlunoContent() {
 
   useEffect(() => {
     loadData()
+    const loggedStudent = db.getLoggedInStudent()
+    if (loggedStudent) {
+      db.syncWithSupabase(loggedStudent.academyId).then(() => {
+        loadData()
+      })
+    }
   }, [])
 
   // Alterna o agendamento da aula (check-in)
