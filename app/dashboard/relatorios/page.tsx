@@ -129,7 +129,7 @@ export default function RelatoriosPage() {
   }, [])
 
   const handleNotificarAluno = (nome: string) => {
-    const mensagem = `Olá, ${nome}! Notamos que você está sumido dos treinos na JiuPro há alguns dias. O tatame está pronto para o seu retorno, estamos te esperando para o próximo rolo! Oss.`
+    const mensagem = `Olá, ${nome}! Notamos que você está sumido dos treinos na JiuPro há alguns dias. O tatame está pronto para o seu retorno, estamos te esperando para o próximo treino! Oss.`
     const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`
     window.open(url, '_blank')
   }

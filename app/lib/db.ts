@@ -589,7 +589,7 @@ function initializeStorage() {
           id: 'ann-default-1',
           academyId: 'gb-centro',
           titulo: '🚨 Horário Especial do Feriado',
-          conteudo: 'No feriado do dia 07/Setembro, o tatame funcionará apenas para rolo livre das 10:00 às 12:00. Não haverá treinos infantis.',
+          conteudo: 'No feriado do dia 07/Setembro, o tatame funcionará apenas para treino livre das 10:00 às 12:00. Não haverá treinos infantis.',
           categoria: 'Alerta',
           data: new Date(Date.now() - 3600000 * 24).toISOString()
         },

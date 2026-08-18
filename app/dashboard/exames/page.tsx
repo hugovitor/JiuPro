@@ -149,7 +149,7 @@ export default function ExameGraduacaoPage() {
               <div className="divide-y divide-zinc-200">
                 <div className="grid grid-cols-5 p-3"><div className="col-span-3 font-semibold">Domínio Técnico Geral (Posições de Guarda e Passagem)</div><div className="text-center text-zinc-400">4.0</div><div className="border-l border-zinc-200"></div></div>
                 <div className="grid grid-cols-5 p-3"><div className="col-span-3 font-semibold">Defesa Pessoal Integrada (Sistemas de Controle Antijogo)</div><div className="text-center text-zinc-400">2.0</div><div className="border-l border-zinc-200"></div></div>
-                <div className="grid grid-cols-5 p-3"><div className="col-span-3 font-semibold">Volume e Mobilidade no Combate (Rolo / Sparring)</div><div className="text-center text-zinc-400">2.0</div><div className="border-l border-zinc-200"></div></div>
+                <div className="grid grid-cols-5 p-3"><div className="col-span-3 font-semibold">Volume e Mobilidade no Combate (Combate / Sparring)</div><div className="text-center text-zinc-400">2.0</div><div className="border-l border-zinc-200"></div></div>
                 <div className="grid grid-cols-5 p-3"><div className="col-span-3 font-semibold">Conduta Disciplinar, Assiduidade e Postura Ética</div><div className="text-center text-zinc-400">2.0</div><div className="border-l border-zinc-200"></div></div>
               </div>
             </div>

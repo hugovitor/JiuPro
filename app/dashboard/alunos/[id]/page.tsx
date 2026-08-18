@@ -86,7 +86,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
       if (classList.length > 0 && !manualClass) {
         setManualClass(classList[0].nome)
       } else if (!manualClass) {
-        setManualClass('Treino Livre / Rolo')
+        setManualClass('Treino Livre / Sparring')
       }
     } else {
       setAluno(null)
@@ -649,7 +649,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
                     {turmas.map((t) => (
                       <option key={t.id} value={t.nome}>{t.horario}h — {t.nome}</option>
                     ))}
-                    <option value="Treino Livre / Rolo">Treino Livre / Rolo</option>
+                    <option value="Treino Livre / Sparring">Treino Livre / Sparring</option>
                   </select>
                 ) : (
                   <input 

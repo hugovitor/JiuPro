@@ -72,7 +72,7 @@ function AreaDoAlunoContent() {
   // Share Badge
   const handleShareBadge = (badgeName: string, badgeDesc: string) => {
     if (!student) return
-    const content = `Desbloqueei uma conquista no JiuPro! 🏆\n\nMedalha: "${badgeName}" (${badgeDesc})\n\nConstância e evolução a cada rolo! Oss! 🥋💪`
+    const content = `Desbloqueei uma conquista no JiuPro! 🏆\n\nMedalha: "${badgeName}" (${badgeDesc})\n\nConstância e evolução a cada treino! Oss! 🥋💪`
     db.addPost(student.academyId, student.id, student.nome, student.faixa, content)
     
     // Auto switch to community tab
@@ -399,7 +399,7 @@ function AreaDoAlunoContent() {
   // Achievements/Badges definitions
   const badgeGallery = [
     { id: 'primeiro-passo', name: 'Primeiro Passo', emoji: '🥋', desc: 'Concluiu a primeira aula na academia' },
-    { id: 'frequencia-ferro', name: 'Frequência de Ferro', emoji: '🔥', desc: 'Acumulou 3 ou mais presenças nos rolos' },
+    { id: 'frequencia-ferro', name: 'Frequência de Ferro', emoji: '🔥', desc: 'Acumulou 3 ou mais presenças nos treinos' },
     { id: 'nogi', name: 'Sem Kimono', emoji: '🤼', desc: 'Realizou check-in em uma aula NoGi' },
     { id: 'campeao', name: 'Campeão de Tatame', emoji: '🥇', desc: 'Conquistou Ouro em um campeonato' }
   ]
