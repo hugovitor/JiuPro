@@ -40,6 +40,22 @@ export default function FichaAlunoPage({ params }: PageProps) {
   const [manualVencimento, setManualVencimento] = useState('10/09/2026')
   const [manualValor, setManualValor] = useState('')
 
+  // Weekday Presence counts helper
+  const getWeekdayPresenceCounts = (presencas: any[]) => {
+    const counts = { Seg: 0, Ter: 0, Qua: 0, Qui: 0, Sex: 0, Sáb: 0 }
+    presencas.forEach(p => {
+      const d = new Date(p.data + 'T00:00:00')
+      const day = d.getDay()
+      if (day === 1) counts.Seg++
+      else if (day === 2) counts.Ter++
+      else if (day === 3) counts.Qua++
+      else if (day === 4) counts.Qui++
+      else if (day === 5) counts.Sex++
+      else if (day === 6) counts.Sáb++
+    })
+    return counts
+  }
+
   const loadData = () => {
     const loggedUser = db.getLoggedInUser()
     if (!loggedUser) {
@@ -182,8 +198,42 @@ export default function FichaAlunoPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <style>{`
+        @media print {
+          body {
+            background-color: white !important;
+            color: black !important;
+            font-size: 11px !important;
+          }
+          /* Hide sidebar, headers, back buttons, forms, actions, and tabs */
+          aside, header, nav, button, .print\\:hidden, .flex.border-b, form, select, input {
+            display: none !important;
+          }
+          /* Make container fit perfectly and remove borders */
+          .space-y-6, .max-w-4xl {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          .bg-white {
+            border: none !important;
+            box-shadow: none !important;
+          }
+          /* Ensure specific tabs are forced to render print layout */
+          .aba-print-container {
+            display: block !important;
+          }
+          .print-only {
+            display: block !important;
+          }
+        }
+        .print-only {
+          display: none;
+        }
+      `}</style>
       
-      <button onClick={() => router.back()} className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5">
+      <button onClick={() => router.back()} className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 print:hidden">
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
@@ -341,7 +391,16 @@ export default function FichaAlunoPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-center">
+          <div className="flex items-center gap-2 self-start sm:self-center print:hidden">
+            <button 
+              onClick={() => window.print()}
+              className="inline-flex items-center px-3 py-1.5 text-xs font-bold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-lg transition-all"
+            >
+              <svg className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12-1.227H7.231c-.615 0-1.11-.497-1.12-1.227L6.34 18m11.318 0h-11.32" />
+              </svg>
+              Imprimir Ficha
+            </button>
             <button 
               onClick={() => setIsEditing(true)}
               className="inline-flex items-center px-3 py-1.5 text-xs font-bold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-lg transition-all"
@@ -619,23 +678,76 @@ export default function FichaAlunoPage({ params }: PageProps) {
       {abaAtiva === 'performance' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* Ficha Física */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3.5 h-fit">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-1.5 flex items-center gap-1">
-              <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0H4.5m15 0a3.75 3.75 0 1 1-7.5 0v-3a3.75 3.75 0 0 1 7.5 0v3Zm-15 0a3.75 3.75 0 1 1 7.5 0v-3a3.75 3.75 0 0 0-7.5 0v3Z" />
-              </svg>
-              Métricas Físicas
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Peso</span>
-                <p className="text-sm font-bold text-slate-900 mt-0.5">{aluno.peso || '78'} kg</p>
+          {/* Coluna 1: Métricas & Gráfico */}
+          <div className="space-y-6">
+            {/* Ficha Física */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3.5 h-fit">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-1.5 flex items-center gap-1">
+                <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0H4.5m15 0a3.75 3.75 0 1 1-7.5 0v-3a3.75 3.75 0 0 1 7.5 0v3Zm-15 0a3.75 3.75 0 1 1 7.5 0v-3a3.75 3.75 0 0 0-7.5 0v3Z" />
+                </svg>
+                Métricas Físicas
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase">Peso</span>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">{aluno.peso || '78'} kg</p>
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase">Altura</span>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">{aluno.altura || '1.75'} m</p>
+                </div>
               </div>
-              <div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Altura</span>
-                <p className="text-sm font-bold text-slate-900 mt-0.5">{aluno.altura || '1.75'} m</p>
-              </div>
+            </div>
+
+            {/* Gráfico de Assiduidade Semanal */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 h-fit print:break-inside-avoid">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-1.5 flex items-center gap-1">
+                <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                </svg>
+                Assiduidade Semanal
+              </h3>
+              
+              {(() => {
+                const getWeekdayPresenceCounts = (presencas: any[]) => {
+                  const counts = { 'Seg': 0, 'Ter': 0, 'Qua': 0, 'Qui': 0, 'Sex': 0, 'Sáb': 0 };
+                  presencas.forEach(p => {
+                    const day = new Date(p.data + 'T00:00:00').getDay();
+                    if (day === 1) counts['Seg']++;
+                    if (day === 2) counts['Ter']++;
+                    if (day === 3) counts['Qua']++;
+                    if (day === 4) counts['Qui']++;
+                    if (day === 5) counts['Sex']++;
+                    if (day === 6) counts['Sáb']++;
+                  });
+                  return counts;
+                };
+                const weekdayCounts = getWeekdayPresenceCounts(aluno.presencas)
+                const maxCount = Math.max(...Object.values(weekdayCounts), 1)
+                const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                
+                return (
+                  <div className="grid grid-cols-6 gap-2 pt-2 items-end">
+                    {days.map(d => {
+                      const val = (weekdayCounts as any)[d]
+                      const pct = Math.max(10, Math.round((val / maxCount) * 100))
+                      return (
+                        <div key={d} className="flex flex-col items-center gap-2">
+                          <span className="text-[8px] font-bold text-slate-400">{val}x</span>
+                          <div className="w-3.5 h-16 bg-slate-50 rounded-full flex flex-col justify-end overflow-hidden border border-slate-100">
+                            <div 
+                              className="w-full bg-gradient-to-t from-red-600 to-rose-500 rounded-full transition-all duration-500 shadow-sm"
+                              style={{ height: `${pct}%` }}
+                            />
+                          </div>
+                          <span className="text-[9px] font-bold text-slate-700">{d}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
             </div>
           </div>
 
@@ -686,6 +798,22 @@ export default function FichaAlunoPage({ params }: PageProps) {
           
         </div>
       )}
+
+      {/* Print Signature block */}
+      <div className="print-only mt-24 pt-8 border-t border-dashed border-slate-350 text-center space-y-4">
+        <div className="flex justify-between px-12 text-[10px] text-slate-500 font-bold">
+          <div>
+            <div className="h-12" />
+            <div className="border-t border-slate-400 w-48 mx-auto" />
+            <p className="mt-1">Assinatura do Atleta</p>
+          </div>
+          <div>
+            <div className="h-12" />
+            <div className="border-t border-slate-400 w-48 mx-auto" />
+            <p className="mt-1">Assinatura do Mestre / Instrutor</p>
+          </div>
+        </div>
+      </div>
 
     </div>
   )

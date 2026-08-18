@@ -22,6 +22,46 @@ function AreaDoAlunoContent() {
   const [newPostContent, setNewPostContent] = useState('')
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
 
+  // Share Badge
+  const handleShareBadge = (badgeName: string, badgeDesc: string) => {
+    if (!student) return
+    const content = `Desbloqueei uma conquista no JiuPro! 🏆\n\nMedalha: "${badgeName}" (${badgeDesc})\n\nConstância e evolução a cada rolo! Oss! 🥋💪`
+    db.addPost(student.academyId, student.id, student.nome, student.faixa, content)
+    
+    // Auto switch to community tab
+    setActiveTab('feed')
+    setPosts(db.getPosts(student.academyId))
+  }
+
+  // Share Tournament Result
+  const handleShareTournament = (t: TournamentResult) => {
+    if (!student) return
+    const medalText = t.resultado === 'Ouro' ? '🥇 Ouro' : t.resultado === 'Prata' ? '🥈 Prata' : t.resultado === 'Bronze' ? '🥉 Bronze' : '🏅 Participação'
+    const content = `Subi no pódio! Conquistei o resultado de ${medalText} no campeonato "${t.campeonato}" (Categoria: ${t.categoria})!\n\nMuito obrigado a todos os parceiros de treino da ${academy?.name || 'JiuPro'}! Oss! 🥋💪`
+    db.addPost(student.academyId, student.id, student.nome, student.faixa, content)
+    
+    // Auto switch to community tab
+    setActiveTab('feed')
+    setPosts(db.getPosts(student.academyId))
+  }
+
+  // Weekday Presence counts helper
+  const getWeekdayPresenceCounts = () => {
+    if (!student) return { Seg: 0, Ter: 0, Qua: 0, Qui: 0, Sex: 0, Sáb: 0 }
+    const counts = { Seg: 0, Ter: 0, Qua: 0, Qui: 0, Sex: 0, Sáb: 0 }
+    student.presencas.forEach(p => {
+      const d = new Date(p.data + 'T00:00:00')
+      const day = d.getDay()
+      if (day === 1) counts.Seg++
+      else if (day === 2) counts.Ter++
+      else if (day === 3) counts.Qua++
+      else if (day === 4) counts.Qui++
+      else if (day === 5) counts.Sex++
+      else if (day === 6) counts.Sáb++
+    })
+    return counts
+  }
+
   // Notifications Bell
   const [showNotifications, setShowNotifications] = useState(false)
 
@@ -462,14 +502,25 @@ function AreaDoAlunoContent() {
                     <div 
                       key={bg.id}
                       title={bg.desc}
-                      className={`p-2 rounded-lg border text-center transition-all flex flex-col items-center justify-center ${
+                      className={`p-2 rounded-lg border text-center transition-all flex flex-col items-center justify-between min-h-[90px] ${
                         hasBadge 
                           ? 'bg-amber-50/50 border-amber-200 opacity-100' 
                           : 'bg-slate-50 border-slate-150 opacity-40 grayscale'
                       }`}
                     >
-                      <span className="text-lg">{bg.emoji}</span>
-                      <span className="text-[7.5px] font-black tracking-tight mt-1 truncate w-full text-slate-950">{bg.name}</span>
+                      <div className="flex flex-col items-center">
+                        <span className="text-lg">{bg.emoji}</span>
+                        <span className="text-[7.5px] font-black tracking-tight mt-1 truncate w-full text-slate-950">{bg.name}</span>
+                      </div>
+                      {hasBadge && (
+                        <button
+                          type="button"
+                          onClick={() => handleShareBadge(bg.name, bg.desc)}
+                          className="mt-1 text-[7px] text-red-600 hover:text-red-800 transition-colors font-bold uppercase tracking-wide hover:underline cursor-pointer"
+                        >
+                          Compartilhar
+                        </button>
+                      )}
                     </div>
                   )
                 })}
@@ -553,6 +604,38 @@ function AreaDoAlunoContent() {
                   </div>
                 )
               })}
+            </div>
+
+            {/* Gráfico de Assiduidade Semanal (CSS Premium) */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Assiduidade Semanal</h3>
+              
+              {(() => {
+                const weekdayCounts = getWeekdayPresenceCounts()
+                const maxCount = Math.max(...Object.values(weekdayCounts), 1)
+                const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                
+                return (
+                  <div className="grid grid-cols-6 gap-2 pt-2 items-end">
+                    {days.map(d => {
+                      const val = (weekdayCounts as any)[d]
+                      const pct = Math.max(10, Math.round((val / maxCount) * 100))
+                      return (
+                        <div key={d} className="flex flex-col items-center gap-2">
+                          <span className="text-[8px] font-bold text-slate-400">{val}x</span>
+                          <div className="w-4 h-16 bg-slate-50 rounded-full flex flex-col justify-end overflow-hidden border border-slate-100">
+                            <div 
+                              className="w-full bg-gradient-to-t from-red-600 to-rose-500 rounded-full transition-all duration-500 shadow-sm"
+                              style={{ height: `${pct}%` }}
+                            />
+                          </div>
+                          <span className="text-[9px] font-bold text-slate-700">{d}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Histórico Recente */}
@@ -708,12 +791,19 @@ function AreaDoAlunoContent() {
               <div className="divide-y divide-slate-100">
                 {student.tournaments && student.tournaments.length > 0 ? (
                   student.tournaments.map((t) => (
-                    <div key={t.id} className="p-4 flex justify-between items-center">
-                      <div>
-                        <p className="text-xs font-bold text-slate-900">{t.campeonato}</p>
+                    <div key={t.id} className="p-4 flex justify-between items-center hover:bg-slate-50/40 transition-colors">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-slate-900 truncate">{t.campeonato}</p>
                         <p className="text-[10px] text-slate-400 mt-0.5">{new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')} • {t.categoria}</p>
+                        <button
+                          type="button"
+                          onClick={() => handleShareTournament(t)}
+                          className="mt-1 text-[8px] text-red-600 hover:underline font-bold uppercase tracking-wider block"
+                        >
+                          Compartilhar no Feed
+                        </button>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0 ${
                         t.resultado === 'Ouro' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
                         t.resultado === 'Prata' ? 'bg-slate-100 text-slate-700 border border-slate-200' :
                         t.resultado === 'Bronze' ? 'bg-orange-50 text-orange-700 border border-orange-100' :
