@@ -373,16 +373,33 @@ export default function FichaAlunoPage({ params }: PageProps) {
         <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-4">
             
-            {/* Tarja de graus estilizada de acordo com a faixa marcial */}
-            <div className="h-14 w-14 bg-zinc-950 rounded-lg flex flex-col items-center justify-between py-1 border-b-[4px] border-red-600 shadow-inner overflow-hidden flex-shrink-0">
-              <span className="text-white text-[8px] font-bold tracking-wider uppercase">{aluno.faixa}</span>
-              {/* Representação visual dos graus em pequenas linhas brancas */}
-              <div className="flex gap-0.5 justify-center mb-0.5">
-                {Array.from({ length: aluno.graus }).map((_, i) => (
-                  <span key={i} className="w-1 h-2.5 bg-white rounded-sm block" />
-                ))}
-                {aluno.graus === 0 && <span className="text-[10px] text-zinc-500 font-bold">0G</span>}
+            {/* Visualizer of Martial Belt representation */}
+            <div className="flex flex-col items-center flex-shrink-0">
+              <div className={`h-8 w-28 rounded border relative flex items-center shadow-inner overflow-hidden ${
+                aluno.faixa === 'Branca' ? 'bg-white border-slate-350' :
+                aluno.faixa === 'Azul' ? 'bg-blue-600 border-blue-700' :
+                aluno.faixa === 'Roxa' ? 'bg-purple-600 border-purple-700' :
+                aluno.faixa === 'Marrom' ? 'bg-amber-800 border-amber-900' :
+                aluno.faixa === 'Preta' ? 'bg-zinc-950 border-zinc-900' :
+                'bg-slate-200 border-slate-350'
+              }`}>
+                {/* Sleeve Sleeve */}
+                <div className={`absolute right-0 top-0 bottom-0 w-8 flex items-center justify-around px-0.5 ${
+                  aluno.faixa === 'Preta' ? 'bg-red-600' : 'bg-zinc-950'
+                }`}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <span 
+                      key={i} 
+                      className={`w-[1px] h-5 rounded-sm block ${
+                        i < aluno.graus ? 'bg-white' : 'bg-transparent'
+                      }`} 
+                    />
+                  ))}
+                </div>
               </div>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                Faixa {aluno.faixa}
+              </span>
             </div>
 
             <div>
@@ -699,6 +716,77 @@ export default function FichaAlunoPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
+
+            {/* Calendário de Frequência Mensal (Habit Tracker) */}
+            {(() => {
+              const today = new Date()
+              const year = today.getFullYear()
+              const month = today.getMonth()
+              const firstDay = new Date(year, month, 1)
+              const firstDayWeekday = firstDay.getDay()
+              const totalDays = new Date(year, month + 1, 0).getDate()
+              const monthName = today.toLocaleDateString('pt-BR', { month: 'long' })
+              const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+
+              const presenceDays = new Set<number>()
+              aluno.presencas.forEach(p => {
+                const pDate = new Date(p.data + 'T00:00:00')
+                if (pDate.getMonth() === month && pDate.getFullYear() === year) {
+                  presenceDays.add(pDate.getDate())
+                }
+              })
+
+              const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+              const calendarCells = []
+              for (let i = 0; i < firstDayWeekday; i++) {
+                calendarCells.push(null)
+              }
+              for (let i = 1; i <= totalDays; i++) {
+                calendarCells.push(i)
+              }
+
+              return (
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3.5 h-fit print:break-inside-avoid">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-1">
+                      <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                      </svg>
+                      Frequência Mensal
+                    </h3>
+                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider bg-slate-50 border border-slate-150 px-2 py-0.5 rounded">
+                      📅 {formattedMonth} / {year}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-7 gap-1 text-center text-[8.5px] font-bold text-slate-400 uppercase">
+                      {weekdays.map(d => <div key={d}>{d}</div>)}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1.5 text-center">
+                      {calendarCells.map((day, idx) => {
+                        if (day === null) {
+                          return <div key={`empty-${idx}`} className="h-6" />
+                        }
+                        const hasTrained = presenceDays.has(day)
+                        return (
+                          <div 
+                            key={`day-${day}`}
+                            className={`h-6 w-6 rounded text-[9px] font-black flex items-center justify-center mx-auto transition-all ${
+                              hasTrained 
+                                ? 'bg-emerald-600 border border-emerald-700 text-white shadow-sm' 
+                                : 'bg-slate-50 border border-slate-200/50 text-slate-400'
+                            }`}
+                          >
+                            {day}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Gráfico de Assiduidade Semanal */}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 h-fit print:break-inside-avoid">

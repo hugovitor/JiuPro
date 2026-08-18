@@ -9,6 +9,7 @@ export default function ListagemAlunosPage() {
   const [busca, setBusca] = useState('')
   const [filtroFaixa, setFiltroFaixa] = useState('Todas')
   const [filtroStatus, setFiltroStatus] = useState('Todos')
+  const [filtroFinanceiro, setFiltroFinanceiro] = useState('Todos')
   const [alunos, setAlunos] = useState<Student[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -20,12 +21,19 @@ export default function ListagemAlunosPage() {
     setIsLoading(false)
   }, [])
 
-  // Lógica combinada de busca por texto, faixa e status
+  // Lógica combinada de busca por texto, faixa, status e financeiro
   const alunosFiltrados = alunos.filter((aluno) => {
     const matchesBusca = aluno.nome.toLowerCase().includes(busca.toLowerCase())
     const matchesFaixa = filtroFaixa === 'Todas' || aluno.faixa === filtroFaixa
     const matchesStatus = filtroStatus === 'Todos' || aluno.status === filtroStatus
-    return matchesBusca && matchesFaixa && matchesStatus
+    const matchesFinanceiro = (() => {
+      if (filtroFinanceiro === 'Todos') return true
+      const hasLateInvoice = aluno.financeiro.some(inv => inv.status === 'Atrasado')
+      if (filtroFinanceiro === 'Inadimplente') return hasLateInvoice
+      if (filtroFinanceiro === 'Regular') return !hasLateInvoice
+      return true
+    })()
+    return matchesBusca && matchesFaixa && matchesStatus && matchesFinanceiro
   })
 
   if (isLoading) {
@@ -99,6 +107,20 @@ export default function ListagemAlunosPage() {
             <option value="Todos">Todos</option>
             <option value="Ativo">Ativos</option>
             <option value="Inativo">Inativos</option>
+          </select>
+        </div>
+
+        {/* Seletor de Filtro Financeiro (Novo!) */}
+        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Caixa:</span>
+          <select
+            value={filtroFinanceiro}
+            onChange={(e) => setFiltroFinanceiro(e.target.value)}
+            className="w-full text-xs font-bold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-800"
+          >
+            <option value="Todos">Todos</option>
+            <option value="Regular">Em Dia</option>
+            <option value="Inadimplente">Com Pendências</option>
           </select>
         </div>
 

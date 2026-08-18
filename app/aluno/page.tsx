@@ -62,6 +62,36 @@ function AreaDoAlunoContent() {
     return counts
   }
 
+  // Month Calendar Details helper
+  const getMonthCalendarDetails = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const firstDayWeekday = firstDay.getDay()
+    const totalDays = new Date(year, month + 1, 0).getDate()
+    const monthName = today.toLocaleDateString('pt-BR', { month: 'long' })
+    const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+    return { year, month, totalDays, firstDayWeekday, formattedMonth }
+  }
+
+  // Presence Days Set helper
+  const getPresenceDaysSet = () => {
+    const daysSet = new Set<number>()
+    if (!student) return daysSet
+    const today = new Date()
+    const currentMonth = today.getMonth()
+    const currentYear = today.getFullYear()
+    
+    student.presencas.forEach(p => {
+      const pDate = new Date(p.data + 'T00:00:00')
+      if (pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear) {
+        daysSet.add(pDate.getDate())
+      }
+    })
+    return daysSet
+  }
+
   // Notifications Bell
   const [showNotifications, setShowNotifications] = useState(false)
 
@@ -355,14 +385,38 @@ function AreaDoAlunoContent() {
       {/* Perfil Superior */}
       <header className="bg-white border-b border-slate-200/80 sticky top-0 z-30 p-4 shadow-sm">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-zinc-950 rounded-lg flex flex-col items-center justify-between py-0.5 border-b-[3px] border-red-600 shadow-sm flex-shrink-0">
-              <span className="text-white text-[7px] font-bold uppercase tracking-wider">{student.faixa}</span>
-              <span className="text-white text-[9px] font-black">{student.graus}G</span>
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            {/* Styled Belt Ribbon in Header */}
+            <div className="flex flex-col items-start gap-1 flex-shrink-0">
+              <div className={`h-6 w-16 rounded border relative flex items-center shadow-inner overflow-hidden ${
+                student.faixa === 'Branca' ? 'bg-white border-slate-300' :
+                student.faixa === 'Azul' ? 'bg-blue-600 border-blue-700' :
+                student.faixa === 'Roxa' ? 'bg-purple-600 border-purple-700' :
+                student.faixa === 'Marrom' ? 'bg-amber-800 border-amber-900' :
+                student.faixa === 'Preta' ? 'bg-zinc-950 border-zinc-900' :
+                'bg-slate-200 border-slate-350'
+              }`}>
+                {/* Belt sleeve (tarja preta / vermelha) */}
+                <div className={`absolute right-0 top-0 bottom-0 w-5 flex items-center justify-around px-0.5 ${
+                  student.faixa === 'Preta' ? 'bg-red-600' : 'bg-zinc-950'
+                }`}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <span 
+                      key={i} 
+                      className={`w-[1px] h-3 rounded-sm block ${
+                        i < student.graus ? 'bg-white' : 'bg-transparent'
+                      }`} 
+                    />
+                  ))}
+                </div>
+              </div>
+              <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider text-center w-full">
+                Faixa {student.faixa}
+              </span>
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-slate-900 leading-tight">{student.nome}</h1>
-              <p className="text-[10px] text-slate-400 font-bold">{academy.name}</p>
+            <div className="min-w-0">
+              <h1 className="text-sm font-bold text-slate-900 leading-tight truncate">{student.nome}</h1>
+              <p className="text-[10px] text-slate-400 font-bold truncate">{academy.name}</p>
             </div>
           </div>
 
@@ -468,18 +522,53 @@ function AreaDoAlunoContent() {
         {/* ABA: TREINOS & EVOLUÇÃO */}
         {activeTab === 'treinos' && (
           <>
-            {/* CARD DE AVANÇO (Gamificação de Graus/Aulas) */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-500 uppercase tracking-wide">Evolução Técnica</span>
-                <span className="font-bold text-slate-900">{aulasConcluidas}/{aulasParaProximoGrau} Aulas</span>
+            {/* Progresso de Graus / Faixa (Visual 2.0) */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Graduação Atual & Evolução</h3>
+              
+              {/* Belt representation */}
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-lg p-3">
+                <div className="flex-shrink-0">
+                  <div className={`h-8 w-32 rounded border relative flex items-center shadow-inner overflow-hidden ${
+                    student.faixa === 'Branca' ? 'bg-white border-slate-300' :
+                    student.faixa === 'Azul' ? 'bg-blue-600 border-blue-700' :
+                    student.faixa === 'Roxa' ? 'bg-purple-600 border-purple-700' :
+                    student.faixa === 'Marrom' ? 'bg-amber-800 border-amber-900' :
+                    student.faixa === 'Preta' ? 'bg-zinc-950 border-zinc-900' :
+                    'bg-slate-200 border-slate-350'
+                  }`}>
+                    {/* Tarja */}
+                    <div className={`absolute right-0 top-0 bottom-0 w-9 flex items-center justify-around px-0.5 ${
+                      student.faixa === 'Preta' ? 'bg-red-600' : 'bg-zinc-950'
+                    }`}>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <span 
+                          key={i} 
+                          className={`w-[1.5px] h-6 rounded-sm block ${
+                            i < student.graus ? 'bg-white' : 'bg-transparent'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Graduação</span>
+                  <span className="text-xs font-black text-slate-800 uppercase tracking-tight">Faixa {student.faixa} • {student.graus} Grau{student.graus !== 1 ? 's' : ''}</span>
+                </div>
               </div>
               
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-red-600 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${percentualProgresso}%` }}
-                />
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase">
+                  <span>Aulas Assistidas: {aulasConcluidas}/{aulasParaProximoGrau}</span>
+                  <span>{Math.round(percentualProgresso)}%</span>
+                </div>
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-red-600 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${percentualProgresso}%` }}
+                  />
+                </div>
               </div>
               
               <p className="text-[11px] text-slate-400 font-medium">
@@ -490,6 +579,7 @@ function AreaDoAlunoContent() {
                 )}
               </p>
             </div>
+
 
             {/* Quadro de Badges / Conquistas */}
             <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3">
@@ -604,6 +694,71 @@ function AreaDoAlunoContent() {
                   </div>
                 )
               })}
+            </div>
+
+            {/* Calendário de Frequência Mensal (Habit Tracker) */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3.5">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Frequência Mensal</h3>
+                {(() => {
+                  const { formattedMonth, year } = getMonthCalendarDetails()
+                  return (
+                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider bg-slate-50 border border-slate-150 px-2.5 py-0.5 rounded-full">
+                      📅 {formattedMonth} / {year}
+                    </span>
+                  )
+                })()}
+              </div>
+
+              {(() => {
+                const { totalDays, firstDayWeekday } = getMonthCalendarDetails()
+                const presenceDays = getPresenceDaysSet()
+                const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                
+                // Adjusting grid array to pre-pad start weekday offset
+                const calendarCells = []
+                for (let i = 0; i < firstDayWeekday; i++) {
+                  calendarCells.push(null)
+                }
+                for (let i = 1; i <= totalDays; i++) {
+                  calendarCells.push(i)
+                }
+
+                return (
+                  <div className="space-y-2">
+                    {/* Header weekdays label */}
+                    <div className="grid grid-cols-7 gap-1 text-center text-[8.5px] font-bold text-slate-400 uppercase">
+                      {weekdays.map(d => <div key={d}>{d}</div>)}
+                    </div>
+                    {/* Grid days */}
+                    <div className="grid grid-cols-7 gap-1.5 text-center">
+                      {calendarCells.map((day, idx) => {
+                        if (day === null) {
+                          return <div key={`empty-${idx}`} className="h-7" />
+                        }
+                        const hasTrained = presenceDays.has(day)
+                        return (
+                          <div 
+                            key={`day-${day}`}
+                            className={`h-7 w-7 rounded-lg text-[10px] font-black flex items-center justify-center mx-auto transition-all ${
+                              hasTrained 
+                                ? 'bg-emerald-600 border border-emerald-700 text-white shadow-sm scale-105' 
+                                : 'bg-slate-50 border border-slate-200/50 text-slate-400'
+                            }`}
+                          >
+                            {day}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {/* Legend */}
+                    <div className="flex items-center justify-end gap-3 pt-2 text-[8px] font-bold text-slate-400 uppercase border-t border-slate-50 mt-1">
+                      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-emerald-600 block border border-emerald-700" /> Presença</span>
+                      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-slate-50 block border border-slate-200/50" /> Sem Registro</span>
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Gráfico de Assiduidade Semanal (CSS Premium) */}
