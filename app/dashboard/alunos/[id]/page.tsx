@@ -390,7 +390,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
                   {Array.from({ length: 4 }).map((_, i) => (
                     <span 
                       key={i} 
-                      className={`w-[1px] h-5 rounded-sm block ${
+                      className={`w-[3px] h-5 rounded-sm block ${
                         i < aluno.graus ? 'bg-white' : 'bg-transparent'
                       }`} 
                     />

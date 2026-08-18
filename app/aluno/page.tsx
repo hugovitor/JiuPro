@@ -454,7 +454,7 @@ function AreaDoAlunoContent() {
                   {Array.from({ length: 4 }).map((_, i) => (
                     <span 
                       key={i} 
-                      className={`w-[1px] h-3 rounded-sm block ${
+                      className={`w-[2px] h-3 rounded-sm block ${
                         i < student.graus ? 'bg-white' : 'bg-transparent'
                       }`} 
                     />
@@ -622,7 +622,7 @@ function AreaDoAlunoContent() {
                       {Array.from({ length: 4 }).map((_, i) => (
                         <span 
                           key={i} 
-                          className={`w-[1.5px] h-6 rounded-sm block ${
+                          className={`w-[3px] h-6 rounded-sm block ${
                             i < student.graus ? 'bg-white' : 'bg-transparent'
                           }`} 
                         />
