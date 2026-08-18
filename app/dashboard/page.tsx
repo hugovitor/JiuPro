@@ -8,6 +8,7 @@ import { db, Student, User } from '../lib/db'
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [alunos, setAlunos] = useState<Student[]>([])
+  const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -15,6 +16,7 @@ export default function DashboardPage() {
     if (loggedUser) {
       setUser(loggedUser)
       setAlunos(db.getStudents(loggedUser.academyId))
+      setAnnouncements(db.getAnnouncements(loggedUser.academyId))
     }
     setIsLoading(false)
   }, [])
@@ -98,6 +100,47 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Oss, {user.name}!</h1>
           <p className="text-sm text-zinc-500">Aqui está o resumo em tempo real da sua academia.</p>
         </div>
+
+        {/* Mural de Avisos Oficiais */}
+        {announcements.length > 0 && (
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-3">
+            <h2 className="font-bold text-xs uppercase tracking-wider text-zinc-800 flex items-center gap-1.5 border-b border-zinc-100 pb-2">
+              <svg className="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 0 1-3.417.592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1-1.564-.317Z" />
+              </svg>
+              Avisos Oficiais Fixados (Mural do Tatame)
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {announcements.map(ann => (
+                <div 
+                  key={ann.id} 
+                  className={`p-4 rounded-lg border flex flex-col justify-between ${
+                    ann.categoria === 'Alerta' ? 'bg-rose-50/50 border-rose-200 text-rose-900' :
+                    ann.categoria === 'Evento' ? 'bg-amber-50/50 border-amber-200 text-amber-900' :
+                    'bg-slate-50/50 border-slate-200 text-slate-800'
+                  }`}
+                >
+                  <div>
+                    <div className="flex justify-between items-start gap-2">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                        ann.categoria === 'Alerta' ? 'bg-rose-100 text-rose-700' :
+                        ann.categoria === 'Evento' ? 'bg-amber-100 text-amber-700' :
+                        'bg-zinc-100 text-zinc-700'
+                      }`}>
+                        {ann.categoria}
+                      </span>
+                      <span className="text-[9px] font-semibold opacity-60">
+                        {new Date(ann.data).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    <h3 className="text-xs font-bold mt-2 text-zinc-950">{ann.titulo}</h3>
+                    <p className="text-[11px] mt-1 opacity-90 leading-relaxed font-medium">{ann.conteudo}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Linha de Cartões de Resumo (KPIs) */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

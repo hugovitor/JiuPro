@@ -44,6 +44,24 @@ export interface TournamentResult {
   resultado: 'Ouro' | 'Prata' | 'Bronze' | 'Participação'
 }
 
+export interface Announcement {
+  id: string
+  academyId: string
+  titulo: string
+  conteudo: string
+  categoria: 'Informativo' | 'Alerta' | 'Evento'
+  data: string
+}
+
+export interface JournalEntry {
+  id: string
+  studentId: string
+  data: string
+  categoria: 'Kimono' | 'NoGi'
+  posicao: string
+  notas: string
+}
+
 export interface Student {
   id: string
   academyId: string
@@ -561,6 +579,36 @@ function initializeStorage() {
       }
     ]
     localStorage.setItem('jiupro_posts', JSON.stringify(mockPosts))
+  }
+
+  // Initialize announcements
+  if (!localStorage.getItem('jiupro_announcements')) {
+    const defaultAnnouncements = {
+      'gb-centro': [
+        {
+          id: 'ann-default-1',
+          academyId: 'gb-centro',
+          titulo: '🚨 Horário Especial do Feriado',
+          conteudo: 'No feriado do dia 07/Setembro, o tatame funcionará apenas para rolo livre das 10:00 às 12:00. Não haverá treinos infantis.',
+          categoria: 'Alerta',
+          data: new Date(Date.now() - 3600000 * 24).toISOString()
+        },
+        {
+          id: 'ann-default-2',
+          academyId: 'gb-centro',
+          titulo: '🎓 Próximo Exame de Graus e Faixas',
+          conteudo: 'Atenção alunos: confiram se suas presenças mínimas estão em dia na Área do Aluno. A avaliação oficial de graduação ocorrerá no dia 28/Setembro.',
+          categoria: 'Evento',
+          data: new Date(Date.now() - 3600000 * 48).toISOString()
+        }
+      ]
+    }
+    localStorage.setItem('jiupro_announcements', JSON.stringify(defaultAnnouncements))
+  }
+
+  // Initialize journals
+  if (!localStorage.getItem('jiupro_journals')) {
+    localStorage.setItem('jiupro_journals', JSON.stringify({}))
   }
 }
 
@@ -1255,5 +1303,72 @@ export const db = {
 
     localStorage.setItem('jiupro_students', JSON.stringify(all))
     return newResult
+  },
+
+  // Announcements methods
+  getAnnouncements(academyId: string): Announcement[] {
+    initializeStorage()
+    if (typeof window === 'undefined') return []
+    const all: Record<string, Announcement[]> = JSON.parse(localStorage.getItem('jiupro_announcements') || '{}')
+    return all[academyId] || []
+  },
+
+  addAnnouncement(academyId: string, titulo: string, conteudo: string, categoria: 'Informativo' | 'Alerta' | 'Evento'): Announcement {
+    initializeStorage()
+    if (typeof window === 'undefined') return {} as Announcement
+    const all: Record<string, Announcement[]> = JSON.parse(localStorage.getItem('jiupro_announcements') || '{}')
+    if (!all[academyId]) all[academyId] = []
+    
+    const newAnn: Announcement = {
+      id: 'ann-' + Date.now(),
+      academyId,
+      titulo,
+      conteudo,
+      categoria,
+      data: new Date().toISOString()
+    }
+    
+    all[academyId].unshift(newAnn)
+    localStorage.setItem('jiupro_announcements', JSON.stringify(all))
+    return newAnn
+  },
+
+  removeAnnouncement(academyId: string, id: string): Announcement[] {
+    initializeStorage()
+    if (typeof window === 'undefined') return []
+    const all: Record<string, Announcement[]> = JSON.parse(localStorage.getItem('jiupro_announcements') || '{}')
+    if (all[academyId]) {
+      all[academyId] = all[academyId].filter(a => a.id !== id)
+      localStorage.setItem('jiupro_announcements', JSON.stringify(all))
+    }
+    return all[academyId] || []
+  },
+
+  // Training Journal methods
+  getJournals(studentId: string): JournalEntry[] {
+    initializeStorage()
+    if (typeof window === 'undefined') return []
+    const all: Record<string, JournalEntry[]> = JSON.parse(localStorage.getItem('jiupro_journals') || '{}')
+    return all[studentId] || []
+  },
+
+  addJournalEntry(studentId: string, categoria: 'Kimono' | 'NoGi', posicao: string, notas: string): JournalEntry {
+    initializeStorage()
+    if (typeof window === 'undefined') return {} as JournalEntry
+    const all: Record<string, JournalEntry[]> = JSON.parse(localStorage.getItem('jiupro_journals') || '{}')
+    if (!all[studentId]) all[studentId] = []
+    
+    const newEntry: JournalEntry = {
+      id: 'journ-' + Date.now(),
+      studentId,
+      data: new Date().toISOString(),
+      categoria,
+      posicao,
+      notas
+    }
+    
+    all[studentId].unshift(newEntry)
+    localStorage.setItem('jiupro_journals', JSON.stringify(all))
+    return newEntry
   }
 }

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
-import { db, Student, Academy, ClassSession, Post, TournamentResult } from '../lib/db'
+import { db, Student, Academy, ClassSession, Post, TournamentResult, Announcement, JournalEntry } from '../lib/db'
 
 function AreaDoAlunoContent() {
   const router = useRouter()
@@ -21,6 +21,53 @@ function AreaDoAlunoContent() {
   // Post states
   const [newPostContent, setNewPostContent] = useState('')
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
+
+  // Announcements
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+
+  // Journal entries states
+  const [journals, setJournals] = useState<JournalEntry[]>([])
+  const [showNewJournalForm, setShowNewJournalForm] = useState(false)
+  const [journalPosicao, setJournalPosicao] = useState('')
+  const [journalNotas, setJournalNotas] = useState('')
+  const [journalCat, setJournalCat] = useState<'Kimono' | 'NoGi'>('Kimono')
+
+  // Top Attendance Leaderboard calculation
+  const getTopFrequencia = () => {
+    if (!student) return []
+    const today = new Date()
+    const currentMonth = today.getMonth()
+    const currentYear = today.getFullYear()
+    const all = db.getStudents(student.academyId)
+    
+    const ranking = all.map(s => {
+      const presencesInMonth = s.presencas.filter(p => {
+        const d = new Date(p.data + 'T00:00:00')
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+      }).length
+      return {
+        nome: s.nome,
+        faixa: s.faixa,
+        quantidade: presencesInMonth
+      }
+    })
+    
+    return ranking.sort((a, b) => b.quantidade - a.quantidade).slice(0, 5)
+  }
+
+  // Journal Entry Save handler
+  const handleSaveJournalEntry = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!student || !journalPosicao || !journalNotas) return
+    
+    db.addJournalEntry(student.id, journalCat, journalPosicao, journalNotas)
+    
+    // Refresh list
+    setJournals(db.getJournals(student.id))
+    setJournalPosicao('')
+    setJournalNotas('')
+    setShowNewJournalForm(false)
+  }
 
   // Share Badge
   const handleShareBadge = (badgeName: string, badgeDesc: string) => {
@@ -139,6 +186,10 @@ function AreaDoAlunoContent() {
     // Load social posts
     const socialPosts = db.getPosts(s.academyId)
     setPosts(socialPosts)
+
+    // Load announcements & journals
+    setAnnouncements(db.getAnnouncements(s.academyId))
+    setJournals(db.getJournals(s.id))
     
     setIsLoading(false)
   }
@@ -519,6 +570,33 @@ function AreaDoAlunoContent() {
 
       <main className="max-w-md mx-auto p-4 space-y-5">
         
+        {/* Mural de Avisos Oficiais */}
+        {announcements.length > 0 && (
+          <div className="space-y-2.5">
+            {announcements.map(ann => (
+              <div 
+                key={ann.id} 
+                className={`p-3.5 rounded-xl border relative shadow-sm transition-all ${
+                  ann.categoria === 'Alerta' ? 'bg-rose-50 border-rose-200 text-rose-950' :
+                  ann.categoria === 'Evento' ? 'bg-amber-50 border-amber-200 text-amber-950' :
+                  'bg-slate-50 border-slate-200 text-slate-900'
+                }`}
+              >
+                <div className="flex justify-between items-start gap-2 border-b border-dashed pb-1.5 mb-1.5 border-black/10">
+                  <h4 className="text-[9px] font-black tracking-wider leading-none uppercase flex items-center gap-1">
+                    {ann.categoria === 'Alerta' ? '🚨 Aviso Importante' : ann.categoria === 'Evento' ? '🎓 Evento / Seminário' : '📢 Comunicado'}
+                  </h4>
+                  <span className="text-[8px] font-bold opacity-60 flex-shrink-0 leading-none">
+                    {new Date(ann.data).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+                <h5 className="text-xs font-bold leading-tight text-slate-950">{ann.titulo}</h5>
+                <p className="text-[10px] mt-1 leading-relaxed opacity-90">{ann.conteudo}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        
         {/* ABA: TREINOS & EVOLUÇÃO */}
         {activeTab === 'treinos' && (
           <>
@@ -793,6 +871,44 @@ function AreaDoAlunoContent() {
               })()}
             </div>
 
+            {/* Hall da Fama - Leaderboard do Mês */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.75a1.125 1.125 0 0 1-1.125-1.125V3.375c0-.621-.503-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 0-1.125 1.125v3.375M16.5 18.75V15.75M12 3v1.5m0 3v1.5m0 3v1.5m-3-6h6m-6 3h6" />
+                </svg>
+                Hall da Fama (Frequência no Mês)
+              </h3>
+              
+              <div className="space-y-2">
+                {(() => {
+                  const leaderboard = getTopFrequencia()
+                  const medals = ['🥇', '🥈', '🥉', '🥋', '🥋']
+                  
+                  return leaderboard.map((row, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex justify-between items-center px-3 py-2 rounded-lg text-xs font-semibold border ${
+                        index === 0 ? 'bg-amber-50/50 border-amber-200 text-amber-900' :
+                        index === 1 ? 'bg-slate-50 border-slate-200 text-slate-900' :
+                        index === 2 ? 'bg-orange-50/50 border-orange-200 text-orange-900' :
+                        'bg-white border-slate-100 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{medals[index]}</span>
+                        <span className="font-bold">{row.nome}</span>
+                        <span className="text-[9px] font-medium text-slate-400 bg-slate-100 px-1 py-0.2 rounded uppercase">
+                          {row.faixa}
+                        </span>
+                      </div>
+                      <span className="font-black font-mono">{row.quantidade} treinos</span>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
+
             {/* Histórico Recente */}
             <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Presenças Históricas</h3>
@@ -970,6 +1086,111 @@ function AreaDoAlunoContent() {
                   ))
                 ) : (
                   <p className="p-6 text-center text-xs text-slate-400">Nenhum torneio cadastrado.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Seção: Diário de Treino (Caderno de Posições) */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                  <svg className="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                  </svg>
+                  Diário de Treinos
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowNewJournalForm(!showNewJournalForm)}
+                  className="px-2.5 py-1 bg-zinc-950 text-white font-bold rounded text-[10px] uppercase hover:bg-zinc-850 transition-colors shadow-sm cursor-pointer"
+                >
+                  {showNewJournalForm ? 'Fechar' : 'Anotar Posição'}
+                </button>
+              </div>
+
+              {showNewJournalForm && (
+                <form onSubmit={handleSaveJournalEntry} className="space-y-3 bg-slate-50 p-3 rounded-lg border border-slate-150">
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-wider text-slate-400">Tipo de Treino</label>
+                    <div className="flex gap-2 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setJournalCat('Kimono')}
+                        className={`flex-1 py-1 text-xs font-bold rounded border transition-all ${
+                          journalCat === 'Kimono' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-500'
+                        }`}
+                      >
+                        🥋 Kimono
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setJournalCat('NoGi')}
+                        className={`flex-1 py-1 text-xs font-bold rounded border transition-all ${
+                          journalCat === 'NoGi' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500'
+                        }`}
+                      >
+                        🤼 NoGi
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-wider text-slate-400">Posição / Técnica Estudada</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Raspagem de gancho, passagem de meia guarda..."
+                      value={journalPosicao}
+                      onChange={(e) => setJournalPosicao(e.target.value)}
+                      className="w-full px-2.5 py-1.5 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-wider text-slate-400">Detalhes / Notas Técnicas</label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="Anotações sobre pegadas, alavancas e ajuste de peso..."
+                      value={journalNotas}
+                      onChange={(e) => setJournalNotas(e.target.value)}
+                      className="w-full px-2.5 py-1.5 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 font-medium"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-1.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-lg text-xs transition-colors shadow-sm cursor-pointer"
+                  >
+                    Salvar no Diário
+                  </button>
+                </form>
+              )}
+
+              {/* Timeline of Journals */}
+              <div className="space-y-3.5 max-h-64 overflow-y-auto pr-1">
+                {journals.length > 0 ? (
+                  journals.map((entry) => (
+                    <div key={entry.id} className="border-l-2 border-slate-200 pl-3.5 relative space-y-1">
+                      <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-slate-355 border border-white" />
+                      <div className="flex justify-between items-center text-[10px]">
+                        <span className={`px-1.5 py-0.2 rounded font-black uppercase text-[8px] border ${
+                          entry.categoria === 'Kimono' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        }`}>
+                          {entry.categoria}
+                        </span>
+                        <span className="text-slate-400 font-bold">
+                          {new Date(entry.data).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-black text-slate-900 leading-tight">{entry.posicao}</h4>
+                      <p className="text-[10px] text-slate-500 font-medium whitespace-pre-wrap leading-relaxed italic bg-slate-50/50 p-2 rounded border border-slate-100/50">
+                        {entry.notas}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-xs text-slate-400 py-6">Você ainda não tem anotações em seu caderno técnico. Comece anotando o que aprendeu hoje!</p>
                 )}
               </div>
             </div>

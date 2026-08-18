@@ -22,6 +22,12 @@ export default function ConfiguracoesPage() {
   const [novoNomeTurma, setNovoNomeTurma] = useState('')
   const [novosDias, setNovosDias] = useState('Seg, Qua, Sex')
 
+  // Estados para avisos
+  const [announcements, setAnnouncements] = useState<any[]>([])
+  const [avisoTitulo, setAvisoTitulo] = useState('')
+  const [avisoConteudo, setAvisoConteudo] = useState('')
+  const [avisoCat, setAvisoCat] = useState<'Informativo' | 'Alerta' | 'Evento'>('Informativo')
+
   const [linkCopiado, setLinkCopiado] = useState(false)
 
   const handleCopiarLink = () => {
@@ -43,6 +49,10 @@ export default function ConfiguracoesPage() {
 
     const classList = db.getClasses(academyId)
     setTurmas(classList)
+
+    const announcementsList = db.getAnnouncements(academyId)
+    setAnnouncements(announcementsList)
+    
     setIsPageLoading(false)
   }
 
@@ -82,6 +92,26 @@ export default function ConfiguracoesPage() {
     if (!user) return
     db.removeClass(user.academyId, id)
     setTurmas(turmas.filter((t) => t.id !== id))
+  }
+
+  // Função para adicionar novo aviso
+  const handleAdicionarAviso = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !avisoTitulo || !avisoConteudo) return
+
+    db.addAnnouncement(user.academyId, avisoTitulo, avisoConteudo, avisoCat)
+    
+    // Refresh
+    setAnnouncements(db.getAnnouncements(user.academyId))
+    setAvisoTitulo('')
+    setAvisoConteudo('')
+  }
+
+  // Função para remover um aviso
+  const handleRemoverAviso = (id: string) => {
+    if (!user) return
+    db.removeAnnouncement(user.academyId, id)
+    setAnnouncements(announcements.filter((a) => a.id !== id))
   }
 
   // Função para salvar as configurações gerais
@@ -307,6 +337,102 @@ export default function ConfiguracoesPage() {
                 className="w-full px-4 py-2 text-xs font-bold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px]"
               >
                 + Adicionar Classe
+              </button>
+            </form>
+          </div>
+
+          {/* Card: Mural de Avisos Oficiais */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden mt-6">
+            <div className="p-5 border-b border-zinc-200 bg-zinc-50/50">
+              <h2 className="font-bold text-sm uppercase tracking-wider text-zinc-800">
+                Mural de Avisos Oficiais (Quadro de Avisos)
+              </h2>
+              <p className="text-xs text-zinc-500 mt-0.5">Estes comunicados aparecerão fixados no topo do painel dos alunos.</p>
+            </div>
+
+            <div className="divide-y divide-zinc-100 min-h-[50px]">
+              {announcements.length > 0 ? (
+                announcements.map((ann) => (
+                  <div key={ann.id} className="p-4 flex items-center justify-between hover:bg-zinc-50/40 transition-colors text-sm">
+                    <div className="flex items-start gap-4">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                        ann.categoria === 'Alerta' ? 'bg-rose-50 text-rose-700 border-rose-100' :
+                        ann.categoria === 'Evento' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                        'bg-zinc-50 text-zinc-600 border-zinc-200'
+                      }`}>
+                        {ann.categoria}
+                      </span>
+                      <div>
+                        <span className="font-semibold text-zinc-800 block">{ann.titulo}</span>
+                        <span className="text-xs text-zinc-500 block mt-0.5">{ann.conteudo}</span>
+                        <span className="text-[9px] text-zinc-400 font-mono mt-1 block">{new Date(ann.data).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoverAviso(ann.id)}
+                      className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/60 px-2.5 py-1 rounded transition-colors flex-shrink-0 cursor-pointer"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-xs text-zinc-400">
+                  Nenhum aviso cadastrado. Publique um aviso oficial abaixo!
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Form: Publicar Novo Aviso */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 mt-6">
+            <h3 className="font-semibold text-zinc-900 text-sm mb-4">Publicar Novo Aviso Paginado</h3>
+            
+            <form onSubmit={handleAdicionarAviso} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">Título do Aviso</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Seminário de Passagem de Guarda"
+                    value={avisoTitulo}
+                    onChange={(e) => setAvisoTitulo(e.target.value)}
+                    className="w-full px-3 py-1.5 mt-1.5 text-xs bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">Categoria</label>
+                  <select
+                    value={avisoCat}
+                    onChange={(e) => setAvisoCat(e.target.value as any)}
+                    className="w-full px-3 py-1.5 mt-1.5 text-xs bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 transition-colors text-zinc-800 font-bold"
+                  >
+                    <option value="Informativo">📢 Informativo</option>
+                    <option value="Alerta">🚨 Alerta Urgente</option>
+                    <option value="Evento">🎓 Evento / Seminário</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">Mensagem / Conteúdo</label>
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Escreva os detalhes do aviso..."
+                  value={avisoConteudo}
+                  onChange={(e) => setAvisoConteudo(e.target.value)}
+                  className="w-full px-3 py-1.5 mt-1.5 text-xs bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 transition-colors font-medium text-zinc-800"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full px-4 py-2 bg-red-600 text-white font-bold rounded-lg text-xs hover:bg-red-700 transition-all shadow-sm cursor-pointer"
+              >
+                Publicar Comunicado
               </button>
             </form>
           </div>
