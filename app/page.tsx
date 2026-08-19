@@ -87,12 +87,13 @@ export default function SaaSLandingPage() {
       </div>
 
       {/* 1. Header (Navbar) - Clean Light Style with Large Text-Only Logo */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
-        <div className="flex items-center justify-between gap-4">
+      {/* 1. Header (Navbar) - Sticky top-0 full width */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-50 py-3 px-6 sm:px-8 w-full shadow-sm">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           
           {/* Text-Only Logo - Enlarged and clean as requested */}
           <div className="flex items-center flex-shrink-0">
-            <svg className="h-11 w-auto text-zinc-955" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-11 w-auto text-zinc-950" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Bold Italic Typography */}
               <text x="2" y="32" fill="#09090B" fontSize="33" fontWeight="950" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
                 JIU<tspan fill="#DC2626">PRO</tspan>

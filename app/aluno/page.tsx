@@ -1193,7 +1193,7 @@ function AreaDoAlunoContent() {
                 {journals.length > 0 ? (
                   journals.map((entry) => (
                     <div key={entry.id} className="border-l-2 border-slate-200 pl-3.5 relative space-y-1">
-                      <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-slate-355 border border-white" />
+                      <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-slate-400 border border-white" />
                       <div className="flex justify-between items-center text-[10px]">
                         <span className={`px-1.5 py-0.2 rounded font-black uppercase text-[8px] border ${
                           entry.categoria === 'Kimono' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'

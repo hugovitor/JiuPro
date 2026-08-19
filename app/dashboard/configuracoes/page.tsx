@@ -251,7 +251,7 @@ export default function ConfiguracoesPage() {
                   type="button"
                   onClick={handleCopiarLink}
                   className={`px-3 py-2 text-xs font-bold text-white rounded-lg transition-all ${
-                    linkCopiado ? 'bg-emerald-650 hover:bg-emerald-755' : 'bg-zinc-950 hover:bg-zinc-850'
+                    linkCopiado ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-zinc-950 hover:bg-zinc-850'
                   }`}
                 >
                   {linkCopiado ? 'Copiado!' : 'Copiar'}
