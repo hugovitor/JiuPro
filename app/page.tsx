@@ -74,7 +74,7 @@ export default function SaaSLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-650 selection:text-white">
+    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-655 selection:bg-red-600 selection:text-white">
       
       {/* faixa preta brand accent at the very top of the page - with centered, wide, equal-sized white stripes */}
       <div className="h-3 bg-zinc-950 flex justify-end">
@@ -86,46 +86,21 @@ export default function SaaSLandingPage() {
         </div>
       </div>
 
-      {/* 1. Header (Navbar) */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
+      {/* 1. Header (Navbar) - Black Belt Style to match the logo perfectly */}
+      <header className="bg-zinc-950 border-b border-zinc-900 sticky top-3.5 z-50 py-2.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-md">
         <div className="flex items-center justify-between">
           
-          {/* Official Premium SVG Logo mimicking the black belt "J" knot */}
+          {/* Logo Oficial JiuPro */}
           <div className="flex items-center">
-            <svg className="h-9 w-auto text-zinc-955" viewBox="0 0 310 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g transform="translate(2, 0)">
-                {/* Left belt loop */}
-                <path d="M46 36 C30 22 6 32 10 44 C14 56 46 52 50 40" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
-                {/* Red End Bar */}
-                <path d="M6 40 L14 34" stroke="#DC2626" strokeWidth="8.5" strokeLinecap="square" />
-                {/* White Stripe (Grau) */}
-                <path d="M10 37 L12 35.5" stroke="#FFFFFF" strokeWidth="2.2" />
-
-                {/* Belt Knot center */}
-                <path d="M44 40 C42 50 56 50 54 40 C52 30 46 30 44 40 Z" fill="#09090B" />
-
-                {/* Vertical Belt Loop (J fold upwards) */}
-                <path d="M50 40 C53 31 66 14 70 8 C73 4 80 4 82 10 C83 14 73 34 62 50" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
-              </g>
-
-              {/* Bold Italic Typography matching design request */}
-              <text x="96" y="44" fill="#09090B" fontSize="27" fontWeight="900" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
-                JIU<tspan fill="#DC2626">PRO</tspan>
-              </text>
-              
-              {/* Spaced Subtitle */}
-              <text x="98" y="58" fill="#71717A" fontSize="7.5" fontWeight="bold" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.24em">
-                PLATAFORMA PARA ACADEMIAS
-              </text>
-            </svg>
+            <img src="/logo.jpg" alt="JiuPro" className="h-9 w-auto" />
           </div>
           
           <div className="flex items-center gap-7">
-            <a href="#precos" className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wider">Planos</a>
-            <a href="#simulador" className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wider">Demonstrações</a>
+            <a href="#precos" className="text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors uppercase tracking-wider">Planos</a>
+            <a href="#simulador" className="text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors uppercase tracking-wider">Demonstrações</a>
             <button
               onClick={() => router.push('/login')}
-              className="text-[11px] font-bold text-white bg-zinc-950 hover:bg-zinc-850 px-4.5 py-2 rounded shadow-sm transition-all cursor-pointer uppercase tracking-wider"
+              className="text-[11px] font-bold text-zinc-950 bg-white hover:bg-zinc-100 px-4 py-2 rounded shadow-sm transition-all cursor-pointer uppercase tracking-wider"
             >
               Acessar Painel
             </button>
@@ -190,7 +165,7 @@ export default function SaaSLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-2.5 border-l-2 border-zinc-900 pl-4">
               <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-900">Cobranças PIX</h3>
-              <p className="text-xs text-zinc-455 leading-relaxed font-light">
+              <p className="text-xs text-zinc-450 leading-relaxed font-light">
                 Notificação de vencimentos diretamente no WhatsApp com textos parametrizados e chaves de pagamento automáticas.
               </p>
             </div>
@@ -220,7 +195,7 @@ export default function SaaSLandingPage() {
 
         {/* Separator mimicking the black belt design with centered, equal-sized white stripes */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
-          <div className="h-4 bg-zinc-950 rounded overflow-hidden flex justify-end">
+          <div className="h-4 bg-zinc-955 rounded overflow-hidden flex justify-end">
             <div className="w-28 h-full bg-red-600 flex items-center justify-center gap-1.5 px-2 border-l border-r border-white/20">
               <div className="w-[4.5px] h-full bg-white" />
               <div className="w-[4.5px] h-full bg-white" />
@@ -259,7 +234,7 @@ export default function SaaSLandingPage() {
                       <h3 className="font-bold text-sm text-zinc-955 tracking-tight">{ac.name}</h3>
                       <p className="text-xs text-zinc-500 leading-relaxed font-light">
                         Responsável: <span className="font-semibold text-zinc-800">{ac.ownerName}</span> <br />
-                        E-mail: <span className="font-mono text-[10px] text-zinc-450">{ac.ownerEmail}</span>
+                        E-mail: <span className="font-mono text-[10px] text-zinc-455">{ac.ownerEmail}</span>
                       </p>
                     </div>
 
@@ -285,7 +260,7 @@ export default function SaaSLandingPage() {
         <section id="assinar" className="py-20 px-6 sm:px-8 max-w-5xl mx-auto space-y-12 scroll-mt-20">
           <div className="text-center space-y-2">
             <h2 className="text-xl font-bold tracking-tight text-zinc-955 uppercase tracking-widest text-xs">Ativação Comercial</h2>
-            <p className="text-xs text-zinc-450 max-w-md mx-auto font-light">
+            <p className="text-xs text-zinc-455 max-w-md mx-auto font-light">
               Escolha seu plano, preencha o formulário e siga para o checkout seguro de faturamento.
             </p>
           </div>
@@ -321,7 +296,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">E-mail de Acesso</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-455">E-mail de Acesso</label>
                 <input 
                   type="email" 
                   value={email}
