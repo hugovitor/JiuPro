@@ -86,15 +86,13 @@ export default function SaaSLandingPage() {
         </div>
       </div>
 
-      {/* 1. Header (Navbar) - Clean Light Style with Black Logo Capsule Badge */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
+      {/* 1. Header (Navbar) - Clean Light Style with Transparent Logo */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
           
-          {/* Logo Oficial JiuPro wrapped in a premium black capsule badge */}
+          {/* Logo Oficial JiuPro com fundo transparente */}
           <div className="flex items-center">
-            <div className="bg-zinc-950 px-4.5 py-1.5 rounded-full flex items-center justify-center shadow-sm border border-zinc-850">
-              <img src="/logo.jpg" alt="JiuPro" className="h-6 w-auto" />
-            </div>
+            <img src="/logo.png" alt="JiuPro" className="h-10 w-auto" />
           </div>
           
           <div className="flex items-center gap-7">
@@ -148,7 +146,7 @@ export default function SaaSLandingPage() {
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href="#assinar"
-                className="w-full sm:w-auto text-center px-7 py-3 text-xs font-extrabold uppercase tracking-wider text-white bg-zinc-950 hover:bg-zinc-850 rounded shadow-md transition-all"
+                className="w-full sm:w-auto text-center px-7 py-3 text-xs font-extrabold uppercase tracking-wider text-white bg-zinc-955 hover:bg-zinc-850 rounded shadow-md transition-all"
               >
                 Criar Unidade Administrativa
               </a>
