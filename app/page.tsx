@@ -74,7 +74,7 @@ export default function SaaSLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-655 selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-650 selection:text-white">
       
       {/* faixa preta brand accent at the very top of the page - with centered, wide, equal-sized white stripes */}
       <div className="h-3 bg-zinc-950 flex justify-end">
@@ -86,13 +86,38 @@ export default function SaaSLandingPage() {
         </div>
       </div>
 
-      {/* 1. Header (Navbar) - Clean Light Style with Transparent Logo */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
+      {/* 1. Header (Navbar) - Clean Light Style with High Definition SVG Logo */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
           
-          {/* Logo Oficial JiuPro com fundo transparente */}
+          {/* Custom HD SVG Belt Logo - perfectly sharp and transparent */}
           <div className="flex items-center">
-            <img src="/logo.png" alt="JiuPro" className="h-10 w-auto" />
+            <svg className="h-9 w-auto text-zinc-950" viewBox="0 0 310 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g transform="translate(2, 0)">
+                {/* Left belt loop */}
+                <path d="M46 36 C30 22 6 32 10 44 C14 56 46 52 50 40" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
+                {/* Red End Bar */}
+                <path d="M6 40 L14 34" stroke="#DC2626" strokeWidth="8.5" strokeLinecap="square" />
+                {/* White Stripe (Grau) */}
+                <path d="M10 37 L12 35.5" stroke="#FFFFFF" strokeWidth="2.2" />
+
+                {/* Belt Knot center */}
+                <path d="M44 40 C42 50 56 50 54 40 C52 30 46 30 44 40 Z" fill="#09090B" />
+
+                {/* Vertical Belt Loop (J fold upwards) */}
+                <path d="M50 40 C53 31 66 14 70 8 C73 4 80 4 82 10 C83 14 73 34 62 50" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
+              </g>
+
+              {/* Bold Italic Typography matching design request */}
+              <text x="96" y="44" fill="#09090B" fontSize="27" fontWeight="900" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
+                JIU<tspan fill="#DC2626">PRO</tspan>
+              </text>
+              
+              {/* Spaced Subtitle */}
+              <text x="98" y="58" fill="#71717A" fontSize="7.5" fontWeight="bold" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.24em">
+                PLATAFORMA PARA ACADEMIAS
+              </text>
+            </svg>
           </div>
           
           <div className="flex items-center gap-7">
@@ -146,7 +171,7 @@ export default function SaaSLandingPage() {
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href="#assinar"
-                className="w-full sm:w-auto text-center px-7 py-3 text-xs font-extrabold uppercase tracking-wider text-white bg-zinc-955 hover:bg-zinc-850 rounded shadow-md transition-all"
+                className="w-full sm:w-auto text-center px-7 py-3 text-xs font-extrabold uppercase tracking-wider text-white bg-zinc-950 hover:bg-zinc-850 rounded shadow-md transition-all"
               >
                 Criar Unidade Administrativa
               </a>
@@ -193,9 +218,9 @@ export default function SaaSLandingPage() {
           </div>
         </section>
 
-        {/* Separator mimicking the black belt design with centered, equal-sized white stripes */}
+        {/* Separator mimicking the black belt design with centered, equal-sized white stripes. FIXED bg-zinc-950 color */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
-          <div className="h-4 bg-zinc-955 rounded overflow-hidden flex justify-end">
+          <div className="h-4 bg-zinc-950 rounded overflow-hidden flex justify-end">
             <div className="w-28 h-full bg-red-600 flex items-center justify-center gap-1.5 px-2 border-l border-r border-white/20">
               <div className="w-[4.5px] h-full bg-white" />
               <div className="w-[4.5px] h-full bg-white" />
@@ -382,7 +407,7 @@ export default function SaaSLandingPage() {
               <div className="bg-white p-4 rounded border border-zinc-200 space-y-2 text-zinc-450">
                 <h4 className="text-[9px] font-bold text-zinc-955 uppercase tracking-wider">Pagamento Criptografado</h4>
                 <p className="text-[10px] text-zinc-400 leading-relaxed font-light">
-                  Sua transação é assegurada pelo Stripe. Nenhuma informação bancária ou de cartão é armazenada.
+                  Sua transação é assegurada pelo Stripe. Nenhuma informação bancária or de cartão é armazenada.
                 </p>
               </div>
             </div>
