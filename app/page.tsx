@@ -86,21 +86,23 @@ export default function SaaSLandingPage() {
         </div>
       </div>
 
-      {/* 1. Header (Navbar) - Black Belt Style to match the logo perfectly */}
-      <header className="bg-zinc-950 border-b border-zinc-900 sticky top-3.5 z-50 py-2.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-md">
+      {/* 1. Header (Navbar) - Clean Light Style with Black Logo Capsule Badge */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
           
-          {/* Logo Oficial JiuPro */}
+          {/* Logo Oficial JiuPro wrapped in a premium black capsule badge */}
           <div className="flex items-center">
-            <img src="/logo.jpg" alt="JiuPro" className="h-9 w-auto" />
+            <div className="bg-zinc-950 px-4.5 py-1.5 rounded-full flex items-center justify-center shadow-sm border border-zinc-850">
+              <img src="/logo.jpg" alt="JiuPro" className="h-6 w-auto" />
+            </div>
           </div>
           
           <div className="flex items-center gap-7">
-            <a href="#precos" className="text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors uppercase tracking-wider">Planos</a>
-            <a href="#simulador" className="text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors uppercase tracking-wider">Demonstrações</a>
+            <a href="#precos" className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wider">Planos</a>
+            <a href="#simulador" className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wider">Demonstrações</a>
             <button
               onClick={() => router.push('/login')}
-              className="text-[11px] font-bold text-zinc-950 bg-white hover:bg-zinc-100 px-4 py-2 rounded shadow-sm transition-all cursor-pointer uppercase tracking-wider"
+              className="text-[11px] font-bold text-white bg-zinc-950 hover:bg-zinc-850 px-4.5 py-2 rounded shadow-sm transition-all cursor-pointer uppercase tracking-wider"
             >
               Acessar Painel
             </button>
@@ -296,7 +298,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-455">E-mail de Acesso</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">E-mail de Acesso</label>
                 <input 
                   type="email" 
                   value={email}
