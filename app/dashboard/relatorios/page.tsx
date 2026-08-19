@@ -260,7 +260,10 @@ export default function RelatoriosPage() {
                   onClick={handleExportFrequencyCSV}
                   className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-250 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  📥 Exportar CSV
+                  <svg className="h-3.5 w-3.5 text-zinc-550" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  <span>Exportar CSV</span>
                 </button>
                 <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-100 uppercase tracking-wider leading-none flex items-center">
                   Ação Recomendada
@@ -394,7 +397,10 @@ export default function RelatoriosPage() {
                   onClick={handleExportFinanceCSV}
                   className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0"
                 >
-                  📥 Exportar CSV
+                  <svg className="h-3.5 w-3.5 text-zinc-550" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  <span>Exportar CSV</span>
                 </button>
               </div>
             </div>

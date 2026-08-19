@@ -409,9 +409,9 @@ export default function ConfiguracoesPage() {
                     onChange={(e) => setAvisoCat(e.target.value as any)}
                     className="w-full px-3 py-1.5 mt-1.5 text-xs bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 transition-colors text-zinc-800 font-bold"
                   >
-                    <option value="Informativo">📢 Informativo</option>
-                    <option value="Alerta">🚨 Alerta Urgente</option>
-                    <option value="Evento">🎓 Evento / Seminário</option>
+                    <option value="Informativo">Informativo</option>
+                    <option value="Alerta">Alerta Urgente</option>
+                    <option value="Evento">Evento / Seminário</option>
                   </select>
                 </div>
               </div>

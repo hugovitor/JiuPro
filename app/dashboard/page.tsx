@@ -152,10 +152,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           
           {/* Card: Alunos Ativos */}
-          <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex flex-col justify-between">
+          <div className="bg-white p-6 rounded-xl border border-zinc-200 border-t-4 border-t-zinc-950 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.06)] flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Atletas Ativos</span>
-              <span className="text-emerald-600 bg-emerald-50 text-[10px] px-2 py-0.5 rounded font-bold border border-emerald-100 flex items-center gap-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-450">Atletas Ativos</span>
+              <span className="text-emerald-700 bg-emerald-50 text-[10px] px-2 py-0.5 rounded font-bold border border-emerald-100 flex items-center gap-1">
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
                 </svg>
@@ -163,16 +163,16 @@ export default function DashboardPage() {
               </span>
             </div>
             <div className="mt-4">
-              <span className="text-3xl font-bold tracking-tight">{alunosAtivos.length}</span>
-              <p className="text-xs text-zinc-500 mt-1">Total de {alunos.length} cadastrados</p>
+              <span className="text-3xl font-bold tracking-tight text-zinc-900">{alunosAtivos.length}</span>
+              <p className="text-xs text-zinc-400 mt-1">Total de {alunos.length} cadastrados</p>
             </div>
           </div>
 
           {/* Card: Inadimplência */}
-          <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex flex-col justify-between">
+          <div className="bg-white p-6 rounded-xl border border-zinc-200 border-t-4 border-t-red-600 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.06)] flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Inadimplência</span>
-              <span className="text-rose-600 bg-rose-50 text-[10px] px-2 py-0.5 rounded font-bold border border-rose-100 flex items-center gap-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-450">Inadimplência</span>
+              <span className="text-rose-700 bg-rose-50 text-[10px] px-2 py-0.5 rounded font-bold border border-rose-100 flex items-center gap-1">
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
@@ -180,18 +180,18 @@ export default function DashboardPage() {
               </span>
             </div>
             <div className="mt-4">
-              <span className="text-3xl font-bold tracking-tight text-rose-600">
+              <span className="text-3xl font-bold tracking-tight text-red-600">
                 R$ {totalInadimplencia.toFixed(2).replace('.', ',')}
               </span>
-              <p className="text-xs text-zinc-500 mt-1">Total vencido a receber</p>
+              <p className="text-xs text-zinc-400 mt-1">Total vencido a receber</p>
             </div>
           </div>
 
-          {/* Card: Saúde Financeira (Novo!) */}
-          <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex flex-col justify-between">
+          {/* Card: Saúde Financeira */}
+          <div className="bg-white p-6 rounded-xl border border-zinc-200 border-t-4 border-t-blue-600 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.06)] flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Adimplência Geral</span>
-              <span className="text-blue-600 bg-blue-50 text-[10px] px-2 py-0.5 rounded font-bold border border-blue-100">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-450">Adimplência Geral</span>
+              <span className="text-blue-700 bg-blue-50 text-[10px] px-2 py-0.5 rounded font-bold border border-blue-100">
                 {adimplenciaPercent}%
               </span>
             </div>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
               </div>
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                 <div 
-                  className="bg-blue-600 h-full rounded-full transition-all" 
+                  className="bg-blue-650 bg-blue-600 h-full rounded-full transition-all" 
                   style={{ width: `${adimplenciaPercent}%` }}
                 />
               </div>
@@ -214,14 +214,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Card: Aniversariantes */}
-          <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex flex-col justify-between">
+          <div className="bg-white p-6 rounded-xl border border-zinc-200 border-t-4 border-t-amber-500 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.06)] flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Aniversariantes</span>
-              <span className="text-red-600 bg-red-50 text-[10px] px-2 py-0.5 rounded font-bold border border-red-100">Agosto</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-450">Aniversariantes</span>
+              <span className="text-amber-800 bg-amber-50 text-[10px] px-2 py-0.5 rounded font-bold border border-amber-100">Agosto</span>
             </div>
             <div className="mt-4">
-              <span className="text-3xl font-bold tracking-tight">{aniversariantes.length}</span>
-              <p className="text-xs text-zinc-500 mt-1">Guerreiros festejando este mês</p>
+              <span className="text-3xl font-bold tracking-tight text-zinc-900">{aniversariantes.length}</span>
+              <p className="text-xs text-zinc-450 mt-1">Guerreiros festejando este mês</p>
             </div>
           </div>
 

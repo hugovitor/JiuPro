@@ -809,7 +809,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
                       Frequência Mensal
                     </h3>
                     <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider bg-slate-50 border border-slate-150 px-2 py-0.5 rounded">
-                      📅 {formattedMonth} / {year}
+                      {formattedMonth} / {year}
                     </span>
                   </div>
 
@@ -898,16 +898,15 @@ export default function FichaAlunoPage({ params }: PageProps) {
             <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
               <h3 className="font-bold text-xs uppercase tracking-wider text-slate-850">Histórico em Competições</h3>
               
-              {/* Quadro rápido de contagem de medalhas */}
               <div className="flex gap-2">
-                <span className="text-[10px] bg-amber-50 border border-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                  🥇 {aluno.tournaments?.filter(t => t.resultado === 'Ouro').length || 0}
+                <span className="text-[9px] bg-amber-50 border border-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                  Ouro: {aluno.tournaments?.filter(t => t.resultado === 'Ouro').length || 0}
                 </span>
-                <span className="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                  🥈 {aluno.tournaments?.filter(t => t.resultado === 'Prata').length || 0}
+                <span className="text-[9px] bg-slate-100 border border-slate-200 text-slate-800 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                  Prata: {aluno.tournaments?.filter(t => t.resultado === 'Prata').length || 0}
                 </span>
-                <span className="text-[10px] bg-orange-50 border border-orange-100 text-orange-700 font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                  🥉 {aluno.tournaments?.filter(t => t.resultado === 'Bronze').length || 0}
+                <span className="text-[9px] bg-orange-50 border border-orange-100 text-orange-800 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                  Bronze: {aluno.tournaments?.filter(t => t.resultado === 'Bronze').length || 0}
                 </span>
               </div>
             </div>
