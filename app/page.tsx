@@ -74,37 +74,37 @@ export default function SaaSLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-605 selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-650 selection:text-white">
       
-      {/* faixa preta brand accent at the very top of the page - with degrees (listras brancas) */}
-      <div className="h-2.5 bg-zinc-950 flex justify-end">
-        <div className="w-24 h-full bg-red-600 flex items-center justify-around px-2.5 border-l border-r border-white/20 relative">
-          <div className="w-[1.5px] h-full bg-white/90" />
-          <div className="w-[1.5px] h-full bg-white/90" />
-          <div className="w-[1.5px] h-full bg-white/90" />
-          <div className="w-[1.5px] h-full bg-white/90" />
+      {/* faixa preta brand accent at the very top of the page - with wider degrees (listras brancas) */}
+      <div className="h-3 bg-zinc-950 flex justify-end">
+        <div className="w-28 h-full bg-red-600 flex items-center justify-around px-3 border-l border-r border-white/20">
+          <div className="w-[3.5px] h-full bg-white" />
+          <div className="w-[3.5px] h-full bg-white" />
+          <div className="w-[3.5px] h-full bg-white" />
+          <div className="w-[3.5px] h-full bg-white" />
         </div>
       </div>
 
       {/* 1. Header (Navbar) */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-2.5 z-50 py-4 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-4 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
           
-          {/* Custom Professional SVG Belt Logo */}
+          {/* Custom Professional SVG Belt Logo with wider degrees */}
           <div className="flex items-center gap-2">
-            <svg className="h-7 w-auto text-zinc-950" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-8 w-auto text-zinc-950" viewBox="0 0 130 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Faixa Preta Base */}
               <rect x="2" y="6" width="22" height="20" rx="2" fill="#09090B" />
               {/* Tarja Vermelha */}
-              <rect x="24" y="6" width="14" height="20" rx="1" fill="#DC2626" />
-              {/* Graus (Listras Brancas) */}
-              <rect x="27" y="8" width="1" height="16" fill="white" />
-              <rect x="30" y="8" width="1" height="16" fill="white" />
-              <rect x="33" y="8" width="1" height="16" fill="white" />
-              <rect x="36" y="8" width="1" height="16" fill="white" />
+              <rect x="24" y="6" width="20" height="20" rx="1" fill="#DC2626" />
+              {/* Graus mais largos (Listras Brancas) */}
+              <rect x="27" y="8" width="2" height="16" fill="white" />
+              <rect x="31" y="8" width="2" height="16" fill="white" />
+              <rect x="35" y="8" width="2" height="16" fill="white" />
+              <rect x="39" y="8" width="2" height="16" fill="white" />
               
               {/* JiuPro Logo Typography */}
-              <text x="45" y="21" fill="#09090B" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.02em">
+              <text x="50" y="21" fill="#09090B" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.02em">
                 Jiu<tspan fill="#DC2626">Pro</tspan>
               </text>
             </svg>
@@ -146,7 +146,7 @@ export default function SaaSLandingPage() {
         <section className="py-24 px-6 sm:px-8 text-center space-y-8 relative overflow-hidden bg-white border-b border-zinc-200">
           <div className="max-w-4xl mx-auto space-y-6">
             
-            <h1 className="text-4xl sm:text-6xl font-black text-zinc-950 tracking-tight leading-[1.05]">
+            <h1 className="text-4xl sm:text-6xl font-black text-zinc-955 tracking-tight leading-[1.05]">
               A excelência na gestão <br />
               <span className="relative inline-block">
                 da sua academia
@@ -208,14 +208,14 @@ export default function SaaSLandingPage() {
           </div>
         </section>
 
-        {/* Separator mimicking the black belt design with degrees */}
+        {/* Separator mimicking the black belt design with wider degrees */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
-          <div className="h-3 bg-zinc-950 rounded overflow-hidden flex justify-end">
-            <div className="w-24 h-full bg-red-600 flex items-center justify-around px-2.5 border-l border-white/20">
-              <div className="w-[1.5px] h-full bg-white/90" />
-              <div className="w-[1.5px] h-full bg-white/90" />
-              <div className="w-[1.5px] h-full bg-white/90" />
-              <div className="w-[1.5px] h-full bg-white/90" />
+          <div className="h-4 bg-zinc-950 rounded overflow-hidden flex justify-end">
+            <div className="w-28 h-full bg-red-600 flex items-center justify-around px-3 border-l border-white/20">
+              <div className="w-[3.5px] h-full bg-white/90" />
+              <div className="w-[3.5px] h-full bg-white/90" />
+              <div className="w-[3.5px] h-full bg-white/90" />
+              <div className="w-[3.5px] h-full bg-white/90" />
             </div>
           </div>
         </div>
@@ -249,7 +249,7 @@ export default function SaaSLandingPage() {
                       <h3 className="font-bold text-sm text-zinc-950 tracking-tight">{ac.name}</h3>
                       <p className="text-xs text-zinc-500 leading-relaxed font-light">
                         Responsável: <span className="font-semibold text-zinc-800">{ac.ownerName}</span> <br />
-                        E-mail: <span className="font-mono text-[10px] text-zinc-450">{ac.ownerEmail}</span>
+                        E-mail: <span className="font-mono text-[10px] text-zinc-455">{ac.ownerEmail}</span>
                       </p>
                     </div>
 
@@ -274,8 +274,8 @@ export default function SaaSLandingPage() {
         {/* 5. Cadastro & Checkout */}
         <section id="assinar" className="py-20 px-6 sm:px-8 max-w-5xl mx-auto space-y-12 scroll-mt-20">
           <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold tracking-tight text-zinc-950 uppercase tracking-widest text-xs">Ativação Comercial</h2>
-            <p className="text-xs text-zinc-400 max-w-md mx-auto font-light">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-955 uppercase tracking-widest text-xs">Ativação Comercial</h2>
+            <p className="text-xs text-zinc-450 max-w-md mx-auto font-light">
               Escolha seu plano, preencha o formulário e siga para o checkout seguro de faturamento.
             </p>
           </div>
@@ -283,8 +283,8 @@ export default function SaaSLandingPage() {
           <div className="bg-white rounded-xl border border-zinc-200 shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-2">
             
             {/* Form de Cadastro */}
-            <form onSubmit={handleRegister} className="p-6 sm:p-8 space-y-4 border-r border-zinc-150">
-              <h3 className="font-bold text-[10px] text-zinc-950 border-b border-zinc-100 pb-2 uppercase tracking-wider">Cadastro de Unidade</h3>
+            <form onSubmit={handleRegister} className="p-6 sm:p-8 space-y-4 border-r border-zinc-155">
+              <h3 className="font-bold text-[10px] text-zinc-950 border-b border-zinc-105 pb-2 uppercase tracking-wider">Cadastro de Unidade</h3>
               
               <div>
                 <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">Nome da Academia</label>
@@ -323,7 +323,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">Defina uma Senha</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-455">Defina uma Senha</label>
                 <input 
                   type="password" 
                   value={password}
@@ -335,7 +335,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">Plano Pretendido</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-455">Plano Pretendido</label>
                 <select
                   value={selectedPlan}
                   onChange={(e) => setSelectedPlan(e.target.value as any)}
@@ -370,7 +370,7 @@ export default function SaaSLandingPage() {
               <div className="space-y-4">
                 <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-955 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
                 
-                <div className="space-y-4 text-xs font-light text-zinc-500">
+                <div className="space-y-4 text-xs font-light text-zinc-550">
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
                     <span className="font-semibold text-zinc-955">Plano Prata</span>
                     <span className="font-bold text-zinc-955">R$ 99</span>
@@ -395,7 +395,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div className="bg-white p-4 rounded border border-zinc-200 space-y-2 text-zinc-450">
-                <h4 className="text-[9px] font-bold text-zinc-950 uppercase tracking-wider">Pagamento Criptografado</h4>
+                <h4 className="text-[9px] font-bold text-zinc-955 uppercase tracking-wider">Pagamento Criptografado</h4>
                 <p className="text-[10px] text-zinc-400 leading-relaxed font-light">
                   Sua transação é assegurada pelo Stripe. Nenhuma informação bancária ou de cartão é armazenada.
                 </p>
