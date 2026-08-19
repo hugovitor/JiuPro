@@ -86,35 +86,20 @@ export default function SaaSLandingPage() {
         </div>
       </div>
 
-      {/* 1. Header (Navbar) - Clean Light Style with High Definition SVG Logo */}
+      {/* 1. Header (Navbar) - Clean Light Style with Large Text-Only Logo */}
       <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3.5 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           
-          {/* Custom HD SVG Belt Logo - perfectly sharp and transparent */}
-          <div className="flex items-center">
-            <svg className="h-9 w-auto text-zinc-950" viewBox="0 0 310 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g transform="translate(2, 0)">
-                {/* Left belt loop */}
-                <path d="M46 36 C30 22 6 32 10 44 C14 56 46 52 50 40" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
-                {/* Red End Bar */}
-                <path d="M6 40 L14 34" stroke="#DC2626" strokeWidth="8.5" strokeLinecap="square" />
-                {/* White Stripe (Grau) */}
-                <path d="M10 37 L12 35.5" stroke="#FFFFFF" strokeWidth="2.2" />
-
-                {/* Belt Knot center */}
-                <path d="M44 40 C42 50 56 50 54 40 C52 30 46 30 44 40 Z" fill="#09090B" />
-
-                {/* Vertical Belt Loop (J fold upwards) */}
-                <path d="M50 40 C53 31 66 14 70 8 C73 4 80 4 82 10 C83 14 73 34 62 50" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
-              </g>
-
-              {/* Bold Italic Typography matching design request */}
-              <text x="96" y="44" fill="#09090B" fontSize="27" fontWeight="900" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
+          {/* Text-Only Logo - Enlarged and clean as requested */}
+          <div className="flex items-center flex-shrink-0">
+            <svg className="h-11 w-auto text-zinc-950" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Bold Italic Typography */}
+              <text x="2" y="32" fill="#09090B" fontSize="33" fontWeight="950" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
                 JIU<tspan fill="#DC2626">PRO</tspan>
               </text>
               
               {/* Spaced Subtitle */}
-              <text x="98" y="58" fill="#71717A" fontSize="7.5" fontWeight="bold" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.24em">
+              <text x="4" y="49" fill="#71717A" fontSize="8" fontWeight="bold" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.27em">
                 PLATAFORMA PARA ACADEMIAS
               </text>
             </svg>
@@ -407,7 +392,7 @@ export default function SaaSLandingPage() {
               <div className="bg-white p-4 rounded border border-zinc-200 space-y-2 text-zinc-450">
                 <h4 className="text-[9px] font-bold text-zinc-955 uppercase tracking-wider">Pagamento Criptografado</h4>
                 <p className="text-[10px] text-zinc-400 leading-relaxed font-light">
-                  Sua transação é assegurada pelo Stripe. Nenhuma informação bancária or de cartão é armazenada.
+                  Sua transação é assegurada pelo Stripe. Nenhuma informação bancária ou de cartão é armazenada.
                 </p>
               </div>
             </div>
