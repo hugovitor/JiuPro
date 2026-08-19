@@ -283,10 +283,10 @@ export default function DashboardLayout({
       
       {/* top banner for demo visual protection */}
       {isDemo && (
-        <div className="bg-red-50 text-red-750 text-red-700 px-4 py-2 text-center text-xs font-semibold border-b border-red-200 flex items-center justify-center gap-2 select-none relative z-50">
-          <span>🛡️ **Ambiente de Visualização Protegido (Modo Demo)**. Gravações e alterações estão desabilitadas.</span>
+        <div className="bg-red-50 text-red-700 px-4 py-2 text-center text-xs font-semibold border-b border-red-200 flex items-center justify-center gap-2 select-none relative z-50">
+          <span>Ambiente de demonstração (apenas leitura). As alterações de dados estão desabilitadas.</span>
           <a href="/#assinar" className="bg-red-600 text-white hover:bg-red-700 px-2.5 py-0.5 rounded-full font-bold ml-1.5 transition-colors text-[10px]">
-            Assinar Plano &rarr;
+            Ver Planos &rarr;
           </a>
         </div>
       )}
@@ -384,7 +384,7 @@ export default function DashboardLayout({
                 disabled={isReactivating}
                 className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-semibold text-zinc-700 hover:text-white bg-slate-100 hover:bg-red-600 rounded-md transition-all cursor-pointer disabled:opacity-50"
               >
-                ⚙️ Gerenciar Assinatura
+                Gerenciar Assinatura
               </button>
             )}
 
@@ -458,7 +458,7 @@ export default function DashboardLayout({
                       disabled={isReactivating}
                       className="w-full text-center py-2.5 text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors"
                     >
-                      ⚙️ Gerenciar Assinatura
+                      Gerenciar Assinatura
                     </button>
                   )}
                   <p className="text-[10px] text-slate-400 text-center font-light">Mestre {user?.name}</p>
@@ -477,12 +477,12 @@ export default function DashboardLayout({
       {/* Floating toast notification for demo mode write blocks */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 bg-zinc-950 border border-red-900/60 text-white rounded-xl shadow-2xl p-4 max-w-sm z-50 animate-bounce flex flex-col gap-1.5 select-none">
-          <p className="text-xs font-black text-red-500 flex items-center gap-1.5">
-            ⚠️ Bloqueado (Modo Visualização)
+          <p className="text-xs font-bold text-red-500 flex items-center gap-1.5">
+            Acesso limitado (Demonstração)
           </p>
           <p className="text-[11px] text-zinc-400 font-light leading-relaxed">{toastMessage}</p>
           <a href="/#assinar" className="text-[10px] font-bold text-white hover:underline mt-1 block">
-            Assine um plano comercial &rarr;
+            Ver Planos &rarr;
           </a>
         </div>
       )}
