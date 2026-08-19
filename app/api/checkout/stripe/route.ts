@@ -9,7 +9,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Parâmetros incompletos' }, { status: 400 })
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!appUrl) {
+      const origin = request.headers.get('origin')
+      appUrl = origin || 'http://localhost:3000'
+    }
 
     // Determinar valor em centavos
     let amount = 19900
