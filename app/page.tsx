@@ -76,13 +76,13 @@ export default function SaaSLandingPage() {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-650 selection:text-white">
       
-      {/* faixa preta brand accent at the very top of the page - with wider degrees (listras brancas) */}
+      {/* faixa preta brand accent at the very top of the page - with centered, wide, equal-sized white stripes */}
       <div className="h-3 bg-zinc-950 flex justify-end">
-        <div className="w-28 h-full bg-red-600 flex items-center justify-around px-3 border-l border-r border-white/20">
-          <div className="w-[3.5px] h-full bg-white" />
-          <div className="w-[3.5px] h-full bg-white" />
-          <div className="w-[3.5px] h-full bg-white" />
-          <div className="w-[3.5px] h-full bg-white" />
+        <div className="w-28 h-full bg-red-600 flex items-center justify-center gap-1.5 px-2 border-l border-r border-white/20">
+          <div className="w-[4.5px] h-full bg-white" />
+          <div className="w-[4.5px] h-full bg-white" />
+          <div className="w-[4.5px] h-full bg-white" />
+          <div className="w-[4.5px] h-full bg-white" />
         </div>
       </div>
 
@@ -90,21 +90,21 @@ export default function SaaSLandingPage() {
       <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-4 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
           
-          {/* Custom Professional SVG Belt Logo with wider degrees */}
+          {/* Custom Professional SVG Belt Logo with wider, equal degrees */}
           <div className="flex items-center gap-2">
-            <svg className="h-8 w-auto text-zinc-950" viewBox="0 0 130 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-8 w-auto text-zinc-950" viewBox="0 0 135 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Faixa Preta Base */}
               <rect x="2" y="6" width="22" height="20" rx="2" fill="#09090B" />
               {/* Tarja Vermelha */}
-              <rect x="24" y="6" width="20" height="20" rx="1" fill="#DC2626" />
-              {/* Graus mais largos (Listras Brancas) */}
-              <rect x="27" y="8" width="2" height="16" fill="white" />
-              <rect x="31" y="8" width="2" height="16" fill="white" />
-              <rect x="35" y="8" width="2" height="16" fill="white" />
-              <rect x="39" y="8" width="2" height="16" fill="white" />
+              <rect x="24" y="6" width="22" height="20" rx="1" fill="#DC2626" />
+              {/* Graus largos de tamanho idêntico */}
+              <rect x="27" y="8" width="2.5" height="16" fill="white" />
+              <rect x="31.5" y="8" width="2.5" height="16" fill="white" />
+              <rect x="36" y="8" width="2.5" height="16" fill="white" />
+              <rect x="40.5" y="8" width="2.5" height="16" fill="white" />
               
               {/* JiuPro Logo Typography */}
-              <text x="50" y="21" fill="#09090B" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.02em">
+              <text x="52" y="21" fill="#09090B" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.02em">
                 Jiu<tspan fill="#DC2626">Pro</tspan>
               </text>
             </svg>
@@ -208,14 +208,14 @@ export default function SaaSLandingPage() {
           </div>
         </section>
 
-        {/* Separator mimicking the black belt design with wider degrees */}
+        {/* Separator mimicking the black belt design with centered, equal-sized white stripes */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
           <div className="h-4 bg-zinc-950 rounded overflow-hidden flex justify-end">
-            <div className="w-28 h-full bg-red-600 flex items-center justify-around px-3 border-l border-white/20">
-              <div className="w-[3.5px] h-full bg-white/90" />
-              <div className="w-[3.5px] h-full bg-white/90" />
-              <div className="w-[3.5px] h-full bg-white/90" />
-              <div className="w-[3.5px] h-full bg-white/90" />
+            <div className="w-28 h-full bg-red-600 flex items-center justify-center gap-1.5 px-2 border-l border-r border-white/20">
+              <div className="w-[4.5px] h-full bg-white" />
+              <div className="w-[4.5px] h-full bg-white" />
+              <div className="w-[4.5px] h-full bg-white" />
+              <div className="w-[4.5px] h-full bg-white" />
             </div>
           </div>
         </div>
@@ -246,10 +246,10 @@ export default function SaaSLandingPage() {
                         </span>
                       </div>
                       
-                      <h3 className="font-bold text-sm text-zinc-950 tracking-tight">{ac.name}</h3>
+                      <h3 className="font-bold text-sm text-zinc-955 tracking-tight">{ac.name}</h3>
                       <p className="text-xs text-zinc-500 leading-relaxed font-light">
                         Responsável: <span className="font-semibold text-zinc-800">{ac.ownerName}</span> <br />
-                        E-mail: <span className="font-mono text-[10px] text-zinc-455">{ac.ownerEmail}</span>
+                        E-mail: <span className="font-mono text-[10px] text-zinc-450">{ac.ownerEmail}</span>
                       </p>
                     </div>
 
@@ -284,7 +284,7 @@ export default function SaaSLandingPage() {
             
             {/* Form de Cadastro */}
             <form onSubmit={handleRegister} className="p-6 sm:p-8 space-y-4 border-r border-zinc-155">
-              <h3 className="font-bold text-[10px] text-zinc-950 border-b border-zinc-105 pb-2 uppercase tracking-wider">Cadastro de Unidade</h3>
+              <h3 className="font-bold text-[10px] text-zinc-955 border-b border-zinc-105 pb-2 uppercase tracking-wider">Cadastro de Unidade</h3>
               
               <div>
                 <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">Nome da Academia</label>
@@ -350,7 +350,7 @@ export default function SaaSLandingPage() {
               <button
                 type="submit"
                 disabled={isRegistering}
-                className="w-full mt-3 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-zinc-950 hover:bg-zinc-900 rounded shadow-md transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full mt-3 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-zinc-955 hover:bg-zinc-900 rounded shadow-md transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isRegistering ? (
                   <span>Processando...</span>
@@ -366,7 +366,7 @@ export default function SaaSLandingPage() {
             </form>
 
             {/* Resumo de Planos e Vantagens */}
-            <div id="precos" className="bg-zinc-50/50 p-6 sm:p-8 flex flex-col justify-between text-zinc-700 border-l border-zinc-150 space-y-6">
+            <div id="precos" className="bg-zinc-50/50 p-6 sm:p-8 flex flex-col justify-between text-zinc-700 border-l border-zinc-155 space-y-6">
               <div className="space-y-4">
                 <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-955 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
                 
@@ -379,7 +379,7 @@ export default function SaaSLandingPage() {
                   
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
                     <span className="font-semibold text-zinc-955 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-red-650 rounded-full animate-pulse" />
                       Plano Ouro (Recomendado)
                     </span>
                     <span className="font-bold text-zinc-955">R$ 199</span>
