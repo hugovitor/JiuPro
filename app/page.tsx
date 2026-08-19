@@ -74,24 +74,40 @@ export default function SaaSLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-605 selection:bg-red-600 selection:text-white">
       
-      {/* faixa preta brand accent at the very top of the page */}
-      <div className="h-2 bg-zinc-950 flex justify-end">
-        <div className="w-16 h-full bg-red-600 border-l border-r border-white/20" />
+      {/* faixa preta brand accent at the very top of the page - with degrees (listras brancas) */}
+      <div className="h-2.5 bg-zinc-950 flex justify-end">
+        <div className="w-24 h-full bg-red-600 flex items-center justify-around px-2.5 border-l border-r border-white/20 relative">
+          <div className="w-[1.5px] h-full bg-white/90" />
+          <div className="w-[1.5px] h-full bg-white/90" />
+          <div className="w-[1.5px] h-full bg-white/90" />
+          <div className="w-[1.5px] h-full bg-white/90" />
+        </div>
       </div>
 
       {/* 1. Header (Navbar) */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-2 z-50 py-4.5 px-6 sm:px-8 max-w-6xl w-full mx-auto rounded-b-xl shadow-sm">
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-2.5 z-50 py-4 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Minimal black belt logo representation */}
-            <div className="h-8 w-16 bg-zinc-950 rounded flex items-center justify-end overflow-hidden shadow border border-zinc-800">
-              <div className="w-4 h-full bg-red-600 border-l border-white/20" />
-            </div>
-            <span className="text-base font-extrabold tracking-tight text-zinc-950">
-              JiuPro
-            </span>
+          
+          {/* Custom Professional SVG Belt Logo */}
+          <div className="flex items-center gap-2">
+            <svg className="h-7 w-auto text-zinc-950" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Faixa Preta Base */}
+              <rect x="2" y="6" width="22" height="20" rx="2" fill="#09090B" />
+              {/* Tarja Vermelha */}
+              <rect x="24" y="6" width="14" height="20" rx="1" fill="#DC2626" />
+              {/* Graus (Listras Brancas) */}
+              <rect x="27" y="8" width="1" height="16" fill="white" />
+              <rect x="30" y="8" width="1" height="16" fill="white" />
+              <rect x="33" y="8" width="1" height="16" fill="white" />
+              <rect x="36" y="8" width="1" height="16" fill="white" />
+              
+              {/* JiuPro Logo Typography */}
+              <text x="45" y="21" fill="#09090B" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.02em">
+                Jiu<tspan fill="#DC2626">Pro</tspan>
+              </text>
+            </svg>
           </div>
           
           <div className="flex items-center gap-7">
@@ -138,7 +154,7 @@ export default function SaaSLandingPage() {
               </span>
             </h1>
             
-            <p className="max-w-xl mx-auto text-sm sm:text-base text-zinc-550 leading-relaxed font-light">
+            <p className="max-w-xl mx-auto text-sm sm:text-base text-zinc-555 leading-relaxed font-light">
               Monitore mensalidades, organize a frequência de treinos, automatize cobranças e gerencie a evolução técnica de faixas e graus em um painel administrativo limpo e ágil.
             </p>
             
@@ -192,10 +208,15 @@ export default function SaaSLandingPage() {
           </div>
         </section>
 
-        {/* Separator mimicking the black belt design */}
+        {/* Separator mimicking the black belt design with degrees */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
-          <div className="h-2 bg-zinc-900 rounded overflow-hidden flex justify-end">
-            <div className="w-16 h-full bg-red-655 bg-red-600 border-l border-white/20" />
+          <div className="h-3 bg-zinc-950 rounded overflow-hidden flex justify-end">
+            <div className="w-24 h-full bg-red-600 flex items-center justify-around px-2.5 border-l border-white/20">
+              <div className="w-[1.5px] h-full bg-white/90" />
+              <div className="w-[1.5px] h-full bg-white/90" />
+              <div className="w-[1.5px] h-full bg-white/90" />
+              <div className="w-[1.5px] h-full bg-white/90" />
+            </div>
           </div>
         </div>
 
@@ -204,7 +225,7 @@ export default function SaaSLandingPage() {
           <div className="max-w-5xl mx-auto space-y-12">
             <div className="text-center space-y-2">
               <h2 className="text-xl font-bold tracking-tight text-zinc-900 uppercase tracking-widest text-xs">Unidades de Demonstração</h2>
-              <p className="text-xs text-zinc-450 max-w-md mx-auto font-light">
+              <p className="text-xs text-zinc-455 max-w-md mx-auto font-light">
                 Experimente o painel de controle administrativo em modo de leitura protegida.
               </p>
             </div>
@@ -235,7 +256,7 @@ export default function SaaSLandingPage() {
                     <div className="pt-2">
                       <button
                         onClick={() => handleQuickLogin(ac.id)}
-                        className="w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded bg-zinc-950 hover:bg-zinc-850 text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                        className="w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded bg-zinc-955 hover:bg-zinc-850 text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         <span>Acessar Unidade</span>
                         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -347,12 +368,12 @@ export default function SaaSLandingPage() {
             {/* Resumo de Planos e Vantagens */}
             <div id="precos" className="bg-zinc-50/50 p-6 sm:p-8 flex flex-col justify-between text-zinc-700 border-l border-zinc-150 space-y-6">
               <div className="space-y-4">
-                <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-950 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
+                <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-955 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
                 
                 <div className="space-y-4 text-xs font-light text-zinc-500">
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
-                    <span className="font-semibold text-zinc-950">Plano Prata</span>
-                    <span className="font-bold text-zinc-950">R$ 99</span>
+                    <span className="font-semibold text-zinc-955">Plano Prata</span>
+                    <span className="font-bold text-zinc-955">R$ 99</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-1 leading-relaxed">Até 50 atletas matriculados, controle completo de presenças e controle de turmas.</p>
                   
@@ -366,8 +387,8 @@ export default function SaaSLandingPage() {
                   <p className="text-[10px] text-zinc-400 pl-1 leading-relaxed font-light">Até 150 atletas matriculados, lembretes inteligentes de PIX via WhatsApp, exames de faixa e graus.</p>
 
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
-                    <span className="font-semibold text-zinc-950">Plano BlackBelt</span>
-                    <span className="font-bold text-zinc-950">R$ 349</span>
+                    <span className="font-semibold text-zinc-955">Plano BlackBelt</span>
+                    <span className="font-bold text-zinc-955">R$ 349</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-1 leading-relaxed">Atletas ilimitados, relatórios para exames, loja/cantina com controle de estoque.</p>
                 </div>
