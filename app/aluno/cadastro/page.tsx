@@ -72,7 +72,7 @@ function AlunoCadastroContent() {
           setIsLoading(false)
         }
       } catch (err: any) {
-        setError(err.message || 'E-mail já cadastrado no sistema.')
+        setError(err.message || 'E-mail já cadastrado.')
         setIsLoading(false)
       }
     }, 800)
@@ -218,7 +218,7 @@ function AlunoCadastroContent() {
 
 export default function AlunoCadastroPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans text-xs text-slate-400">Acessando sistema de matrícula...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans text-xs text-slate-400">Acessando matrícula...</div>}>
       <AlunoCadastroContent />
     </Suspense>
   )

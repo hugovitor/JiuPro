@@ -144,7 +144,7 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none transition-colors disabled:opacity-50"
           >
-            {isLoading ? 'Autenticando tatame...' : 'Entrar no Sistema'}
+            {isLoading ? 'Autenticando tatame...' : 'Entrar no JiuPro'}
           </button>
         </form>
 

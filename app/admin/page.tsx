@@ -40,7 +40,7 @@ export default function SuperadminPage() {
       setIsAuthenticated(true)
       setAcademies(db.superadminGetAcademies())
     } else {
-      setLoginError('Credenciais administrativas inválidas. Acesso restrito ao dono da plataforma.')
+      setLoginError('Credenciais administrativas inválidas. Acesso restrito ao proprietário.')
     }
   }
 
@@ -88,33 +88,33 @@ export default function SuperadminPage() {
     return matchesSearch && matchesPlan && matchesStatus
   })
 
-  // 1. Superadmin Login Screen
+  // 1. Superadmin Login Screen - Clean White Layout
   if (!isAuthenticated) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#09090b] px-4 sm:px-6 lg:px-8 font-sans antialiased text-zinc-150">
-        <div className="w-full max-w-sm space-y-6 bg-zinc-950 p-8 rounded-2xl border border-zinc-800 shadow-xl">
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-900">
+        <div className="w-full max-w-sm space-y-6 bg-white p-8 rounded-2xl border border-slate-200 shadow-lg">
           
           <div className="flex flex-col items-center">
-            <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center shadow-md border-r-4 border-red-500">
-              <span className="text-black font-black text-xl italic tracking-tighter">JP</span>
+            <div className="h-12 w-12 bg-zinc-950 rounded-xl flex items-center justify-center shadow-md border-r-4 border-red-500">
+              <span className="text-white font-black text-xl italic tracking-tighter">JP</span>
             </div>
-            <h1 className="mt-5 text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
-              Superadmin <span className="text-red-500 font-extrabold">JiuPro</span>
+            <h1 className="mt-5 text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-1.5">
+              Controle Geral <span className="text-red-655 font-extrabold text-red-600">JiuPro</span>
             </h1>
-            <p className="mt-1 text-[11px] text-zinc-500">
-              Gerenciamento central do SaaS JiuPro
+            <p className="mt-1 text-[11px] text-zinc-400">
+              Acesso exclusivo do proprietário
             </p>
           </div>
 
           {loginError && (
-            <div className="bg-red-950/50 text-red-400 text-xs p-3 rounded-lg border border-red-900/40 font-medium">
+            <div className="bg-red-50 text-red-750 text-xs p-3 rounded-lg border border-red-200/50 font-medium">
               {loginError}
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
                 E-mail Administrativo
               </label>
               <input 
@@ -123,12 +123,12 @@ export default function SuperadminPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="admin@jiupro.com.br"
-                className="w-full px-3.5 py-2.5 mt-1 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 transition-colors"
+                className="w-full px-3.5 py-2.5 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 transition-colors"
               />
             </div>
             
             <div>
-              <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
                 Chave Secreta
               </label>
               <input 
@@ -137,20 +137,20 @@ export default function SuperadminPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Senha mestra superadmin"
-                className="w-full px-3.5 py-2.5 mt-1 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 transition-colors"
+                className="w-full px-3.5 py-2.5 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 transition-colors"
               />
             </div>
 
             <button 
               type="submit"
-              className="w-full mt-2 py-3 text-xs font-black text-black bg-white rounded-xl shadow hover:bg-zinc-200 transition-colors cursor-pointer"
+              className="w-full mt-2 py-3 text-xs font-black text-white bg-slate-950 hover:bg-slate-850 rounded-xl shadow transition-colors cursor-pointer"
             >
-              Autenticar Proprietário
+              Autenticar Acesso
             </button>
           </form>
 
-          <p className="text-center text-[10px] text-zinc-650">
-            Apenas o dono da plataforma JiuPro possui credenciais de acesso ao superadmin.
+          <p className="text-center text-[10px] text-slate-450 leading-relaxed">
+            Apenas o proprietário autorizado do JiuPro possui chaves de acesso a esta área.
           </p>
 
         </div>
@@ -158,27 +158,27 @@ export default function SuperadminPage() {
     )
   }
 
-  // 2. Superadmin Control Panel
+  // 2. Superadmin Control Panel - Clean White Theme
   return (
-    <div className="min-h-screen bg-[#09090b] font-sans antialiased text-zinc-100 flex flex-col justify-between selection:bg-red-650 selection:text-white">
+    <div className="min-h-screen bg-slate-50 font-sans antialiased text-slate-800 flex flex-col justify-between selection:bg-red-600 selection:text-white">
       
       {/* Header */}
-      <header className="bg-zinc-950 border-b border-zinc-900 py-4 px-6 sm:px-8">
+      <header className="bg-white border-b border-slate-200 py-4 px-6 sm:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 bg-white rounded-xl flex items-center justify-center border-r-[3.5px] border-red-600 shadow-lg">
-              <span className="text-black font-black text-xs italic tracking-tighter">JP</span>
+            <div className="h-9 w-9 bg-zinc-950 rounded-xl flex items-center justify-center border-r-[3.5px] border-red-600 shadow-lg">
+              <span className="text-white font-black text-xs italic tracking-tighter">JP</span>
             </div>
-            <span className="text-base font-bold tracking-tight text-white flex items-center gap-2">
-              JiuPro <span className="text-red-500 font-extrabold">Painel Geral</span>
+            <span className="text-base font-bold tracking-tight text-slate-950 flex items-center gap-2">
+              JiuPro <span className="text-red-600 font-extrabold">Painel do Proprietário</span>
             </span>
           </div>
           
           <button
             onClick={handleLogout}
-            className="text-xs font-bold text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-xl transition-all cursor-pointer"
+            className="text-xs font-bold text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl transition-all cursor-pointer"
           >
-            Sair do Admin
+            Sair do Painel
           </button>
         </div>
       </header>
@@ -188,66 +188,66 @@ export default function SuperadminPage() {
         
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Administração do Sistema</h1>
-          <p className="text-xs text-zinc-400 mt-1 font-light">Controle de faturamento, planos comerciais e status de filiais do JiuPro.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gerenciamento Geral</h1>
+          <p className="text-xs text-slate-500 mt-1 font-light">Controle comercial e status de todas as filiais cadastradas no JiuPro.</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           
-          <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-900 flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">SaaS MRR Estimado</span>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">MRR Estimado</span>
             <div className="mt-4">
-              <span className="text-3xl font-black tracking-tight text-emerald-400">R$ {mrr.toFixed(2).replace('.', ',')}</span>
-              <p className="text-[9px] text-zinc-550 mt-1 font-light">Receita Recorrente Mensal de filiais ativas</p>
+              <span className="text-3xl font-black tracking-tight text-emerald-600">R$ {mrr.toFixed(2).replace('.', ',')}</span>
+              <p className="text-[9px] text-slate-400 mt-1 font-light">Faturamento mensal recorrente de filiais ativas</p>
             </div>
           </div>
 
-          <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-900 flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Filiais Cadastradas</span>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Filiais Cadastradas</span>
             <div className="mt-4">
-              <span className="text-3xl font-black tracking-tight text-white">{totalAcademies}</span>
-              <p className="text-[9px] text-zinc-550 mt-1">Total de inquilinos (Tenants)</p>
+              <span className="text-3xl font-black tracking-tight text-slate-900">{totalAcademies}</span>
+              <p className="text-[9px] text-slate-400 mt-1">Total de contas registradas</p>
             </div>
           </div>
 
-          <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-900 flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Assinaturas Ativas</span>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Contas Ativas</span>
             <div className="mt-4">
-              <span className="text-3xl font-black tracking-tight text-emerald-500">{activeAcademies}</span>
-              <p className="text-[9px] text-zinc-550 mt-1">Academias com acesso liberado</p>
+              <span className="text-3xl font-black tracking-tight text-emerald-600">{activeAcademies}</span>
+              <p className="text-[9px] text-slate-400 mt-1">Academias com acesso liberado</p>
             </div>
           </div>
 
-          <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-900 flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Filiais Suspensas</span>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Contas Suspensas</span>
             <div className="mt-4">
-              <span className="text-3xl font-black tracking-tight text-red-500">{suspendedAcademies}</span>
-              <p className="text-[9px] text-zinc-550 mt-1">Inadimplentes ou expiradas</p>
+              <span className="text-3xl font-black tracking-tight text-rose-600">{suspendedAcademies}</span>
+              <p className="text-[9px] text-slate-400 mt-1">Contas bloqueadas ou com pendências</p>
             </div>
           </div>
 
         </div>
 
         {/* Filter Toolbar */}
-        <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex-1">
             <input 
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por academia, professor ou email..."
-              className="w-full md:max-w-md px-3.5 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 transition-colors"
+              className="w-full md:max-w-md px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 transition-colors"
             />
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase">Plano:</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Plano:</span>
               <select
                 value={filterPlan}
                 onChange={(e) => setFilterPlan(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2.5 text-xs text-white cursor-pointer"
+                className="bg-white border border-slate-200 rounded-lg py-1 px-2.5 text-xs text-slate-800 cursor-pointer shadow-sm"
               >
                 <option value="Todos">Todos</option>
                 <option value="Prata">Prata</option>
@@ -256,12 +256,12 @@ export default function SuperadminPage() {
               </select>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase">Status:</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Status:</span>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-2.5 text-xs text-white cursor-pointer"
+                className="bg-white border border-slate-200 rounded-lg py-1 px-2.5 text-xs text-slate-800 cursor-pointer shadow-sm"
               >
                 <option value="Todos">Todos</option>
                 <option value="Ativo">Ativo</option>
@@ -272,35 +272,35 @@ export default function SuperadminPage() {
         </div>
 
         {/* Academies Table */}
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-900 overflow-hidden shadow-xl">
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-zinc-900 bg-zinc-900/40 text-zinc-400 font-bold uppercase tracking-wider text-[9px]">
+                <tr className="border-b border-slate-200 bg-slate-50 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
                   <th className="p-4">Academia</th>
                   <th className="p-4">Mestre Responsável</th>
                   <th className="p-4">E-mail</th>
-                  <th className="p-4">Plano</th>
+                  <th className="p-4">Plano Contratado</th>
                   <th className="p-4">Status</th>
                   <th className="p-4 text-right">Ações de Controle</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900">
+              <tbody className="divide-y divide-slate-100">
                 {filteredAcademies.length > 0 ? (
                   filteredAcademies.map((ac) => {
                     const statusClass = ac.status === 'Ativo' 
-                      ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/40' 
-                      : 'bg-rose-950/60 text-rose-400 border border-rose-900/40'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                      : 'bg-rose-50 text-rose-700 border border-rose-100'
                     return (
-                      <tr key={ac.id} className="hover:bg-zinc-900/20 transition-colors">
-                        <td className="p-4 font-bold text-white">{ac.name}</td>
-                        <td className="p-4 text-zinc-300">{ac.ownerName}</td>
-                        <td className="p-4 text-zinc-450 font-mono text-[11px]">{ac.ownerEmail}</td>
+                      <tr key={ac.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-900">{ac.name}</td>
+                        <td className="p-4 text-slate-600">{ac.ownerName}</td>
+                        <td className="p-4 text-slate-500 font-mono text-[11px]">{ac.ownerEmail}</td>
                         <td className="p-4">
                           <select
                             value={ac.plan}
                             onChange={(e) => handleChangePlan(ac.id, e.target.value as any)}
-                            className="bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-300 font-semibold cursor-pointer text-[11px]"
+                            className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-slate-700 font-semibold cursor-pointer text-[11px] shadow-sm"
                           >
                             <option value="Prata">Prata</option>
                             <option value="Ouro">Ouro</option>
@@ -317,8 +317,8 @@ export default function SuperadminPage() {
                             onClick={() => handleToggleStatus(ac.id, ac.status)}
                             className={`px-3 py-1.5 rounded-xl font-bold text-[10px] transition-all cursor-pointer ${
                               ac.status === 'Ativo' 
-                                ? 'bg-red-950 hover:bg-red-900 text-red-400 border border-red-900/30' 
-                                : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-900/30'
+                                ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200' 
+                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
                             }`}
                           >
                             {ac.status === 'Ativo' ? 'Suspender Acesso' : 'Ativar Acesso'}
@@ -329,7 +329,7 @@ export default function SuperadminPage() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-zinc-500 font-light">
+                    <td colSpan={6} className="p-8 text-center text-slate-400 font-light">
                       Nenhuma filial encontrada com os filtros selecionados.
                     </td>
                   </tr>
@@ -342,8 +342,8 @@ export default function SuperadminPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 py-6 text-center text-xs text-zinc-500">
-        <p>© 2526 JiuPro Admin Core. Todos os direitos reservados. Proprietário Autorizado.</p>
+      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-450">
+        <p>© 2026 Painel Administrativo JiuPro. Todos os direitos reservados.</p>
       </footer>
 
     </div>

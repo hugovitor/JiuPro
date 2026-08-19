@@ -283,9 +283,9 @@ export default function DashboardLayout({
       
       {/* top banner for demo visual protection */}
       {isDemo && (
-        <div className="bg-red-950 text-red-200 px-4 py-2 text-center text-xs font-semibold border-b border-red-900 flex items-center justify-center gap-2 select-none relative z-50">
+        <div className="bg-red-50 text-red-750 text-red-700 px-4 py-2 text-center text-xs font-semibold border-b border-red-200 flex items-center justify-center gap-2 select-none relative z-50">
           <span>🛡️ **Ambiente de Visualização Protegido (Modo Demo)**. Gravações e alterações estão desabilitadas.</span>
-          <a href="/#assinar" className="bg-red-800 text-white hover:bg-red-700 px-2.5 py-0.5 rounded-full font-bold ml-1.5 transition-colors text-[10px]">
+          <a href="/#assinar" className="bg-red-600 text-white hover:bg-red-700 px-2.5 py-0.5 rounded-full font-bold ml-1.5 transition-colors text-[10px]">
             Assinar Plano &rarr;
           </a>
         </div>
@@ -395,7 +395,7 @@ export default function DashboardLayout({
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
               </svg>
-              Sair do sistema
+              Sair
             </button>
           </div>
         </aside>

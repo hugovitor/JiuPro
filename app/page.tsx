@@ -75,7 +75,7 @@ export default function SaaSLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-sans antialiased text-zinc-800 flex flex-col justify-between selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-white font-sans antialiased text-zinc-800 flex flex-col justify-between selection:bg-red-650 selection:text-white">
       
       {/* 1. Header (Navbar) - Branco Limpo */}
       <header className="bg-white/95 backdrop-blur-md border-b border-zinc-200/80 sticky top-0 z-50 py-4 px-6 sm:px-8">
@@ -86,7 +86,7 @@ export default function SaaSLandingPage() {
             </div>
             <span className="text-lg font-bold tracking-tight text-zinc-900 flex items-center gap-2">
               Jiu<span className="text-red-600 font-extrabold">Pro</span>
-              <span className="text-[9px] font-bold text-zinc-550 bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 rounded-full">SaaS</span>
+              <span className="text-[9px] font-bold text-zinc-550 bg-zinc-100 border border-zinc-205 px-2.5 py-0.5 rounded-full">Plataforma</span>
             </span>
           </div>
           
@@ -109,7 +109,7 @@ export default function SaaSLandingPage() {
         {/* Payment Notifications */}
         {paymentStatus === 'success_payment' && (
           <div className="max-w-4xl mx-auto mt-6 px-6">
-            <div className="bg-emerald-50 border border-emerald-250 p-4 rounded-xl text-center text-xs font-bold text-emerald-800 flex items-center justify-center gap-2">
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center text-xs font-bold text-emerald-800 flex items-center justify-center gap-2">
               🎉 Assinatura confirmada com sucesso via Stripe! Clique em "Acessar Painel" para entrar na sua nova unidade administrativa.
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function SaaSLandingPage() {
           </div>
         </section>
 
-        {/* 4. Simulador SaaS - Sandbox de Demonstração (Fundo Claro) */}
+        {/* 4. Simulador - Sandbox de Demonstração (Fundo Claro) */}
         <section id="simulador" className="py-20 px-6 sm:px-8 bg-zinc-50 border-y border-zinc-200/80 scroll-mt-16">
           <div className="max-w-5xl mx-auto space-y-10">
             <div className="text-center space-y-3">
@@ -334,7 +334,7 @@ export default function SaaSLandingPage() {
               <button
                 type="submit"
                 disabled={isRegistering}
-                className="w-full mt-3 py-3.5 text-xs font-black text-white bg-red-655 hover:bg-red-700 bg-red-600 rounded-xl shadow-lg transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full mt-3 py-3.5 text-xs font-black text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-lg transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isRegistering ? (
                   <span>Processando...</span>
@@ -349,41 +349,41 @@ export default function SaaSLandingPage() {
               </button>
             </form>
 
-            {/* Resumo de Planos e Vantagens */}
-            <div id="precos" className="bg-zinc-950 p-8 flex flex-col justify-between text-white space-y-6">
+            {/* Resumo de Planos e Vantagens - Fundo Branco e Borda */}
+            <div id="precos" className="bg-zinc-50 p-8 flex flex-col justify-between text-zinc-800 border-l border-zinc-200/80 space-y-6">
               <div className="space-y-5">
-                <h3 className="font-extrabold text-[10px] uppercase tracking-widest text-red-500 border-b border-zinc-900 pb-2.5">Benefícios Disponíveis</h3>
+                <h3 className="font-extrabold text-[10px] uppercase tracking-widest text-red-600 border-b border-zinc-200 pb-2.5">Benefícios Disponíveis</h3>
                 
-                <div className="space-y-4 text-xs font-light text-zinc-300">
-                  <div className="flex justify-between border-b border-zinc-900 pb-2.5 items-center">
-                    <span className="font-semibold text-white">Plano Prata</span>
-                    <span className="font-bold text-white">R$ 99/mês</span>
+                <div className="space-y-4 text-xs font-light text-zinc-650">
+                  <div className="flex justify-between border-b border-zinc-200 pb-2.5 items-center">
+                    <span className="font-semibold text-zinc-900">Plano Prata</span>
+                    <span className="font-bold text-zinc-950">R$ 99/mês</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400 pl-2 leading-relaxed">Até 50 atletas matriculados, controle completo de presenças e controle de aulas agendadas.</p>
+                  <p className="text-[10px] text-zinc-500 pl-2 leading-relaxed">Até 50 atletas matriculados, controle completo de presenças e controle de aulas agendadas.</p>
                   
-                  <div className="flex justify-between border-b border-zinc-900 pb-2.5 items-center">
-                    <span className="font-semibold text-white flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                  <div className="flex justify-between border-b border-zinc-200 pb-2.5 items-center">
+                    <span className="font-semibold text-zinc-900 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-amber-550 rounded-full" />
                       Plano Ouro (Recomendado)
                     </span>
-                    <span className="font-bold text-white">R$ 199/mês</span>
+                    <span className="font-bold text-zinc-950">R$ 199/mês</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400 pl-2 leading-relaxed font-light">Até 150 atletas matriculados, lembretes inteligentes de PIX via WhatsApp, controle avançado de graus, exames de faixa e diários de treino.</p>
+                  <p className="text-[10px] text-zinc-500 pl-2 leading-relaxed font-light">Até 150 atletas matriculados, lembretes inteligentes de PIX via WhatsApp, controle avançado de graus, exames de faixa e diários de treino.</p>
 
-                  <div className="flex justify-between border-b border-zinc-900 pb-2.5 items-center">
-                    <span className="font-semibold text-white">Plano BlackBelt</span>
-                    <span className="font-bold text-white">R$ 349/mês</span>
+                  <div className="flex justify-between border-b border-zinc-200 pb-2.5 items-center">
+                    <span className="font-semibold text-zinc-900">Plano BlackBelt</span>
+                    <span className="font-bold text-zinc-950">R$ 349/mês</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400 pl-2 leading-relaxed">Alunos ilimitados, unificação de filiais, exportação A4 de relatórios para exames, loja/cantina com controle de estoque e suporte 24h.</p>
+                  <p className="text-[10px] text-zinc-500 pl-2 leading-relaxed">Alunos ilimitados, unificação de filiais, exportação A4 de relatórios para exames, loja/cantina com controle de estoque e suporte 24h.</p>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-2 text-zinc-300">
+              <div className="bg-white p-4 rounded-xl border border-zinc-200 space-y-2 text-zinc-500">
                 <h4 className="text-[9px] font-black text-red-500 uppercase tracking-widest flex items-center gap-1.5">
                   🛡️ Pagamento Criptografado
                 </h4>
-                <p className="text-[10px] text-zinc-400 leading-relaxed font-light">
-                  Sua transação é assegurada pelo Stripe. Nenhuma informação de pagamento ou cartão de crédito é armazenada em nossos servidores.
+                <p className="text-[10px] text-zinc-500 leading-relaxed font-light">
+                  Sua transação é assegurada pelo Stripe. Nenhuma informação de pagamento ou cartão de crédito é armazenada.
                 </p>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function SaaSLandingPage() {
 
       {/* 6. Footer */}
       <footer className="bg-zinc-50 border-t border-zinc-200 py-8 text-center text-xs text-zinc-500">
-        <p>© 2026 JiuPro B2B SaaS. Gestão Marcial e Comercial Integrada. Todos os direitos reservados. Oss!</p>
+        <p>© 2026 JiuPro. Gestão Marcial e Comercial Integrada. Todos os direitos reservados. Oss!</p>
       </footer>
 
     </div>
