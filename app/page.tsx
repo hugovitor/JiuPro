@@ -87,25 +87,35 @@ export default function SaaSLandingPage() {
       </div>
 
       {/* 1. Header (Navbar) */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-4 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
+      <header className="bg-white/90 backdrop-blur-md border-b border-zinc-200 sticky top-3.5 z-50 py-3 px-6 sm:px-8 max-w-5xl w-full mx-auto rounded-b-xl shadow-sm">
         <div className="flex items-center justify-between">
           
-          {/* Custom Professional SVG Belt Logo with wider, equal degrees */}
-          <div className="flex items-center gap-2">
-            <svg className="h-8 w-auto text-zinc-950" viewBox="0 0 135 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Faixa Preta Base */}
-              <rect x="2" y="6" width="22" height="20" rx="2" fill="#09090B" />
-              {/* Tarja Vermelha */}
-              <rect x="24" y="6" width="22" height="20" rx="1" fill="#DC2626" />
-              {/* Graus largos de tamanho idêntico */}
-              <rect x="27" y="8" width="2.5" height="16" fill="white" />
-              <rect x="31.5" y="8" width="2.5" height="16" fill="white" />
-              <rect x="36" y="8" width="2.5" height="16" fill="white" />
-              <rect x="40.5" y="8" width="2.5" height="16" fill="white" />
+          {/* Official Premium SVG Logo mimicking the black belt "J" knot */}
+          <div className="flex items-center">
+            <svg className="h-9 w-auto text-zinc-955" viewBox="0 0 310 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g transform="translate(2, 0)">
+                {/* Left belt loop */}
+                <path d="M46 36 C30 22 6 32 10 44 C14 56 46 52 50 40" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
+                {/* Red End Bar */}
+                <path d="M6 40 L14 34" stroke="#DC2626" strokeWidth="8.5" strokeLinecap="square" />
+                {/* White Stripe (Grau) */}
+                <path d="M10 37 L12 35.5" stroke="#FFFFFF" strokeWidth="2.2" />
+
+                {/* Belt Knot center */}
+                <path d="M44 40 C42 50 56 50 54 40 C52 30 46 30 44 40 Z" fill="#09090B" />
+
+                {/* Vertical Belt Loop (J fold upwards) */}
+                <path d="M50 40 C53 31 66 14 70 8 C73 4 80 4 82 10 C83 14 73 34 62 50" stroke="#18181B" strokeWidth="8.5" strokeLinecap="round" fill="none" />
+              </g>
+
+              {/* Bold Italic Typography matching design request */}
+              <text x="96" y="44" fill="#09090B" fontSize="27" fontWeight="900" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
+                JIU<tspan fill="#DC2626">PRO</tspan>
+              </text>
               
-              {/* JiuPro Logo Typography */}
-              <text x="52" y="21" fill="#09090B" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.02em">
-                Jiu<tspan fill="#DC2626">Pro</tspan>
+              {/* Spaced Subtitle */}
+              <text x="98" y="58" fill="#71717A" fontSize="7.5" fontWeight="bold" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.24em">
+                PLATAFORMA PARA ACADEMIAS
               </text>
             </svg>
           </div>
@@ -180,7 +190,7 @@ export default function SaaSLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-2.5 border-l-2 border-zinc-900 pl-4">
               <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-900">Cobranças PIX</h3>
-              <p className="text-xs text-zinc-450 leading-relaxed font-light">
+              <p className="text-xs text-zinc-455 leading-relaxed font-light">
                 Notificação de vencimentos diretamente no WhatsApp com textos parametrizados e chaves de pagamento automáticas.
               </p>
             </div>
@@ -370,7 +380,7 @@ export default function SaaSLandingPage() {
               <div className="space-y-4">
                 <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-955 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
                 
-                <div className="space-y-4 text-xs font-light text-zinc-550">
+                <div className="space-y-4 text-xs font-light text-zinc-555">
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
                     <span className="font-semibold text-zinc-955">Plano Prata</span>
                     <span className="font-bold text-zinc-955">R$ 99</span>
