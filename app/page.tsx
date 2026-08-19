@@ -205,7 +205,7 @@ export default function SaaSLandingPage() {
 
         {/* Separator mimicking the black belt design with centered, equal-sized white stripes. FIXED bg-zinc-950 color */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
-          <div className="h-4 bg-zinc-955 rounded overflow-hidden flex justify-end">
+          <div className="h-4 bg-zinc-950 rounded overflow-hidden flex justify-end">
             <div className="w-28 h-full bg-red-600 flex items-center justify-center gap-1.5 px-2 border-l border-r border-white/20">
               <div className="w-[4.5px] h-full bg-white" />
               <div className="w-[4.5px] h-full bg-white" />
