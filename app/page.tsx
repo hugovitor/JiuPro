@@ -74,7 +74,7 @@ export default function SaaSLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-650 flex flex-col justify-between selection:bg-red-650 selection:text-white">
+    <div className="min-h-screen bg-zinc-50 font-sans antialiased text-zinc-600 flex flex-col justify-between selection:bg-red-600 selection:text-white">
       
       {/* faixa preta brand accent at the very top of the page - with centered, wide, equal-sized white stripes */}
       <div className="h-3 bg-zinc-950 flex justify-end">
@@ -92,7 +92,7 @@ export default function SaaSLandingPage() {
           
           {/* Text-Only Logo - Enlarged and clean as requested */}
           <div className="flex items-center flex-shrink-0">
-            <svg className="h-11 w-auto text-zinc-950" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-11 w-auto text-zinc-955" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Bold Italic Typography */}
               <text x="2" y="32" fill="#09090B" fontSize="33" fontWeight="950" fontStyle="italic" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="-0.03em">
                 JIU<tspan fill="#DC2626">PRO</tspan>
@@ -124,7 +124,7 @@ export default function SaaSLandingPage() {
         {/* Payment Notifications */}
         {paymentStatus === 'success_payment' && (
           <div className="max-w-4xl mx-auto mt-6 px-6">
-            <div className="bg-emerald-50 border border-emerald-250 p-4 rounded-xl text-center text-xs font-bold text-emerald-800">
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center text-xs font-bold text-emerald-800">
               Assinatura confirmada com sucesso! Clique em "Acessar Painel" para entrar na sua nova unidade administrativa.
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function SaaSLandingPage() {
         <section className="py-24 px-6 sm:px-8 text-center space-y-8 relative overflow-hidden bg-white border-b border-zinc-200">
           <div className="max-w-4xl mx-auto space-y-6">
             
-            <h1 className="text-4xl sm:text-6xl font-black text-zinc-955 tracking-tight leading-[1.05]">
+            <h1 className="text-4xl sm:text-6xl font-black text-zinc-950 tracking-tight leading-[1.05]">
               A excelência na gestão <br />
               <span className="relative inline-block">
                 da sua academia
@@ -149,7 +149,7 @@ export default function SaaSLandingPage() {
               </span>
             </h1>
             
-            <p className="max-w-xl mx-auto text-sm sm:text-base text-zinc-555 leading-relaxed font-light">
+            <p className="max-w-xl mx-auto text-sm sm:text-base text-zinc-500 leading-relaxed font-light">
               Monitore mensalidades, organize a frequência de treinos, automatize cobranças e gerencie a evolução técnica de faixas e graus em um painel administrativo limpo e ágil.
             </p>
             
@@ -175,28 +175,28 @@ export default function SaaSLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-2.5 border-l-2 border-zinc-900 pl-4">
               <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-900">Cobranças PIX</h3>
-              <p className="text-xs text-zinc-450 leading-relaxed font-light">
+              <p className="text-xs text-zinc-400 leading-relaxed font-light">
                 Notificação de vencimentos diretamente no WhatsApp com textos parametrizados e chaves de pagamento automáticas.
               </p>
             </div>
             
             <div className="space-y-2.5 border-l-2 border-red-600 pl-4">
               <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-900">Controle de Presença</h3>
-              <p className="text-xs text-zinc-455 leading-relaxed font-light">
+              <p className="text-xs text-zinc-400 leading-relaxed font-light">
                 Agendamento de check-ins pelos atletas e validação/fechamento das aulas em tempo real pelo professor.
               </p>
             </div>
 
             <div className="space-y-2.5 border-l-2 border-zinc-900 pl-4">
               <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-900">Evolução Técnica</h3>
-              <p className="text-xs text-zinc-455 leading-relaxed font-light">
+              <p className="text-xs text-zinc-400 leading-relaxed font-light">
                 Controle automático de graduações de faixas e graus baseados na assiduidade e no tempo mínimo de carência de treino.
               </p>
             </div>
 
             <div className="space-y-2.5 border-l-2 border-red-600 pl-4">
               <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-900">Retenção de Alunos</h3>
-              <p className="text-xs text-zinc-455 leading-relaxed font-light">
+              <p className="text-xs text-zinc-400 leading-relaxed font-light">
                 Relatórios automáticos que listam atletas sumidos do tatame para facilitar ações preventivas de evasão.
               </p>
             </div>
@@ -205,7 +205,7 @@ export default function SaaSLandingPage() {
 
         {/* Separator mimicking the black belt design with centered, equal-sized white stripes. FIXED bg-zinc-950 color */}
         <div className="max-w-5xl mx-auto px-6 sm:px-8 my-8">
-          <div className="h-4 bg-zinc-950 rounded overflow-hidden flex justify-end">
+          <div className="h-4 bg-zinc-955 rounded overflow-hidden flex justify-end">
             <div className="w-28 h-full bg-red-600 flex items-center justify-center gap-1.5 px-2 border-l border-r border-white/20">
               <div className="w-[4.5px] h-full bg-white" />
               <div className="w-[4.5px] h-full bg-white" />
@@ -220,7 +220,7 @@ export default function SaaSLandingPage() {
           <div className="max-w-5xl mx-auto space-y-12">
             <div className="text-center space-y-2">
               <h2 className="text-xl font-bold tracking-tight text-zinc-900 uppercase tracking-widest text-xs">Unidades de Demonstração</h2>
-              <p className="text-xs text-zinc-455 max-w-md mx-auto font-light">
+              <p className="text-xs text-zinc-400 max-w-md mx-auto font-light">
                 Experimente o painel de controle administrativo em modo de leitura protegida.
               </p>
             </div>
@@ -241,17 +241,17 @@ export default function SaaSLandingPage() {
                         </span>
                       </div>
                       
-                      <h3 className="font-bold text-sm text-zinc-955 tracking-tight">{ac.name}</h3>
+                      <h3 className="font-bold text-sm text-zinc-900 tracking-tight">{ac.name}</h3>
                       <p className="text-xs text-zinc-500 leading-relaxed font-light">
                         Responsável: <span className="font-semibold text-zinc-800">{ac.ownerName}</span> <br />
-                        E-mail: <span className="font-mono text-[10px] text-zinc-455">{ac.ownerEmail}</span>
+                        E-mail: <span className="font-mono text-[10px] text-zinc-400">{ac.ownerEmail}</span>
                       </p>
                     </div>
 
                     <div className="pt-2">
                       <button
                         onClick={() => handleQuickLogin(ac.id)}
-                        className="w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded bg-zinc-955 hover:bg-zinc-850 text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                        className="w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded bg-zinc-950 hover:bg-zinc-850 text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         <span>Acessar Unidade</span>
                         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -269,8 +269,8 @@ export default function SaaSLandingPage() {
         {/* 5. Cadastro & Checkout */}
         <section id="assinar" className="py-20 px-6 sm:px-8 max-w-5xl mx-auto space-y-12 scroll-mt-20">
           <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold tracking-tight text-zinc-955 uppercase tracking-widest text-xs">Ativação Comercial</h2>
-            <p className="text-xs text-zinc-455 max-w-md mx-auto font-light">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-900 uppercase tracking-widest text-xs">Ativação Comercial</h2>
+            <p className="text-xs text-zinc-400 max-w-md mx-auto font-light">
               Escolha seu plano, preencha o formulário e siga para o checkout seguro de faturamento.
             </p>
           </div>
@@ -278,11 +278,11 @@ export default function SaaSLandingPage() {
           <div className="bg-white rounded-xl border border-zinc-200 shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-2">
             
             {/* Form de Cadastro */}
-            <form onSubmit={handleRegister} className="p-6 sm:p-8 space-y-4 border-r border-zinc-155">
-              <h3 className="font-bold text-[10px] text-zinc-955 border-b border-zinc-105 pb-2 uppercase tracking-wider">Cadastro de Unidade</h3>
+            <form onSubmit={handleRegister} className="p-6 sm:p-8 space-y-4 border-r border-zinc-200">
+              <h3 className="font-bold text-[10px] text-zinc-900 border-b border-zinc-100 pb-2 uppercase tracking-wider">Cadastro de Unidade</h3>
               
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">Nome da Academia</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400">Nome da Academia</label>
                 <input 
                   type="text" 
                   value={academyName}
@@ -294,7 +294,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">Professor Responsável</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400">Professor Responsável</label>
                 <input 
                   type="text" 
                   value={ownerName}
@@ -306,7 +306,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-450">E-mail de Acesso</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400">E-mail de Acesso</label>
                 <input 
                   type="email" 
                   value={email}
@@ -318,7 +318,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-455">Defina uma Senha</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400">Defina uma Senha</label>
                 <input 
                   type="password" 
                   value={password}
@@ -330,7 +330,7 @@ export default function SaaSLandingPage() {
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-455">Plano Pretendido</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-400">Plano Pretendido</label>
                 <select
                   value={selectedPlan}
                   onChange={(e) => setSelectedPlan(e.target.value as any)}
@@ -345,7 +345,7 @@ export default function SaaSLandingPage() {
               <button
                 type="submit"
                 disabled={isRegistering}
-                className="w-full mt-3 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-zinc-955 hover:bg-zinc-900 rounded shadow-md transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full mt-3 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-zinc-950 hover:bg-zinc-900 rounded shadow-md transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isRegistering ? (
                   <span>Processando...</span>
@@ -361,36 +361,36 @@ export default function SaaSLandingPage() {
             </form>
 
             {/* Resumo de Planos e Vantagens */}
-            <div id="precos" className="bg-zinc-50/50 p-6 sm:p-8 flex flex-col justify-between text-zinc-700 border-l border-zinc-155 space-y-6">
+            <div id="precos" className="bg-zinc-50/50 p-6 sm:p-8 flex flex-col justify-between text-zinc-700 border-l border-zinc-200 space-y-6">
               <div className="space-y-4">
-                <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-955 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
+                <h3 className="font-extrabold text-[9px] uppercase tracking-widest text-zinc-900 border-b border-zinc-200 pb-2">Plano de Assinaturas</h3>
                 
-                <div className="space-y-4 text-xs font-light text-zinc-555">
+                <div className="space-y-4 text-xs font-light text-zinc-500">
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
-                    <span className="font-semibold text-zinc-955">Plano Prata</span>
-                    <span className="font-bold text-zinc-955">R$ 99</span>
+                    <span className="font-semibold text-zinc-900">Plano Prata</span>
+                    <span className="font-bold text-zinc-900">R$ 99</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-1 leading-relaxed">Até 50 atletas matriculados, controle completo de presenças e controle de turmas.</p>
                   
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
-                    <span className="font-semibold text-zinc-955 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-red-650 rounded-full animate-pulse" />
+                    <span className="font-semibold text-zinc-900 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
                       Plano Ouro (Recomendado)
                     </span>
-                    <span className="font-bold text-zinc-955">R$ 199</span>
+                    <span className="font-bold text-zinc-900">R$ 199</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-1 leading-relaxed font-light">Até 150 atletas matriculados, lembretes inteligentes de PIX via WhatsApp, exames de faixa e graus.</p>
 
                   <div className="flex justify-between border-b border-zinc-200 pb-2 items-center">
-                    <span className="font-semibold text-zinc-955">Plano BlackBelt</span>
-                    <span className="font-bold text-zinc-955">R$ 349</span>
+                    <span className="font-semibold text-zinc-900">Plano BlackBelt</span>
+                    <span className="font-bold text-zinc-900">R$ 349</span>
                   </div>
                   <p className="text-[10px] text-zinc-400 pl-1 leading-relaxed">Atletas ilimitados, relatórios para exames, loja/cantina com controle de estoque.</p>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded border border-zinc-200 space-y-2 text-zinc-450">
-                <h4 className="text-[9px] font-bold text-zinc-955 uppercase tracking-wider">Pagamento Criptografado</h4>
+              <div className="bg-white p-4 rounded border border-zinc-200 space-y-2 text-zinc-400">
+                <h4 className="text-[9px] font-bold text-zinc-900 uppercase tracking-wider">Pagamento Criptografado</h4>
                 <p className="text-[10px] text-zinc-400 leading-relaxed font-light">
                   Sua transação é assegurada pelo Stripe. Nenhuma informação bancária ou de cartão é armazenada.
                 </p>

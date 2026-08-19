@@ -107,7 +107,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-9 w-9 bg-zinc-950 rounded-xl flex items-center justify-center border-r-[3px] border-red-655 shadow-sm animate-pulse">
+          <div className="h-9 w-9 bg-zinc-950 rounded-xl flex items-center justify-center border-r-[3px] border-red-600 shadow-sm animate-pulse">
             <span className="text-white font-black text-xs italic tracking-tighter">JP</span>
           </div>
           <span className="text-xs font-semibold text-slate-400">Acessando tatame...</span>
@@ -416,7 +416,7 @@ export default function DashboardLayout({
               </button>
               
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 bg-slate-950 rounded flex items-center justify-center border-r-2 border-red-655">
+                <div className="h-6 w-6 bg-slate-950 rounded flex items-center justify-center border-r-2 border-red-600">
                   <span className="text-white font-black text-[10px] italic tracking-tighter">
                     {academy?.name ? academy.name[0] : 'J'}
                   </span>

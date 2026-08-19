@@ -99,7 +99,7 @@ export default function SuperadminPage() {
               <span className="text-white font-black text-xl italic tracking-tighter">JP</span>
             </div>
             <h1 className="mt-5 text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-1.5">
-              Controle Geral <span className="text-red-655 font-extrabold text-red-600">JiuPro</span>
+              Controle Geral <span className="text-red-600 font-extrabold">JiuPro</span>
             </h1>
             <p className="mt-1 text-[11px] text-zinc-400">
               Acesso exclusivo do proprietário
