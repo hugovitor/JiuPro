@@ -613,6 +613,22 @@ function initializeStorage() {
   }
 }
 
+export function isDemoAcademy(academyId: string): boolean {
+  return ['gb-centro', 'alliance-pinheiros', 'atos-sp'].includes(academyId)
+}
+
+function checkDemoBlock(academyId: string): boolean {
+  if (isDemoAcademy(academyId)) {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('jiupro_demo_block', {
+        detail: { message: 'Esta ação está desativada no modo de demonstração. Assine um plano para liberar!' }
+      }))
+    }
+    return true
+  }
+  return false
+}
+
 // Expose APIs
 export const db = {
   async seedDatabase() {
@@ -629,7 +645,12 @@ export const db = {
             name: a.name,
             mensalidade_padrao: a.mensalidadePadrao,
             dia_vencimento: a.diaVencimento,
-            whatsapp_template: a.whatsappTemplate || ''
+            whatsapp_template: a.whatsappTemplate || '',
+            owner_name: a.ownerName,
+            owner_email: a.ownerEmail,
+            plan: a.plan,
+            status: a.status,
+            professor_grade: a.professorGrade
           })
         }
 
@@ -732,7 +753,12 @@ export const db = {
             mensalidadePadrao: acData.mensalidade_padrao,
             diaVencimento: acData.dia_vencimento,
             whatsappTemplate: acData.whatsapp_template,
-            logoUrl: acData.logo_url
+            logoUrl: acData.logo_url,
+            ownerName: acData.owner_name,
+            ownerEmail: acData.owner_email,
+            plan: acData.plan,
+            status: acData.status,
+            professorGrade: acData.professor_grade
           }
           localStorage.setItem('jiupro_academies', JSON.stringify(academies))
         }
@@ -919,6 +945,9 @@ export const db = {
 
   // Mutators
   saveStudent(student: Omit<Student, 'id' | 'financeiro' | 'presencas'> & { id?: string }): Student {
+    if (student.academyId && checkDemoBlock(student.academyId)) {
+      return student as Student;
+    }
     initializeStorage()
     const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     
@@ -974,6 +1003,8 @@ export const db = {
   },
 
   updateStudentBelt(id: string, belt: string, degrees: number) {
+    const student = this.getStudent(id)
+    if (student && checkDemoBlock(student.academyId)) return
     initializeStorage()
     const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const idx = all.findIndex(s => s.id === id)
@@ -989,6 +1020,8 @@ export const db = {
   },
 
   updateStudentInvoices(id: string, invoices: Invoice[]) {
+    const student = this.getStudent(id)
+    if (student && checkDemoBlock(student.academyId)) return
     initializeStorage()
     const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const idx = all.findIndex(s => s.id === id)
@@ -1013,6 +1046,7 @@ export const db = {
   },
 
   saveClass(academyId: string, classData: Omit<ClassSession, 'id'> & { id?: string }): ClassSession {
+    if (checkDemoBlock(academyId)) return classData as ClassSession
     initializeStorage()
     const all: Record<string, ClassSession[]> = JSON.parse(localStorage.getItem('jiupro_turmas') || '{}')
     if (!all[academyId]) all[academyId] = []
@@ -1032,6 +1066,7 @@ export const db = {
   },
 
   removeClass(academyId: string, classId: string) {
+    if (checkDemoBlock(academyId)) return
     initializeStorage()
     const all: Record<string, ClassSession[]> = JSON.parse(localStorage.getItem('jiupro_turmas') || '{}')
     if (all[academyId]) {
@@ -1041,6 +1076,7 @@ export const db = {
   },
 
   confirmCheckIn(academyId: string, studentId: string, status: 'Confirmado' | 'Faltou') {
+    if (checkDemoBlock(academyId)) return
     initializeStorage()
     
     // Update check-ins list
@@ -1093,6 +1129,7 @@ export const db = {
   },
 
   studentCheckIn(academyId: string, studentId: string, classTime: string) {
+    if (checkDemoBlock(academyId)) return
     initializeStorage()
     const allCheckins: Record<string, CheckIn[]> = JSON.parse(localStorage.getItem('jiupro_checkins') || '{}')
     if (!allCheckins[academyId]) allCheckins[academyId] = []
@@ -1131,6 +1168,7 @@ export const db = {
   },
 
   studentCancelCheckIn(academyId: string, studentId: string) {
+    if (checkDemoBlock(academyId)) return
     initializeStorage()
     const allCheckins: Record<string, CheckIn[]> = JSON.parse(localStorage.getItem('jiupro_checkins') || '{}')
     if (allCheckins[academyId]) {
@@ -1146,6 +1184,7 @@ export const db = {
   },
 
   updateAcademySettings(academyId: string, settings: { mensalidadePadrao: string; diaVencimento: string; whatsappTemplate?: string }) {
+    if (checkDemoBlock(academyId)) return
     initializeStorage()
     const academies: Academy[] = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
     const idx = academies.findIndex(a => a.id === academyId)
@@ -1169,6 +1208,8 @@ export const db = {
   },
 
   addManualPresence(studentId: string, date: string, classTitle: string) {
+    const student = this.getStudent(studentId)
+    if (student && checkDemoBlock(student.academyId)) return
     initializeStorage()
     const students: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const idx = students.findIndex(s => s.id === studentId)
@@ -1191,6 +1232,8 @@ export const db = {
   },
 
   addManualInvoice(studentId: string, mes: string, vencimento: string, valor: string) {
+    const student = this.getStudent(studentId)
+    if (student && checkDemoBlock(student.academyId)) return
     initializeStorage()
     const students: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const idx = students.findIndex(s => s.id === studentId)
@@ -1564,6 +1607,7 @@ export const db = {
   },
 
   recordSale(academyId: string, studentId: string, productId: string): Sale {
+    if (checkDemoBlock(academyId)) return {} as Sale
     initializeStorage()
     const products: Product[] = JSON.parse(localStorage.getItem('jiupro_products') || '[]')
     const sales: Sale[] = JSON.parse(localStorage.getItem('jiupro_sales') || '[]')
@@ -1607,6 +1651,8 @@ export const db = {
 
   // Performance and Tournament Logging
   updateStudentPerformance(studentId: string, peso: string, altura: string) {
+    const student = this.getStudent(studentId)
+    if (student && checkDemoBlock(student.academyId)) return
     initializeStorage()
     const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const idx = all.findIndex(s => s.id === studentId)
@@ -1618,6 +1664,8 @@ export const db = {
   },
 
   addTournamentResult(studentId: string, campeonato: string, data: string, categoria: string, resultado: 'Ouro' | 'Prata' | 'Bronze' | 'Participação'): TournamentResult {
+    const student = this.getStudent(studentId)
+    if (student && checkDemoBlock(student.academyId)) return {} as TournamentResult
     initializeStorage()
     const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const idx = all.findIndex(s => s.id === studentId)
@@ -1660,6 +1708,7 @@ export const db = {
   },
 
   addAnnouncement(academyId: string, titulo: string, conteudo: string, categoria: 'Informativo' | 'Alerta' | 'Evento'): Announcement {
+    if (checkDemoBlock(academyId)) return {} as Announcement
     initializeStorage()
     if (typeof window === 'undefined') return {} as Announcement
     const all: Record<string, Announcement[]> = JSON.parse(localStorage.getItem('jiupro_announcements') || '{}')
@@ -1680,6 +1729,7 @@ export const db = {
   },
 
   removeAnnouncement(academyId: string, id: string): Announcement[] {
+    if (checkDemoBlock(academyId)) return []
     initializeStorage()
     if (typeof window === 'undefined') return []
     const all: Record<string, Announcement[]> = JSON.parse(localStorage.getItem('jiupro_announcements') || '{}')
@@ -1699,6 +1749,8 @@ export const db = {
   },
 
   addJournalEntry(studentId: string, categoria: 'Kimono' | 'NoGi', posicao: string, notas: string): JournalEntry {
+    const student = this.getStudent(studentId)
+    if (student && checkDemoBlock(student.academyId)) return {} as JournalEntry
     initializeStorage()
     if (typeof window === 'undefined') return {} as JournalEntry
     const all: Record<string, JournalEntry[]> = JSON.parse(localStorage.getItem('jiupro_journals') || '{}')
@@ -1716,5 +1768,40 @@ export const db = {
     all[studentId].unshift(newEntry)
     localStorage.setItem('jiupro_journals', JSON.stringify(all))
     return newEntry
+  },
+
+  // Superadmin Utility Methods
+  superadminGetAcademies(): Academy[] {
+    initializeStorage()
+    if (typeof window === 'undefined') return DEFAULT_ACADEMIAS
+    return JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
+  },
+
+  superadminSetAcademyStatus(academyId: string, status: 'Ativo' | 'Suspenso') {
+    initializeStorage()
+    const academies = this.superadminGetAcademies()
+    const idx = academies.findIndex(a => a.id === academyId)
+    if (idx !== -1) {
+      academies[idx].status = status
+      localStorage.setItem('jiupro_academies', JSON.stringify(academies))
+    }
+    // Update on Supabase
+    supabase.from('academies').update({ status }).eq('id', academyId).then(({ error }) => {
+      if (error) console.error('Erro ao atualizar status da academia no Supabase:', error)
+    })
+  },
+
+  superadminSetAcademyPlan(academyId: string, plan: 'Prata' | 'Ouro' | 'BlackBelt') {
+    initializeStorage()
+    const academies = this.superadminGetAcademies()
+    const idx = academies.findIndex(a => a.id === academyId)
+    if (idx !== -1) {
+      academies[idx].plan = plan
+      localStorage.setItem('jiupro_academies', JSON.stringify(academies))
+    }
+    // Update on Supabase
+    supabase.from('academies').update({ plan }).eq('id', academyId).then(({ error }) => {
+      if (error) console.error('Erro ao atualizar plano no Supabase:', error)
+    })
   }
 }

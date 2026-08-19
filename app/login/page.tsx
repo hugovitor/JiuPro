@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { db } from '../lib/db'
+import { supabase } from '../lib/supabase'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -17,20 +18,61 @@ export default function LoginPage() {
     setIsLoading(true)
     setError('')
 
-    setTimeout(() => {
-      const users = db.getUsers()
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase())
+    try {
+      // 1. Tenta buscar o usuário direto no banco Supabase (para clientes reais pós-Stripe)
+      const { data: user, error: dbError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .single()
 
-      if (user) {
-        // Set cookie
-        document.cookie = `jiupro_session=${user.id}; path=/; max-age=86400; SameSite=Strict;`
-        setIsLoading(false)
-        router.push('/dashboard')
-      } else {
+      if (dbError || !user) {
+        // Fallback: busca no LocalStorage (para as contas modelo de demonstração)
+        const localUsers = db.getUsers()
+        const localUser = localUsers.find(u => u.email.toLowerCase() === email.toLowerCase())
+
+        if (localUser) {
+          document.cookie = `jiupro_session=${localUser.id}; path=/; max-age=86400; SameSite=Strict;`
+          setIsLoading(false)
+          router.push('/dashboard')
+          return
+        }
+
         setIsLoading(false)
         setError('E-mail não cadastrado. Cadastre sua academia na página inicial!')
+        return
       }
-    }, 800)
+
+      // 2. Valida a senha do usuário
+      if (user.password !== password) {
+        setIsLoading(false)
+        setError('Senha incorreta para o e-mail informado!')
+        return
+      }
+
+      // 3. Salva no LocalStorage local para sincronização de cache do resto do app
+      const localUsers = db.getUsers()
+      if (!localUsers.some(u => u.id === user.id)) {
+        localUsers.push({
+          id: user.id,
+          academyId: user.academy_id,
+          name: user.name,
+          email: user.email,
+          role: user.role as any,
+          grade: user.grade || 'Faixa Preta'
+        })
+        localStorage.setItem('jiupro_users', JSON.stringify(localUsers))
+      }
+
+      // 4. Cria o cookie de sessão e envia ao dashboard
+      document.cookie = `jiupro_session=${user.id}; path=/; max-age=86400; SameSite=Strict;`
+      setIsLoading(false)
+      router.push('/dashboard')
+    } catch (err) {
+      console.error(err)
+      setIsLoading(false)
+      setError('Erro ao conectar com o banco de dados. Verifique a conexão.')
+    }
   }
 
   const handleQuickLogin = (emailStr: string) => {

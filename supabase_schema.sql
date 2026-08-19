@@ -5,7 +5,14 @@ CREATE TABLE IF NOT EXISTS academies (
   mensalidade_padrao TEXT NOT NULL DEFAULT '150,00',
   dia_vencimento TEXT NOT NULL DEFAULT '10',
   whatsapp_template TEXT,
-  logo_url TEXT
+  logo_url TEXT,
+  owner_name TEXT,
+  owner_email TEXT,
+  plan TEXT NOT NULL DEFAULT 'Ouro',
+  status TEXT NOT NULL DEFAULT 'Ativo',
+  professor_grade TEXT,
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT
 );
 
 -- 2. Administradores (Mestres)
@@ -15,7 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'Professor'
+  role TEXT NOT NULL DEFAULT 'Professor',
+  grade TEXT
 );
 
 -- 3. Atletas (Alunos)
