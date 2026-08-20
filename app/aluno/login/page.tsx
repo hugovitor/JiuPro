@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabase'
 import { db } from '../../lib/db'
 
 export default function AlunoLoginPage() {
@@ -13,21 +14,120 @@ export default function AlunoLoginPage() {
   
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
 
-    setTimeout(() => {
-      const student = db.loginStudent(email, password)
-      if (student) {
-        setIsLoading(false)
-        router.push('/aluno')
-      } else {
+    try {
+      // 1. Query student directly from Supabase
+      const { data: student, error: dbError } = await supabase
+        .from('students')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .single()
+
+      if (dbError || !student) {
+        // Fallback: check local storage (for offline/demo accounts)
+        const localStudent = db.loginStudent(email, password)
+        if (localStudent) {
+          setIsLoading(false)
+          router.push('/aluno')
+          return
+        }
+
         setIsLoading(false)
         setError('E-mail ou senha incorretos. A senha padrão de demonstração é 123456.')
+        return
       }
-    }, 800)
+
+      // 2. Validate password
+      const dbPassword = student.password || '123456'
+      if (dbPassword !== password) {
+        setIsLoading(false)
+        setError('Senha incorreta para o e-mail informado.')
+        return
+      }
+
+      // 3. Load invoices, presence, etc. from Supabase to sync local storage cache
+      const { data: invoices } = await supabase.from('invoices').select('*').eq('student_id', student.id)
+      const { data: attendances } = await supabase.from('attendances').select('*').eq('student_id', student.id)
+      const { data: tournaments } = await supabase.from('tournaments').select('*').eq('student_id', student.id)
+
+      // Map to Student model structure
+      const mappedStudent = {
+        id: student.id,
+        academyId: student.academy_id,
+        nome: student.nome,
+        email: student.email,
+        faixa: student.faixa,
+        graus: student.graus || 0,
+        status: student.status,
+        dataMatricula: student.data_matricula,
+        mensalidade: student.mensalidade,
+        chavePix: student.chave_pix,
+        graduadoPor: student.graduado_por,
+        mestreOriginal: student.mestre_original,
+        password: student.password,
+        peso: student.peso,
+        altura: student.altura,
+        badges: student.badges || [],
+        financeiro: (invoices || []).map((inv: any) => ({
+          mes: inv.mes,
+          vencimento: inv.vencimento,
+          valor: inv.valor,
+          status: inv.status
+        })),
+        presencas: (attendances || []).map((att: any) => ({
+          data: att.data,
+          horario: att.horario,
+          treino: att.treino
+        })),
+        tournaments: (tournaments || []).map((t: any) => ({
+          id: t.id,
+          campeonato: t.campeonato,
+          data: t.data,
+          categoria: t.categoria,
+          resultado: t.resultado
+        }))
+      }
+
+      // Save to local storage for local cache
+      const localStudents = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+      const otherStudents = localStudents.filter((s: any) => s.id !== student.id)
+      otherStudents.push(mappedStudent)
+      localStorage.setItem('jiupro_students', JSON.stringify(otherStudents))
+
+      // Also ensure academy is cached
+      const { data: academyData } = await supabase.from('academies').select('*').eq('id', student.academy_id).single()
+      if (academyData) {
+        const localAcademies = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
+        const otherAcademies = localAcademies.filter((a: any) => a.id !== student.academy_id)
+        otherAcademies.push({
+          id: academyData.id,
+          name: academyData.name,
+          mensalidadePadrao: academyData.mensalidade_padrao,
+          diaVencimento: academyData.dia_vencimento,
+          whatsappTemplate: academyData.whatsapp_template,
+          logoUrl: academyData.logo_url,
+          ownerName: academyData.owner_name,
+          ownerEmail: academyData.owner_email,
+          plan: academyData.plan,
+          status: academyData.status,
+          stripeConnectId: academyData.stripe_connect_id
+        })
+        localStorage.setItem('jiupro_academies', JSON.stringify(otherAcademies))
+      }
+
+      // 4. Create session cookie and redirect
+      document.cookie = `jiupro_student_session=${student.id}; path=/; max-age=86400; SameSite=Strict;`
+      setIsLoading(false)
+      router.push('/aluno')
+    } catch (err) {
+      console.error(err)
+      setIsLoading(false)
+      setError('Erro ao conectar com o banco de dados.')
+    }
   }
 
   return (

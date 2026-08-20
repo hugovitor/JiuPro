@@ -1411,6 +1411,42 @@ export const db = {
     all.push(newStudent)
     localStorage.setItem('jiupro_students', JSON.stringify(all))
 
+    // Background push to Supabase - Student
+    supabase.from('students').upsert({
+      id: newStudent.id,
+      academy_id: newStudent.academyId,
+      nome: newStudent.nome,
+      email: newStudent.email,
+      password: newStudent.password || '123456',
+      faixa: newStudent.faixa,
+      graus: newStudent.graus,
+      status: newStudent.status,
+      data_matricula: newStudent.dataMatricula,
+      mensalidade: newStudent.mensalidade,
+      dia_vencimento: '10',
+      chave_pix: newStudent.chavePix,
+      peso: '',
+      altura: '',
+      graduado_por: newStudent.graduadoPor,
+      mestre_original: newStudent.mestreOriginal,
+      badges: []
+    }).then(({ error }) => {
+      if (error) console.error('Erro ao registrar atleta no Supabase:', error)
+    })
+
+    // Background push to Supabase - Default Invoice
+    if (newStudent.financeiro.length > 0) {
+      supabase.from('invoices').insert({
+        student_id: newStudent.id,
+        mes: newStudent.financeiro[0].mes,
+        vencimento: newStudent.financeiro[0].vencimento,
+        valor: newStudent.financeiro[0].valor,
+        status: newStudent.financeiro[0].status
+      }).then(({ error }) => {
+        if (error) console.error('Erro ao cadastrar fatura inicial no Supabase:', error)
+      })
+    }
+
     // Notify academy owner (find user of that academy)
     const users: User[] = JSON.parse(localStorage.getItem('jiupro_users') || '[]')
     const admin = users.find(u => u.academyId === academyId)
