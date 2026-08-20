@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { db } from '../lib/db'
+import { supabase } from '../lib/supabase'
 
 export default function SuperadminPage() {
   const router = useRouter()
@@ -11,6 +12,7 @@ export default function SuperadminPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   // State for administrative data
   const [academies, setAcademies] = useState<any[]>([])
@@ -50,16 +52,41 @@ export default function SuperadminPage() {
   }, [])
 
   // Handle superadmin login
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoginError('')
+    setIsLoading(true)
 
-    if (email === 'admin@jiupro.com.br' && password === 'admin') {
-      document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Lax;'
-      setIsAuthenticated(true)
-      setAcademies(db.superadminGetAcademies())
-    } else {
-      setLoginError('Credenciais administrativas inválidas. Acesso restrito ao proprietário.')
+    try {
+      // Query the 'users' table in Supabase where role is 'SuperAdmin'
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .eq('password', password)
+        .eq('role', 'SuperAdmin')
+        .single()
+
+      if (error || !user) {
+        // Fallback for default hardcoded admin in case they haven't registered one yet
+        if (email === 'admin@jiupro.com.br' && password === 'admin') {
+          document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Lax;'
+          setIsAuthenticated(true)
+          setAcademies(db.superadminGetAcademies())
+          setIsLoading(false)
+          return
+        }
+        setLoginError('Credenciais administrativas inválidas. Acesso restrito ao proprietário.')
+      } else {
+        document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Lax;'
+        setIsAuthenticated(true)
+        setAcademies(db.superadminGetAcademies())
+      }
+    } catch (err) {
+      console.error(err)
+      setLoginError('Erro de conexão ao autenticar.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -162,9 +189,10 @@ export default function SuperadminPage() {
 
             <button 
               type="submit"
-              className="w-full mt-2 py-3 text-xs font-black text-white bg-slate-950 hover:bg-slate-850 rounded-xl shadow transition-colors cursor-pointer"
+              disabled={isLoading}
+              className="w-full mt-2 py-3 text-xs font-black text-white bg-slate-950 hover:bg-slate-850 rounded-xl shadow transition-colors cursor-pointer disabled:opacity-50"
             >
-              Autenticar Acesso
+              {isLoading ? 'Autenticando...' : 'Autenticar Acesso'}
             </button>
           </form>
 
