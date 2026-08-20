@@ -95,17 +95,48 @@ export default function ConfiguracoesPage() {
         const acadId = params.get('academyId')
         
         if (connectStatus === 'success' && accountId && acadId === loggedUser.academyId) {
-          db.updateAcademySettings(loggedUser.academyId, {
-            mensalidadePadrao: db.getAcademy(loggedUser.academyId)?.mensalidadePadrao || '150,00',
-            diaVencimento: db.getAcademy(loggedUser.academyId)?.diaVencimento || '10',
-            stripeConnectId: accountId
+          // Atualizar banco de dados via API primeiro
+          fetch('/api/academy/settings', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              academyId: loggedUser.academyId,
+              settings: {
+                mensalidadePadrao: db.getAcademy(loggedUser.academyId)?.mensalidadePadrao || '150,00',
+                diaVencimento: db.getAcademy(loggedUser.academyId)?.diaVencimento || '10',
+                stripeConnectId: accountId
+              }
+            })
+          }).then(async (res) => {
+            if (res.ok) {
+              // Salvar no local storage local
+              db.updateAcademySettings(loggedUser.academyId, {
+                mensalidadePadrao: db.getAcademy(loggedUser.academyId)?.mensalidadePadrao || '150,00',
+                diaVencimento: db.getAcademy(loggedUser.academyId)?.diaVencimento || '10',
+                stripeConnectId: accountId
+              })
+              alert('Conta Stripe Connect vinculada com sucesso! Agora você pode receber mensalidades por cartão de crédito.')
+              window.history.replaceState({}, document.title, window.location.pathname)
+              // Forçar sincronização para recarregar tudo atualizado
+              await db.syncWithSupabase(loggedUser.academyId)
+              loadData(loggedUser.academyId)
+            } else {
+              alert('Erro ao salvar vinculação com a Stripe no banco de dados.')
+            }
+          }).catch(err => {
+            console.error(err)
+            alert('Erro de conexão ao salvar vinculação.')
           })
-          window.history.replaceState({}, document.title, window.location.pathname)
-          alert('Conta Stripe Connect vinculada com sucesso! Agora você pode receber mensalidades por cartão de crédito.')
+          return
         }
       }
 
-      loadData(loggedUser.academyId)
+      // Sincronizar com o Supabase no início para garantir que o cache local está preenchido
+      db.syncWithSupabase(loggedUser.academyId).then(() => {
+        loadData(loggedUser.academyId)
+      })
     } else {
       setIsPageLoading(false)
     }
