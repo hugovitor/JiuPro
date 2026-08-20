@@ -4,6 +4,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { db, Student } from '../../lib/db'
+import { IBJJF_BELTS } from '../../lib/belts'
+import BeltVisual from '../../components/BeltVisual'
 
 export default function ListagemAlunosPage() {
   const [busca, setBusca] = useState('')

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { db, Student, Academy, ClassSession, Post, TournamentResult, Announcement, JournalEntry } from '../lib/db'
 import { supabase } from '../lib/supabase'
 import PwaBanner from '../components/PwaBanner'
+import BeltVisual from '../components/BeltVisual'
 
 function AreaDoAlunoContent() {
   const router = useRouter()
