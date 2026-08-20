@@ -9,6 +9,13 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
+    const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRole) {
+      return NextResponse.json({ 
+        error: 'Chave SUPABASE_SERVICE_ROLE_KEY não configurada no arquivo .env.local. Por favor, adicione-a para habilitar o upload.' 
+      }, { status: 500 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const studentId = formData.get('studentId') as string
@@ -23,15 +30,16 @@ export async function POST(request: Request) {
 
     const fileExt = file.name.split('.').pop()
     const fileName = `${studentId}-${Date.now()}.${fileExt}`
-    const filePath = `avatars/${fileName}`
 
-    // 1. Garantir que o bucket existe
-    await supabaseAdmin.storage.createBucket('avatars', {
-      public: true,
-      fileSizeLimit: 2097152 // 2MB
-    }).catch(() => {
-      // Ignora erro se o bucket já existir
-    })
+    // 1. Garantir que o bucket existe (tenta criar, se falhar assume que já existe ou precisa de criação manual)
+    try {
+      await supabaseAdmin.storage.createBucket('avatars', {
+        public: true,
+        fileSizeLimit: 2097152 // 2MB
+      })
+    } catch (bucketErr) {
+      console.log('Bucket "avatars" já existente ou criação automática indisponível.')
+    }
 
     // 2. Fazer upload do arquivo para o bucket avatars do Supabase
     const { error: uploadError } = await supabaseAdmin.storage
@@ -43,6 +51,11 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error('Erro no upload do arquivo para o storage:', uploadError)
+      if (uploadError.message === 'Bucket not found') {
+        return NextResponse.json({ 
+          error: 'O bucket "avatars" não foi encontrado no Supabase. Por favor, crie um bucket público chamado "avatars" no menu Storage do seu painel Supabase.' 
+        }, { status: 500 })
+      }
       return NextResponse.json({ error: uploadError.message }, { status: 500 })
     }
 
