@@ -196,7 +196,7 @@ function AlunoCadastroContent() {
       localStorage.setItem('jiupro_academies', JSON.stringify(otherAcademies))
 
       // 6. Criar cookie de sessão
-      document.cookie = `jiupro_student_session=${newStudentId}; path=/; max-age=86400; SameSite=Strict;`
+      document.cookie = `jiupro_student_session=${newStudentId}; path=/; max-age=86400; SameSite=Lax;`
       
       setSuccess('Matrícula realizada com sucesso! Acessando tatame...')
       setTimeout(() => {

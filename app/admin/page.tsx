@@ -36,7 +36,7 @@ export default function SuperadminPage() {
     setLoginError('')
 
     if (email === 'admin@jiupro.com.br' && password === 'admin') {
-      document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Strict;'
+      document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Lax;'
       setIsAuthenticated(true)
       setAcademies(db.superadminGetAcademies())
     } else {
@@ -46,7 +46,7 @@ export default function SuperadminPage() {
 
   // Handle logout
   const handleLogout = () => {
-    document.cookie = 'jiupro_superadmin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict;'
+    document.cookie = 'jiupro_superadmin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;'
     setIsAuthenticated(false)
   }
 

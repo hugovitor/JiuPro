@@ -32,7 +32,7 @@ export default function LoginPage() {
         const localUser = localUsers.find(u => u.email.toLowerCase() === email.toLowerCase())
 
         if (localUser) {
-          document.cookie = `jiupro_session=${localUser.id}; path=/; max-age=86400; SameSite=Strict;`
+          document.cookie = `jiupro_session=${localUser.id}; path=/; max-age=86400; SameSite=Lax;`
           setIsLoading(false)
           router.push('/dashboard')
           return
@@ -65,7 +65,7 @@ export default function LoginPage() {
       }
 
       // 4. Cria o cookie de sessão e envia ao dashboard
-      document.cookie = `jiupro_session=${user.id}; path=/; max-age=86400; SameSite=Strict;`
+      document.cookie = `jiupro_session=${user.id}; path=/; max-age=86400; SameSite=Lax;`
       setIsLoading(false)
       router.push('/dashboard')
     } catch (err) {

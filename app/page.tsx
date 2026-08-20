@@ -32,7 +32,7 @@ export default function SaaSLandingPage() {
     const users = db.getUsers()
     const user = users.find(u => u.academyId === academyId)
     if (user) {
-      document.cookie = `jiupro_session=${user.id}; path=/; max-age=86400; SameSite=Strict;`
+      document.cookie = `jiupro_session=${user.id}; path=/; max-age=86400; SameSite=Lax;`
       router.push('/dashboard')
     }
   }

@@ -1061,7 +1061,7 @@ export const db = {
     localStorage.setItem('jiupro_checkins', JSON.stringify(checkins))
 
     // Create session cookie
-    document.cookie = `jiupro_session=${newUser.id}; path=/; max-age=86400; SameSite=Strict;`
+    document.cookie = `jiupro_session=${newUser.id}; path=/; max-age=86400; SameSite=Lax;`
 
     return newUser
   },
@@ -1086,14 +1086,14 @@ export const db = {
     const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const student = all.find(s => s.email.toLowerCase() === email.toLowerCase() && (s.password || '123456') === password)
     if (student) {
-      document.cookie = `jiupro_student_session=${student.id}; path=/; max-age=86400; SameSite=Strict;`
+      document.cookie = `jiupro_student_session=${student.id}; path=/; max-age=86400; SameSite=Lax;`
       return student
     }
     return null
   },
 
   logoutStudent() {
-    document.cookie = 'jiupro_student_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict;'
+    document.cookie = 'jiupro_student_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;'
   },
 
   getLoggedInStudent(): Student | null {

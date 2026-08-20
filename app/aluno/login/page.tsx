@@ -120,7 +120,7 @@ export default function AlunoLoginPage() {
       }
 
       // 4. Create session cookie and redirect
-      document.cookie = `jiupro_student_session=${student.id}; path=/; max-age=86400; SameSite=Strict;`
+      document.cookie = `jiupro_student_session=${student.id}; path=/; max-age=86400; SameSite=Lax;`
       setIsLoading(false)
       router.push('/aluno')
     } catch (err) {
