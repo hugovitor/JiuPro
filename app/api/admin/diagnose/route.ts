@@ -36,9 +36,9 @@ export async function GET() {
     const dummyId = 'dummy-diag-' + Date.now()
     const { error: insertError } = await supabaseAdmin.from('notifications').insert({
       id: dummyId,
+      user_id: 'system-diagnose',
       title: 'Diagnóstico do Sistema',
-      content: 'Executando testes automatizados...',
-      date: new Date().toISOString().split('T')[0]
+      description: 'Executando testes automatizados...'
     })
 
     if (insertError) {
