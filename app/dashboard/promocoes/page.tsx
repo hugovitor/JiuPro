@@ -4,6 +4,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, Student, User } from '../../lib/db'
+import { IBJJF_BELTS, getMaxDegreesForBelt } from '../../lib/belts'
+import BeltVisual from '../../components/BeltVisual'
 
 export default function PromocoesPage() {
   const router = useRouter()
@@ -32,6 +34,14 @@ export default function PromocoesPage() {
   // Encontra os dados do aluno atualmente selecionado para exibir um resumo na tela
   const alunoAtual = listaAlunos.find(a => a.id === alunoSelecionadoId)
 
+  // Max degrees for the selected belt
+  const maxDegrees = getMaxDegreesForBelt(novaFaixa)
+
+  // Belt grouping
+  const infantilBelts = IBJJF_BELTS.filter(b => b.category === 'Infantil')
+  const adultoBelts = IBJJF_BELTS.filter(b => b.category === 'Adulto')
+  const mestreBelts = IBJJF_BELTS.filter(b => b.category === 'Mestre')
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!alunoSelecionadoId) {
@@ -41,12 +51,12 @@ export default function PromocoesPage() {
 
     setIsLoading(true)
 
-    // Save in Mock DB
+    // Save in DB
     db.updateStudentBelt(alunoSelecionadoId, novaFaixa, novosGraus)
 
     setTimeout(() => {
       setIsLoading(false)
-      alert(`Graduação de ${alunoAtual?.nome} atualizada com sucesso!`)
+      alert(`Graduação de ${alunoAtual?.nome} atualizada com sucesso para Faixa ${novaFaixa} (${novosGraus}º Grau)!`)
       router.push('/dashboard/alunos')
     }, 800)
   }
@@ -60,8 +70,10 @@ export default function PromocoesPage() {
       
       {/* Título da Seção */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Homologação de Graduações</h1>
-        <p className="text-xs text-zinc-500 mt-1">Registre a evolução técnica e conceda novas faixas e graus aos seus atletas.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Homologação de Graduações (IBJJF)</h1>
+        <p className="text-xs text-zinc-500 mt-1">
+          Registre a evolução técnica e conceda novas faixas e graus aos seus atletas conforme o regulamento oficial da IBJJF.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -101,22 +113,33 @@ export default function PromocoesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  Nova Faixa
+                  Nova Faixa Oficial (IBJJF)
                 </label>
                 <select
                   value={novaFaixa}
-                  onChange={(e) => setNovaFaixa(e.target.value)}
+                  onChange={(e) => {
+                    const belt = e.target.value
+                    setNovaFaixa(belt)
+                    const max = getMaxDegreesForBelt(belt)
+                    if (novosGraus > max) setNovosGraus(max)
+                  }}
                   className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
                 >
-                  <option value="Branca">Branca</option>
-                  <option value="Cinza">Cinza</option>
-                  <option value="Amarela">Amarela</option>
-                  <option value="Laranja">Laranja</option>
-                  <option value="Verde">Verde</option>
-                  <option value="Azul">Azul</option>
-                  <option value="Roxa">Roxa</option>
-                  <option value="Marrom">Marrom</option>
-                  <option value="Preta">Preta</option>
+                  <optgroup label="Adulto / Master (16+ anos)">
+                    {adultoBelts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Infantil / Juvenil (4 a 15 anos)">
+                    {infantilBelts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Mestres & Grandes Mestres">
+                    {mestreBelts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
@@ -129,11 +152,11 @@ export default function PromocoesPage() {
                   onChange={(e) => setNovosGraus(Number(e.target.value))}
                   className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
                 >
-                  <option value={0}>0 Graus</option>
-                  <option value={1}>1º Grau</option>
-                  <option value={2}>2º Graus</option>
-                  <option value={3}>3º Graus</option>
-                  <option value={4}>4º Graus</option>
+                  {Array.from({ length: maxDegrees + 1 }).map((_, idx) => (
+                    <option key={idx} value={idx}>
+                      {idx === 0 ? 'Sem Graus (0º)' : `${idx}º Grau`}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -141,7 +164,7 @@ export default function PromocoesPage() {
             {/* Campo: Data da Cerimônia / Homologação */}
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                Data da Cerimônia
+                Data da Cerimônia / Exame
               </label>
               <input 
                 type="date"
@@ -169,7 +192,7 @@ export default function PromocoesPage() {
         {/* Card Lateral Informativo / Resumo Visual (Ocupa 1 coluna) */}
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 space-y-4 h-fit">
           <h2 className="font-bold text-xs text-zinc-900 uppercase tracking-wider border-b border-zinc-100 pb-2">
-            Resumo Técnico
+            Resumo Técnico & Pré-Visualização
           </h2>
           
           {alunoAtual ? (
@@ -179,24 +202,32 @@ export default function PromocoesPage() {
                 <p className="text-sm font-bold text-zinc-950 mt-0.5">{alunoAtual.nome}</p>
               </div>
               
-              <div className="flex justify-between items-center bg-zinc-50 p-3 rounded-xl border border-zinc-200">
-                <div>
-                  <p className="text-[9px] text-zinc-400 font-bold uppercase">Graduação Atual</p>
-                  <p className="text-xs font-bold text-zinc-800 mt-0.5">Faixa {alunoAtual.faixa}</p>
+              {/* Graduação Atual */}
+              <div className="bg-zinc-50 p-3.5 rounded-xl border border-zinc-200 space-y-2">
+                <p className="text-[9px] text-zinc-400 font-bold uppercase">Graduação Atual</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-800">Faixa {alunoAtual.faixa}</span>
+                  <span className="text-[10px] font-black bg-zinc-200 px-2 py-0.5 rounded text-zinc-700">
+                    {alunoAtual.graus}ºG
+                  </span>
                 </div>
-                <span className="text-[10px] font-black bg-zinc-200 px-2 py-0.5 rounded text-zinc-700">
-                  {alunoAtual.graus}ºG
-                </span>
+                <div className="pt-1 flex justify-center">
+                  <BeltVisual belt={alunoAtual.faixa} degrees={alunoAtual.graus} size="md" showLabel={false} />
+                </div>
               </div>
 
-              <div className="flex justify-between items-center bg-red-50 p-3 rounded-xl border border-red-200">
-                <div>
-                  <p className="text-[9px] text-red-700 font-bold uppercase">Nova Graduação</p>
-                  <p className="text-xs font-bold text-red-900 mt-0.5">Faixa {novaFaixa}</p>
+              {/* Nova Graduação */}
+              <div className="bg-red-50/50 p-3.5 rounded-xl border border-red-200 space-y-2">
+                <p className="text-[9px] text-red-700 font-bold uppercase">Nova Graduação</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-red-950">Faixa {novaFaixa}</span>
+                  <span className="text-[10px] font-black bg-red-600 text-white px-2 py-0.5 rounded">
+                    {novosGraus}ºG
+                  </span>
                 </div>
-                <span className="text-[10px] font-black bg-red-600 text-white px-2 py-0.5 rounded">
-                  {novosGraus}ºG
-                </span>
+                <div className="pt-1 flex justify-center">
+                  <BeltVisual belt={novaFaixa} degrees={novosGraus} size="md" showLabel={false} />
+                </div>
               </div>
             </div>
           ) : (

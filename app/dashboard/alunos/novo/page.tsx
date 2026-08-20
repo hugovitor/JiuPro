@@ -4,6 +4,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, User } from '../../../lib/db'
+import { IBJJF_BELTS, getMaxDegreesForBelt } from '../../../lib/belts'
+import BeltVisual from '../../../components/BeltVisual'
 
 export default function NovoAlunoPage() {
   const router = useRouter()
@@ -31,6 +33,11 @@ export default function NovoAlunoPage() {
       }
     }
   }, [])
+
+  const maxDegrees = getMaxDegreesForBelt(faixa)
+  const infantilBelts = IBJJF_BELTS.filter(b => b.category === 'Infantil')
+  const adultoBelts = IBJJF_BELTS.filter(b => b.category === 'Adulto')
+  const mestreBelts = IBJJF_BELTS.filter(b => b.category === 'Mestre')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -69,11 +76,11 @@ export default function NovoAlunoPage() {
         {/* Cabeçalho do formulário */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Matricular Novo Guerreiro</h1>
-          <p className="text-sm text-zinc-500">Insira as informações do aluno para iniciar o controle de frequência e mensalidades.</p>
+          <p className="text-xs text-zinc-500 mt-1">Insira as informações do aluno conforme as diretrizes oficiais de graduação IBJJF.</p>
         </div>
 
         {/* Card do Formulário */}
-        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             
             {/* Linha Dupla: Nome e E-mail */}
@@ -88,7 +95,7 @@ export default function NovoAlunoPage() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="Ex: Gabriel Almeida Santos"
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-semibold text-zinc-900 transition-colors"
                 />
               </div>
 
@@ -101,31 +108,42 @@ export default function NovoAlunoPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Ex: gabriel@email.com"
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-semibold text-zinc-900 transition-colors"
                 />
               </div>
             </div>
 
             {/* Linha Dupla: Faixa e Graus */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Graduação / Faixa
+                  Graduação / Faixa Oficial (IBJJF)
                 </label>
                 <select
                   value={faixa}
-                  onChange={(e) => setFaixa(e.target.value)}
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  onChange={(e) => {
+                    const selected = e.target.value
+                    setFaixa(selected)
+                    const max = getMaxDegreesForBelt(selected)
+                    if (Number(graus) > max) setGraus(String(max))
+                  }}
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
                 >
-                  <option value="Branca">Branca</option>
-                  <option value="Cinza">Cinza</option>
-                  <option value="Amarela">Amarela</option>
-                  <option value="Laranja">Laranja</option>
-                  <option value="Verde">Verde</option>
-                  <option value="Azul">Azul</option>
-                  <option value="Roxa">Roxa</option>
-                  <option value="Marrom">Marrom</option>
-                  <option value="Preta">Preta</option>
+                  <optgroup label="Adulto / Master (16+ anos)">
+                    {adultoBelts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Infantil / Juvenil (4 a 15 anos)">
+                    {infantilBelts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Mestres & Grandes Mestres">
+                    {mestreBelts.map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
@@ -136,15 +154,24 @@ export default function NovoAlunoPage() {
                 <select
                   value={graus}
                   onChange={(e) => setGraus(e.target.value)}
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
                 >
-                  <option value="0">Sem Graus</option>
-                  <option value="1">1 Grau</option>
-                  <option value="2">2 Graus</option>
-                  <option value="3">3 Graus</option>
-                  <option value="4">4 Graus</option>
+                  {Array.from({ length: maxDegrees + 1 }).map((_, idx) => (
+                    <option key={idx} value={String(idx)}>
+                      {idx === 0 ? 'Sem Graus (0º)' : `${idx}º Grau`}
+                    </option>
+                  ))}
                 </select>
               </div>
+            </div>
+
+            {/* Visualizer da Faixa selecionada */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-zinc-200 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Visualização da Faixa</span>
+                <span className="text-xs font-bold text-zinc-800">Faixa {faixa} • {graus}º Grau</span>
+              </div>
+              <BeltVisual belt={faixa} degrees={Number(graus)} size="md" showLabel={false} />
             </div>
 
             {/* Linha Dupla: Mensalidade e Data */}
@@ -153,9 +180,9 @@ export default function NovoAlunoPage() {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
                   Valor da Mensalidade (R$)
                 </label>
-                <div className="relative mt-1.5 rounded-lg shadow-sm">
+                <div className="relative mt-1.5 rounded-xl shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <span className="text-zinc-400 text-sm">R$</span>
+                    <span className="text-zinc-400 text-xs font-bold">R$</span>
                   </div>
                   <input
                     type="text"
@@ -163,7 +190,7 @@ export default function NovoAlunoPage() {
                     value={mensalidade}
                     onChange={(e) => setMensalidade(e.target.value)}
                     placeholder="150,00"
-                    className="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-zinc-200 rounded-lg placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 font-semibold text-zinc-900 transition-colors"
                   />
                 </div>
               </div>
@@ -177,26 +204,26 @@ export default function NovoAlunoPage() {
                   required
                   value={dataMatricula}
                   onChange={(e) => setDataMatricula(e.target.value)}
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-semibold text-zinc-900 transition-colors"
                 />
               </div>
             </div>
 
-            {/* Rodapé do formulário / Botões */}
+            {/* Ações */}
             <div className="pt-4 border-t border-zinc-100 flex items-center justify-end gap-3">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard/alunos')}
-                className="px-4 py-2.5 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+                onClick={() => router.back()}
+                className="px-4 py-2.5 text-xs font-bold text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-all"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-800 rounded-xl shadow-sm transition-all disabled:opacity-50 cursor-pointer"
               >
-                {isLoading ? 'Salvando...' : 'Finalizar Matrícula'}
+                {isLoading ? 'Matriculando...' : 'Concluir Matrícula'}
               </button>
             </div>
 

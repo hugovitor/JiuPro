@@ -113,16 +113,22 @@ export default function ListagemAlunosPage() {
             onChange={(e) => setFiltroFaixa(e.target.value)}
             className="w-full text-xs font-bold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-800"
           >
-            <option value="Todas">Todas</option>
-            <option value="Branca">Branca</option>
-            <option value="Cinza">Cinza</option>
-            <option value="Amarela">Amarela</option>
-            <option value="Laranja">Laranja</option>
-            <option value="Verde">Verde</option>
-            <option value="Azul">Azul</option>
-            <option value="Roxa">Roxa</option>
-            <option value="Marrom">Marrom</option>
-            <option value="Preta">Preta</option>
+            <option value="Todas">Todas as Faixas</option>
+            <optgroup label="Adulto / Master (16+ anos)">
+              {IBJJF_BELTS.filter(b => b.category === 'Adulto').map(b => (
+                <option key={b.id} value={b.name}>{b.name}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Infantil / Juvenil (4 a 15 anos)">
+              {IBJJF_BELTS.filter(b => b.category === 'Infantil').map(b => (
+                <option key={b.id} value={b.name}>{b.name}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Mestres & Grandes Mestres">
+              {IBJJF_BELTS.filter(b => b.category === 'Mestre').map(b => (
+                <option key={b.id} value={b.name}>{b.name}</option>
+              ))}
+            </optgroup>
           </select>
         </div>
 
@@ -196,10 +202,11 @@ export default function ListagemAlunosPage() {
                     
                     {/* Faixa e Graus */}
                     <td className="p-4">
-                      <div className="inline-flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-lg">
-                        <span className="font-bold text-zinc-800">Faixa {aluno.faixa}</span>
+                      <div className="inline-flex items-center gap-2.5 bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-xl">
+                        <BeltVisual belt={aluno.faixa} degrees={aluno.graus} size="xs" showLabel={false} />
+                        <span className="font-bold text-zinc-800 text-[11px]">Faixa {aluno.faixa}</span>
                         {aluno.graus > 0 && (
-                          <span className="text-[9px] font-black bg-zinc-950 text-white px-1.5 py-0.2 rounded">
+                          <span className="text-[9px] font-black bg-zinc-950 text-white px-1.5 py-0.5 rounded">
                             {aluno.graus}ºG
                           </span>
                         )}

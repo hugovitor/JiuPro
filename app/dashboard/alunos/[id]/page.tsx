@@ -4,6 +4,8 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, Student, User, Invoice } from '../../../lib/db'
+import { IBJJF_BELTS, getMaxDegreesForBelt } from '../../../lib/belts'
+import BeltVisual from '../../../components/BeltVisual'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -364,35 +366,46 @@ export default function FichaAlunoPage({ params }: PageProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Faixa</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Faixa Oficial (IBJJF)</label>
                 <select 
                   value={editFaixa} 
-                  onChange={(e) => setEditFaixa(e.target.value)}
+                  onChange={(e) => {
+                    const belt = e.target.value
+                    setEditFaixa(belt)
+                    const max = getMaxDegreesForBelt(belt)
+                    if (editGraus > max) setEditGraus(max)
+                  }}
                   className="w-full px-3 py-2 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 transition-colors text-slate-700 font-bold"
                 >
-                  <option value="Branca">Branca</option>
-                  <option value="Cinza">Cinza</option>
-                  <option value="Amarela">Amarela</option>
-                  <option value="Laranja">Laranja</option>
-                  <option value="Verde">Verde</option>
-                  <option value="Azul">Azul</option>
-                  <option value="Roxa">Roxa</option>
-                  <option value="Marrom">Marrom</option>
-                  <option value="Preta">Preta</option>
+                  <optgroup label="Adulto / Master (16+ anos)">
+                    {IBJJF_BELTS.filter(b => b.category === 'Adulto').map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Infantil / Juvenil (4 a 15 anos)">
+                    {IBJJF_BELTS.filter(b => b.category === 'Infantil').map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Mestres & Grandes Mestres">
+                    {IBJJF_BELTS.filter(b => b.category === 'Mestre').map(b => (
+                      <option key={b.id} value={b.name}>{b.name}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Graus</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Graus na Faixa</label>
                 <select 
                   value={editGraus} 
                   onChange={(e) => setEditGraus(Number(e.target.value))}
                   className="w-full px-3 py-2 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 transition-colors text-slate-700 font-bold"
                 >
-                  <option value={0}>0 Graus</option>
-                  <option value={1}>1 Grau</option>
-                  <option value={2}>2 Graus</option>
-                  <option value={3}>3 Graus</option>
-                  <option value={4}>4 Graus</option>
+                  {Array.from({ length: getMaxDegreesForBelt(editFaixa) + 1 }).map((_, idx) => (
+                    <option key={idx} value={idx}>
+                      {idx === 0 ? 'Sem Graus (0º)' : `${idx}º Grau`}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -462,33 +475,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
           <div className="flex items-center gap-4">
             
             {/* Visualizer of Martial Belt representation */}
-            <div className="flex flex-col items-center flex-shrink-0">
-              <div className={`h-8 w-28 rounded border relative flex items-center shadow-inner overflow-hidden ${
-                aluno.faixa === 'Branca' ? 'bg-white border-slate-350' :
-                aluno.faixa === 'Azul' ? 'bg-blue-600 border-blue-700' :
-                aluno.faixa === 'Roxa' ? 'bg-purple-600 border-purple-700' :
-                aluno.faixa === 'Marrom' ? 'bg-amber-800 border-amber-900' :
-                aluno.faixa === 'Preta' ? 'bg-zinc-950 border-zinc-900' :
-                'bg-slate-200 border-slate-350'
-              }`}>
-                {/* Sleeve Sleeve */}
-                <div className={`absolute right-0 top-0 bottom-0 w-8 flex items-center justify-around px-0.5 ${
-                  aluno.faixa === 'Preta' ? 'bg-red-600' : 'bg-zinc-950'
-                }`}>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <span 
-                      key={i} 
-                      className={`w-[3px] h-5 rounded-sm block ${
-                        i < aluno.graus ? 'bg-white' : 'bg-transparent'
-                      }`} 
-                    />
-                  ))}
-                </div>
-              </div>
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                Faixa {aluno.faixa}
-              </span>
-            </div>
+            <BeltVisual belt={aluno.faixa} degrees={aluno.graus} size="lg" />
 
             <div>
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">{aluno.nome}</h1>

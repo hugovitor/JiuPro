@@ -583,14 +583,25 @@ function AreaDoAlunoContent() {
   const getMetaAulas = (faixa: string) => {
     const metaMap: Record<string, number> = {
       'Branca': 50,
+      'Cinza e Branca': 55,
       'Cinza': 60,
+      'Cinza e Preta': 60,
+      'Amarela e Branca': 60,
       'Amarela': 60,
+      'Amarela e Preta': 60,
+      'Laranja e Branca': 60,
       'Laranja': 60,
+      'Laranja e Preta': 60,
+      'Verde e Branca': 60,
       'Verde': 60,
+      'Verde e Preta': 60,
       'Azul': 100,
       'Roxa': 150,
       'Marrom': 200,
-      'Preta': 250
+      'Preta': 250,
+      'Vermelha e Preta': 300,
+      'Vermelha e Branca': 350,
+      'Vermelha': 400
     }
     return metaMap[faixa] || 50
   }
@@ -659,33 +670,7 @@ function AreaDoAlunoContent() {
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* Styled Belt Ribbon in Header */}
-            <div className="flex flex-col items-start gap-1 flex-shrink-0">
-              <div className={`h-6 w-16 rounded border relative flex items-center shadow-inner overflow-hidden ${
-                student.faixa === 'Branca' ? 'bg-white border-slate-300' :
-                student.faixa === 'Azul' ? 'bg-blue-600 border-blue-700' :
-                student.faixa === 'Roxa' ? 'bg-purple-600 border-purple-700' :
-                student.faixa === 'Marrom' ? 'bg-amber-800 border-amber-900' :
-                student.faixa === 'Preta' ? 'bg-zinc-950 border-zinc-900' :
-                'bg-slate-200 border-slate-350'
-              }`}>
-                {/* Belt sleeve (tarja preta / vermelha) */}
-                <div className={`absolute right-0 top-0 bottom-0 w-5 flex items-center justify-around px-0.5 ${
-                  student.faixa === 'Preta' ? 'bg-red-600' : 'bg-zinc-950'
-                }`}>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <span 
-                      key={i} 
-                      className={`w-[2px] h-3 rounded-sm block ${
-                        i < student.graus ? 'bg-white' : 'bg-transparent'
-                      }`} 
-                    />
-                  ))}
-                </div>
-              </div>
-              <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider text-center w-full">
-                Faixa {student.faixa}
-              </span>
-            </div>
+            <BeltVisual belt={student.faixa} degrees={student.graus} size="sm" showLabel={true} />
             {/* Foto de perfil / Avatar clicável */}
             <div className="relative group cursor-pointer flex-shrink-0">
               <label htmlFor="avatar-input" className="cursor-pointer block relative">
@@ -858,28 +843,7 @@ function AreaDoAlunoContent() {
               {/* Belt representation */}
               <div className="flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-lg p-3">
                 <div className="flex-shrink-0">
-                  <div className={`h-8 w-32 rounded border relative flex items-center shadow-inner overflow-hidden ${
-                    student.faixa === 'Branca' ? 'bg-white border-slate-300' :
-                    student.faixa === 'Azul' ? 'bg-blue-600 border-blue-700' :
-                    student.faixa === 'Roxa' ? 'bg-purple-600 border-purple-700' :
-                    student.faixa === 'Marrom' ? 'bg-amber-800 border-amber-900' :
-                    student.faixa === 'Preta' ? 'bg-zinc-950 border-zinc-900' :
-                    'bg-slate-200 border-slate-350'
-                  }`}>
-                    {/* Tarja */}
-                    <div className={`absolute right-0 top-0 bottom-0 w-9 flex items-center justify-around px-0.5 ${
-                      student.faixa === 'Preta' ? 'bg-red-600' : 'bg-zinc-950'
-                    }`}>
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <span 
-                          key={i} 
-                          className={`w-[3px] h-6 rounded-sm block ${
-                            i < student.graus ? 'bg-white' : 'bg-transparent'
-                          }`} 
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  <BeltVisual belt={student.faixa} degrees={student.graus} size="md" showLabel={false} />
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Graduação</span>

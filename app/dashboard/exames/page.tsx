@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from 'react'
 import { db, Student, User, Academy } from '../../lib/db'
+import { IBJJF_BELTS } from '../../lib/belts'
+import BeltVisual from '../../components/BeltVisual'
 import { supabase } from '../../lib/supabase'
 
 export default function ExameGraduacaoPage() {
@@ -132,14 +134,21 @@ export default function ExameGraduacaoPage() {
               onChange={(e) => setNovaFaixa(e.target.value)}
               className="w-full px-3 py-2 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900"
             >
-              <option value="Cinza">Cinza</option>
-              <option value="Amarela">Amarela</option>
-              <option value="Laranja">Laranja</option>
-              <option value="Verde">Verde</option>
-              <option value="Azul">Azul</option>
-              <option value="Roxa">Roxa</option>
-              <option value="Marrom">Marrom</option>
-              <option value="Preta">Preta</option>
+              <optgroup label="Adulto / Master (16+ anos)">
+                {IBJJF_BELTS.filter(b => b.category === 'Adulto').map(b => (
+                  <option key={b.id} value={b.name}>{b.name}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Infantil / Juvenil (4 a 15 anos)">
+                {IBJJF_BELTS.filter(b => b.category === 'Infantil').map(b => (
+                  <option key={b.id} value={b.name}>{b.name}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Mestres & Grandes Mestres">
+                {IBJJF_BELTS.filter(b => b.category === 'Mestre').map(b => (
+                  <option key={b.id} value={b.name}>{b.name}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
 
