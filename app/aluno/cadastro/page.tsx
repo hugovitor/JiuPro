@@ -107,34 +107,44 @@ function AlunoCadastroContent() {
       const formattedDueDate = new Date(Date.now() + 86400000 * 5).toLocaleDateString('pt-BR')
 
       // 3. Cadastrar Aluno no Supabase
-      const { error: regError } = await supabase.from('students').insert({
-        id: newStudentId,
-        academy_id: selectedAcademyId,
-        nome: nome,
-        email: email,
-        password: password,
-        faixa: 'Branca',
-        graus: 0,
-        status: 'Ativo',
-        data_matricula: new Date().toISOString().split('T')[0],
-        mensalidade: defaultMonthlyFee,
-        dia_vencimento: '10',
-        chave_pix: academyData.owner_email,
-        peso: '',
-        altura: '',
-        badges: []
+      // 3. Cadastrar Aluno no Supabase via API segura (bypassing RLS)
+      const registerResponse = await fetch('/api/aluno/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          student: {
+            id: newStudentId,
+            academy_id: selectedAcademyId,
+            nome: nome,
+            email: email,
+            password: password,
+            faixa: 'Branca',
+            graus: 0,
+            status: 'Ativo',
+            data_matricula: new Date().toISOString().split('T')[0],
+            mensalidade: defaultMonthlyFee,
+            dia_vencimento: '10',
+            chave_pix: academyData.owner_email,
+            peso: '',
+            altura: '',
+            badges: []
+          },
+          invoice: {
+            student_id: newStudentId,
+            mes: capitalizedMonth,
+            vencimento: formattedDueDate,
+            valor: defaultMonthlyFee,
+            status: 'Atrasado'
+          }
+        })
       })
 
-      if (regError) throw regError
-
-      // 4. Criar Fatura Inicial do Aluno no Supabase
-      await supabase.from('invoices').insert({
-        student_id: newStudentId,
-        mes: capitalizedMonth,
-        vencimento: formattedDueDate,
-        valor: defaultMonthlyFee,
-        status: 'Atrasado'
-      })
+      const registerResult = await registerResponse.json()
+      if (!registerResponse.ok) {
+        throw new Error(registerResult.error || 'Erro ao registrar atleta.')
+      }
 
       // 5. Salvar na sessão local/cache do navegador para login imediato
       const mappedStudent = {

@@ -150,284 +150,13 @@ export interface Post {
 }
 
 // Initial mockup data
-const DEFAULT_WHATSAPP_TEMPLATE = 'Olá, {aluno}! Consta em aberto no JiuPro a mensalidade de {mes} (Vencimento: {vencimento}) no valor de R$ {valor}.\n\nVocê pode pagar via PIX.\nChave: {chavePix}\n\nObrigado! Oss.';
+const DEFAULT_WHATSAPP_TEMPLATE = 'Olá, {aluno}! Consta em aberto no JiuPro a mensalidade de {mes} (Vencimento: {vencimento}) no valor de R$ {valor}.\n\nVocê pode pagar via PIX.\nChave: {chavePix}\n\nObrigado! Oss.'
 
-const DEFAULT_ACADEMIAS: Academy[] = [
-  {
-    id: 'gb-centro',
-    name: 'Gracie Barra Centro',
-    ownerName: 'Prof. Ricardo Ramos',
-    ownerEmail: 'ricardo@graciebarra.com.br',
-    plan: 'Ouro',
-    status: 'Ativo',
-    professorGrade: 'Faixa Preta 3º Grau',
-    mensalidadePadrao: '150,00',
-    diaVencimento: '10',
-    whatsappTemplate: DEFAULT_WHATSAPP_TEMPLATE
-  },
-  {
-    id: 'alliance-pinheiros',
-    name: 'Alliance Pinheiros',
-    ownerName: 'Prof. Fábio Gurgel',
-    ownerEmail: 'fabio@alliance.com.br',
-    plan: 'Prata',
-    status: 'Ativo',
-    professorGrade: 'Faixa Preta 6º Grau',
-    mensalidadePadrao: '180,00',
-    diaVencimento: '05',
-    whatsappTemplate: DEFAULT_WHATSAPP_TEMPLATE
-  },
-  {
-    id: 'atos-sp',
-    name: 'Atos SP',
-    ownerName: 'Prof. André Galvão',
-    ownerEmail: 'andre@atos.com',
-    plan: 'BlackBelt',
-    status: 'Suspenso',
-    professorGrade: 'Faixa Preta 4º Grau',
-    mensalidadePadrao: '200,00',
-    diaVencimento: '15',
-    whatsappTemplate: DEFAULT_WHATSAPP_TEMPLATE
-  }
-]
-
-const DEFAULT_USERS: User[] = [
-  {
-    id: 'user-ricardo',
-    academyId: 'gb-centro',
-    name: 'Prof. Ricardo Ramos',
-    email: 'ricardo@graciebarra.com.br',
-    role: 'Dono',
-    grade: 'Faixa Preta 3º Grau'
-  },
-  {
-    id: 'user-fabio',
-    academyId: 'alliance-pinheiros',
-    name: 'Prof. Fábio Gurgel',
-    email: 'fabio@alliance.com.br',
-    role: 'Dono',
-    grade: 'Faixa Preta 6º Grau'
-  },
-  {
-    id: 'user-andre',
-    academyId: 'atos-sp',
-    name: 'Prof. André Galvão',
-    email: 'andre@atos.com',
-    role: 'Dono',
-    grade: 'Faixa Preta 4º Grau'
-  }
-]
-
-const DEFAULT_STUDENTS: Student[] = [
-  // Gracie Barra Centro
-  {
-    id: '1',
-    academyId: 'gb-centro',
-    nome: 'Carlos Silva',
-    faixa: 'Azul',
-    graus: 3,
-    status: 'Ativo',
-    dataMatricula: '2025-03-12',
-    mensalidade: '150,00',
-    chavePix: 'financeiro@graciebarracentro.com.br',
-    email: 'carlos.silva@gmail.com',
-    graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie Jr.',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '10/08/2026', valor: '150,00', status: 'Atrasado' },
-      { mes: 'Julho/2026', vencimento: '10/07/2026', valor: '150,00', status: 'Pago' }
-    ],
-    presencas: [
-      { data: '2026-08-14', horario: '19:30h', treino: 'Avançado — Foco em Competição' },
-      { data: '2026-08-12', horario: '19:30h', treino: 'Avançado — Foco em Competição' }
-    ]
-  },
-  {
-    id: '2',
-    academyId: 'gb-centro',
-    nome: 'Mariana Costa',
-    faixa: 'Roxa',
-    graus: 4,
-    status: 'Ativo',
-    dataMatricula: '2024-07-10',
-    mensalidade: '150,00',
-    chavePix: 'financeiro@graciebarracentro.com.br',
-    email: 'mariana.costa@hotmail.com',
-    graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie Jr.',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '10/08/2026', valor: '150,00', status: 'Atrasado' },
-      { mes: 'Julho/2026', vencimento: '10/07/2026', valor: '150,00', status: 'Pago' }
-    ],
-    presencas: [
-      { data: '2026-08-14', horario: '19:30h', treino: 'Avançado — Foco em Competição' }
-    ]
-  },
-  {
-    id: '3',
-    academyId: 'gb-centro',
-    nome: 'Rodrigo Lima',
-    faixa: 'Branca',
-    graus: 1,
-    status: 'Ativo',
-    dataMatricula: '2026-01-05',
-    mensalidade: '150,00',
-    chavePix: 'financeiro@graciebarracentro.com.br',
-    email: 'rodrigo.lima@outlook.com',
-    graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie Jr.',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '10/08/2026', valor: '150,00', status: 'Atrasado' },
-      { mes: 'Julho/2026', vencimento: '10/07/2026', valor: '150,00', status: 'Pago' }
-    ],
-    presencas: [
-      { data: '2026-08-14', horario: '19:30h', treino: 'Avançado — Foco em Competição' }
-    ]
-  },
-  {
-    id: '4',
-    academyId: 'gb-centro',
-    nome: 'Marcos Oliveira',
-    faixa: 'Roxa',
-    graus: 2,
-    status: 'Inativo',
-    dataMatricula: '2024-02-15',
-    mensalidade: '150,00',
-    chavePix: 'financeiro@graciebarracentro.com.br',
-    email: 'marcos.oliveira@gmail.com',
-    graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie Jr.',
-    financeiro: [
-      { mes: 'Julho/2026', vencimento: '10/07/2026', valor: '150,00', status: 'Pago' }
-    ],
-    presencas: []
-  },
-  {
-    id: '5',
-    academyId: 'gb-centro',
-    nome: 'Felipe Melo',
-    faixa: 'Branca',
-    graus: 0,
-    status: 'Ativo',
-    dataMatricula: '2025-11-22',
-    mensalidade: '150,00',
-    chavePix: 'financeiro@graciebarracentro.com.br',
-    email: 'felipe.melo@gmail.com',
-    graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie Jr.',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '10/08/2026', valor: '150,00', status: 'Pago' }
-    ],
-    presencas: []
-  },
-  {
-    id: '6',
-    academyId: 'gb-centro',
-    nome: 'Beatriz Santos',
-    faixa: 'Preta',
-    graus: 1,
-    status: 'Ativo',
-    dataMatricula: '2022-09-09',
-    mensalidade: '150,00',
-    chavePix: 'financeiro@graciebarracentro.com.br',
-    email: 'beatriz.santos@gmail.com',
-    graduadoPor: 'Prof. Ricardo Ramos (Faixa Preta 3º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie Jr.',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '10/08/2026', valor: '150,00', status: 'Pago' }
-    ],
-    presencas: []
-  },
-
-  // Alliance Pinheiros
-  {
-    id: '11',
-    academyId: 'alliance-pinheiros',
-    nome: 'Lucas Almeida',
-    faixa: 'Marrom',
-    graus: 2,
-    status: 'Ativo',
-    dataMatricula: '2024-05-15',
-    mensalidade: '180,00',
-    chavePix: 'pix@alliancepinheiros.com.br',
-    email: 'lucas.almeida@gmail.com',
-    graduadoPor: 'Prof. Fábio Gurgel (Faixa Preta 6º Grau)',
-    mestreOriginal: 'Mestre Rolls Gracie',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '05/08/2026', valor: '180,00', status: 'Pago' }
-    ],
-    presencas: [
-      { data: '2026-08-14', horario: '12:00h', treino: 'Meio-dia — Sem Kimono (NoGi)' }
-    ]
-  },
-  {
-    id: '12',
-    academyId: 'alliance-pinheiros',
-    nome: 'Juliana Ribeiro',
-    faixa: 'Azul',
-    graus: 3,
-    status: 'Ativo',
-    dataMatricula: '2025-06-20',
-    mensalidade: '180,00',
-    chavePix: 'pix@alliancepinheiros.com.br',
-    email: 'juliana.rib@hotmail.com',
-    graduadoPor: 'Prof. Fábio Gurgel (Faixa Preta 6º Grau)',
-    mestreOriginal: 'Mestre Rolls Gracie',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '05/08/2026', valor: '180,00', status: 'Atrasado' }
-    ],
-    presencas: []
-  },
-
-  // Atos SP
-  {
-    id: '21',
-    academyId: 'atos-sp',
-    nome: 'Arthur Jorge',
-    faixa: 'Marrom',
-    graus: 1,
-    status: 'Ativo',
-    dataMatricula: '2024-03-01',
-    mensalidade: '200,00',
-    chavePix: 'financeiro@atossp.com',
-    email: 'arthur.jorge@gmail.com',
-    graduadoPor: 'Prof. André Galvão (Faixa Preta 4º Grau)',
-    mestreOriginal: 'Mestre Carlos Gracie',
-    financeiro: [
-      { mes: 'Agosto/2026', vencimento: '15/08/2026', valor: '200,00', status: 'Atrasado' }
-    ],
-    presencas: []
-  }
-]
-
-const DEFAULT_TURMAS: Record<string, ClassSession[]> = {
-  'gb-centro': [
-    { id: 'gb-1', horario: '07:00', nome: 'Matinal — Todos os Níveis', dias: 'Seg, Qua, Sex' },
-    { id: 'gb-2', horario: '12:00', nome: 'Meio-dia — Sem Kimono (NoGi)', dias: 'Ter, Qui' },
-    { id: 'gb-3', horario: '18:30', nome: 'Infantil — Até 12 anos', dias: 'Seg, Qua, Sex' },
-    { id: 'gb-4', horario: '19:30', nome: 'Avançado — Foco em Competição', dias: 'Seg, Qua, Sex' },
-    { id: 'gb-5', horario: '21:00', nome: 'Iniciantes — Fundamentos', dias: 'Seg, Qua' }
-  ],
-  'alliance-pinheiros': [
-    { id: 'al-1', horario: '12:00', nome: 'Meio-dia — Sem Kimono (NoGi)', dias: 'Ter, Qui' },
-    { id: 'al-2', horario: '19:00', nome: 'Classe Geral', dias: 'Seg, Ter, Qua, Qui, Sex' }
-  ],
-  'atos-sp': [
-    { id: 'at-1', horario: '19:30', nome: 'Treino de Competição', dias: 'Seg, Ter, Qua, Qui, Sex' }
-  ]
-}
-
-const DEFAULT_CHECKINS: Record<string, CheckIn[]> = {
-  'gb-centro': [
-    { id: '1', nome: 'Carlos Silva', faixa: 'Azul', graus: 4, status: 'Pendente', horario: '19:30' },
-    { id: '2', nome: 'Mariana Costa', faixa: 'Roxa', graus: 4, status: 'Pendente', horario: '19:30' },
-    { id: '3', nome: 'Rodrigo Lima', faixa: 'Branca', graus: 1, status: 'Confirmado', horario: '19:30' }
-  ],
-  'alliance-pinheiros': [
-    { id: '11', nome: 'Lucas Almeida', faixa: 'Marrom', graus: 2, status: 'Pendente', horario: '12:00' }
-  ],
-  'atos-sp': []
-}
+const DEFAULT_ACADEMIAS: Academy[] = []
+const DEFAULT_USERS: User[] = []
+const DEFAULT_STUDENTS: Student[] = []
+const DEFAULT_TURMAS: Record<string, ClassSession[]> = {}
+const DEFAULT_CHECKINS: Record<string, CheckIn[]> = {}
 
 // LocalStorage Check and Setup helper
 function initializeStorage() {
@@ -615,7 +344,7 @@ function initializeStorage() {
 }
 
 export function isDemoAcademy(academyId: string): boolean {
-  return ['gb-centro', 'alliance-pinheiros', 'atos-sp'].includes(academyId)
+  return false
 }
 
 function checkDemoBlock(academyId: string): boolean {
@@ -1216,19 +945,14 @@ export const db = {
     }
     localStorage.setItem('jiupro_academies', JSON.stringify(academies))
 
-    // Supabase update academy settings
-    const updatePayload: any = {
-      mensalidade_padrao: settings.mensalidadePadrao,
-      dia_vencimento: settings.diaVencimento,
-      whatsapp_template: settings.whatsappTemplate || ''
-    }
-    if (settings.stripeConnectId !== undefined) {
-      updatePayload.stripe_connect_id = settings.stripeConnectId
-    }
-
-    supabase.from('academies').update(updatePayload).eq('id', academyId).then(({ error }) => {
-      if (error) console.error('Erro ao salvar configurações no Supabase:', error)
-    })
+    // Call secure backend API to update Supabase bypassing RLS
+    fetch('/api/academy/settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ academyId, settings })
+    }).catch(err => console.error('Erro ao atualizar Supabase via API:', err))
   },
 
   addManualPresence(studentId: string, date: string, classTitle: string) {
