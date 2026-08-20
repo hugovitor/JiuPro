@@ -4,6 +4,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, Student, Academy, ClassSession, Post, TournamentResult, Announcement, JournalEntry } from '../lib/db'
+import { supabase } from '../lib/supabase'
 
 function AreaDoAlunoContent() {
   const router = useRouter()
@@ -167,6 +168,27 @@ function AreaDoAlunoContent() {
     if (!student || !academy) return
     setIsProcessingCheckout(true)
     try {
+      // Buscar email fresco do Supabase para garantir que nunca seja nulo/indefinido
+      let emailParaCheckout = student.email
+
+      if (!emailParaCheckout || !emailParaCheckout.includes('@')) {
+        const { data: freshStudent } = await supabase
+          .from('students')
+          .select('email')
+          .eq('id', student.id)
+          .single()
+        
+        if (freshStudent?.email) {
+          emailParaCheckout = freshStudent.email
+        }
+      }
+
+      if (!emailParaCheckout || !emailParaCheckout.includes('@')) {
+        alert('Não foi possível identificar seu e-mail para o pagamento. Por favor, faça login novamente.')
+        setIsProcessingCheckout(false)
+        return
+      }
+
       const response = await fetch('/api/checkout/stripe-connect', {
         method: 'POST',
         headers: {
@@ -176,7 +198,7 @@ function AreaDoAlunoContent() {
           studentId: student.id,
           plano: academy.plan,
           academyId: academy.id,
-          email: student.email,
+          email: emailParaCheckout,
         }),
       })
 
