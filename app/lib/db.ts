@@ -490,7 +490,10 @@ export const db = {
           plan: acData.plan,
           status: acData.status,
           professorGrade: acData.professor_grade,
-          stripeConnectId: acData.stripe_connect_id
+          stripeConnectId: acData.stripe_connect_id,
+          referralCode: acData.referral_code,
+          referredByCode: acData.referred_by_code,
+          freeMonths: acData.free_months
         }
         const idx = academies.findIndex((a: any) => a.id === academyId)
         if (idx !== -1) {
