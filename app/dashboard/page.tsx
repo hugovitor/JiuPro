@@ -68,15 +68,33 @@ export default function DashboardPage() {
   const totalFinanceiro = totalPago + totalInadimplencia
   const adimplenciaPercent = totalFinanceiro > 0 ? Math.round((totalPago / totalFinanceiro) * 100) : 100
 
-  // Birthdays mock list using students for this academy
-  const aniversariantes = alunosAtivos.slice(0, 3).map((aluno) => {
-    const dia = (parseInt(aluno.id) * 7) % 28 + 1
+  // Safe hash generator from string for deterministic mock values
+  const getStringHash = (str: string) => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i)
+      hash |= 0
+    }
+    return Math.abs(hash)
+  }
+
+  const now = new Date()
+  const currentMonthName = now.toLocaleString('pt-BR', { month: 'long' })
+  const currentMonthCapitalized = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+  const currentMonthShort = now.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')
+  const monthAbbr = currentMonthShort.charAt(0).toUpperCase() + currentMonthShort.slice(1)
+
+  // Birthdays list for this academy
+  const aniversariantes = alunosAtivos.slice(0, 4).map((aluno) => {
+    const hash = getStringHash(aluno.id || aluno.nome)
+    const dia = (hash % 28) + 1
+    const idade = 18 + (hash % 28)
     return {
       id: aluno.id,
       nome: aluno.nome,
       faixa: aluno.faixa,
-      data: `${dia < 10 ? '0' + dia : dia}/Ago`,
-      idade: 20 + ((parseInt(aluno.id) * 3) % 25)
+      data: `${dia < 10 ? '0' + dia : dia}/${monthAbbr}`,
+      idade
     }
   })
 
@@ -104,12 +122,12 @@ export default function DashboardPage() {
         {/* Saudação */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Oss, {user.name}!</h1>
-          <p className="text-sm text-zinc-500">Aqui está o resumo em tempo real da sua academia.</p>
+          <p className="text-xs text-zinc-500 mt-1">Aqui está o resumo em tempo real da sua academia.</p>
         </div>
 
         {/* Mural de Avisos Oficiais */}
         {announcements.length > 0 && (
-          <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-6 space-y-4">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 space-y-4">
             <h2 className="font-bold text-xs uppercase tracking-wider text-zinc-700 flex items-center gap-2 border-b border-zinc-100 pb-3">
               <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 0 1-3.417.592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1-1.564-.317Z" />
@@ -152,9 +170,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           
           {/* Card: Alunos Ativos */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_4px_12px_-3px_rgba(0,0,0,0.06)]">
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Atletas Ativos</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Atletas Ativos</span>
               <span className="text-emerald-700 bg-emerald-50 text-[9px] px-2 py-0.5 rounded-md font-bold border border-emerald-100 flex items-center gap-1">
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A12.018 12.018 0 0 1 12 21c-1.954 0-3.772-.465-5.38-1.285V19.13c0-1.112.285-2.16.786-3.07M12 19.13a11.963 11.963 0 0 0 3.011-1.025M12 19.13a11.963 11.963 0 0 1-3.011-1.025M21 9.75A3.75 3.75 0 1 1 17.25 6 3.75 3.75 0 0 1 21 9.75ZM12.75 9.75a3.75 3.75 0 1 1-3.75-3.75 3.75 3.75 0 0 1 3.75 3.75Z" />
@@ -164,14 +182,14 @@ export default function DashboardPage() {
             </div>
             <div className="mt-4">
               <span className="text-3xl font-black tracking-tight text-zinc-900">{alunosAtivos.length}</span>
-              <p className="text-[10px] font-semibold text-zinc-400 mt-1">Total de {alunos.length} cadastrados</p>
+              <p className="text-[10px] font-semibold text-zinc-400 mt-1">Total de {alunos.length} matriculados</p>
             </div>
           </div>
 
           {/* Card: Inadimplência */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_4px_12px_-3px_rgba(0,0,0,0.06)]">
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Inadimplência</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Inadimplência</span>
               <span className="text-red-700 bg-red-50 text-[9px] px-2 py-0.5 rounded-md font-bold border border-red-100 flex items-center gap-1">
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
@@ -188,9 +206,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Card: Saúde Financeira */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_4px_12px_-3px_rgba(0,0,0,0.06)]">
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Adimplência Geral</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Adimplência Geral</span>
               <span className="text-blue-700 bg-blue-50 text-[9px] px-2 py-0.5 rounded-md font-bold border border-blue-100">
                 {adimplenciaPercent}%
               </span>
@@ -214,14 +232,16 @@ export default function DashboardPage() {
           </div>
 
           {/* Card: Aniversariantes */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-200/80 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_4px_12px_-3px_rgba(0,0,0,0.06)]">
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Aniversariantes</span>
-              <span className="text-amber-800 bg-amber-50 text-[9px] px-2 py-0.5 rounded-md font-bold border border-amber-100">Agosto</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Aniversariantes</span>
+              <span className="text-amber-800 bg-amber-50 text-[9px] px-2 py-0.5 rounded-md font-bold border border-amber-100 capitalize">
+                {currentMonthCapitalized}
+              </span>
             </div>
             <div className="mt-4">
-              <span className="text-3xl font-black tracking-tight text-zinc-900">{aniversariantes.length}</span>
-              <p className="text-[10px] font-semibold text-zinc-450 mt-1">Guerreiros festejando este mês</p>
+              <span className="text-3xl font-black tracking-tight text-zinc-950">{aniversariantes.length}</span>
+              <p className="text-[10px] font-semibold text-zinc-400 mt-1">Guerreiros festejando este mês</p>
             </div>
           </div>
 
@@ -231,9 +251,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           
           {/* Tabela: Cobranças Pendentes */}
-          <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
-              <h2 className="font-semibold text-zinc-900 text-sm uppercase tracking-wider">Mensalidades Atrasadas</h2>
+              <h2 className="font-bold text-zinc-900 text-xs uppercase tracking-wider">Mensalidades em Atraso</h2>
               <Link 
                 href="/dashboard/alunos" 
                 className="text-xs font-bold text-red-650 hover:text-red-700 transition-colors flex items-center gap-1"
@@ -264,7 +284,7 @@ export default function DashboardPage() {
                       <span className="text-xs font-bold text-zinc-900">R$ {item.valor}</span>
                       <button 
                         onClick={() => handleCobrancaWhatsapp(item)}
-                        className="text-[10px] bg-zinc-950 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors font-bold shadow-sm flex items-center gap-1.5"
+                        className="text-[10px] bg-zinc-950 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
                       >
                         <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
@@ -283,10 +303,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Lista: Aniversariantes do Mês */}
-          <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
-              <h2 className="font-semibold text-zinc-900 text-sm uppercase tracking-wider">Aniversariantes do Mês</h2>
-              <span className="text-xs font-bold text-zinc-400">Agosto</span>
+              <h2 className="font-bold text-zinc-900 text-xs uppercase tracking-wider">Aniversariantes do Mês</h2>
+              <span className="text-xs font-bold text-zinc-400 capitalize">{currentMonthCapitalized}</span>
             </div>
             
             <div className="divide-y divide-zinc-100 min-h-[150px]">
@@ -309,7 +329,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold bg-zinc-100 text-zinc-650 px-2.5 py-1 rounded-lg">
+                    <span className="text-[10px] font-bold bg-zinc-100 text-zinc-700 px-2.5 py-1 rounded-lg">
                       {aniv.data}
                     </span>
                   </div>
