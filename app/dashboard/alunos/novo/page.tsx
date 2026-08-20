@@ -43,6 +43,19 @@ export default function NovoAlunoPage() {
     e.preventDefault()
     if (!user) return
 
+    const academy = db.getAcademy(user.academyId)
+    if (academy) {
+      const totalStudents = db.getStudents(user.academyId).length
+      if (academy.plan === 'Prata' && totalStudents >= 50) {
+        alert('Limite atingido! O Plano Prata suporta até 50 atletas matriculados. Faça upgrade para o plano Ouro ou BlackBelt para continuar matriculando!')
+        return
+      }
+      if (academy.plan === 'Ouro' && totalStudents >= 150) {
+        alert('Limite atingido! O Plano Ouro suporta até 150 atletas matriculados. Faça upgrade para o plano BlackBelt para continuar matriculando!')
+        return
+      }
+    }
+
     setIsLoading(true)
 
     const novoAluno = {

@@ -22,6 +22,8 @@ export default function DashboardLayout({
   const [notifications, setNotifications] = useState<any[]>([])
   const [showNotifications, setShowNotifications] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [lockedFeatureName, setLockedFeatureName] = useState('')
 
   const loadSession = () => {
     const loggedUser = db.getLoggedInUser()
@@ -248,6 +250,17 @@ export default function DashboardLayout({
     },
   ]
 
+  const getIsItemLocked = (itemName: string) => {
+    const plan = academy?.plan || 'Ouro'
+    if (plan === 'Prata') {
+      return ['Alunos Sumidos', 'Graduações', 'Fichas de Exame', 'Loja & Cantina'].includes(itemName)
+    }
+    if (plan === 'Ouro') {
+      return ['Loja & Cantina'].includes(itemName)
+    }
+    return false
+  }
+
   const isDemo = academy ? isDemoAcademy(academy.id) : false
   const initials = user?.name ? user.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : 'JP'
 
@@ -255,10 +268,16 @@ export default function DashboardLayout({
     <nav className={`space-y-1 ${mobile ? 'p-4' : 'p-3 mt-2'}`}>
       {menuItems.map((item) => {
         const isActive = pathname === item.path
+        const isLocked = getIsItemLocked(item.name)
         return (
           <button
             key={item.path}
             onClick={() => {
+              if (isLocked) {
+                setLockedFeatureName(item.name)
+                setShowUpgradeModal(true)
+                return
+              }
               router.push(item.path)
               if (mobile) setIsMobileMenuOpen(false)
             }}
@@ -272,9 +291,13 @@ export default function DashboardLayout({
               <span className={isActive ? 'text-red-500' : 'text-zinc-400'}>
                 {item.icon}
               </span>
-              <span>{item.name}</span>
+              <span className={isLocked ? 'opacity-40' : ''}>{item.name}</span>
             </div>
-            {isActive && (
+            {isLocked ? (
+              <svg className="h-3 w-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+              </svg>
+            ) : isActive && (
               <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
             )}
           </button>
@@ -489,6 +512,60 @@ export default function DashboardLayout({
           <a href="/#assinar" className="text-[10px] font-bold text-white hover:underline mt-1 block">
             Ver Planos &rarr;
           </a>
+        </div>
+      )}
+
+
+      {/* Modal de Upgrade de Plano Comercial */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white max-w-md w-full p-6 rounded-2xl border border-zinc-200 shadow-2xl space-y-5 animate-scale-in text-center">
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-500 border border-amber-100">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+              </svg>
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-bold text-zinc-950 uppercase tracking-wider">Recurso Bloqueado</h3>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                A ferramenta **"{lockedFeatureName}"** não faz parte do seu plano atual (**Plano {academy?.plan}**).
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-left text-xs space-y-2">
+              <p className="font-bold text-zinc-800 text-[10px] uppercase">Planos Recomendados para Liberar:</p>
+              {academy?.plan === 'Prata' && (
+                <div className="space-y-1.5 text-zinc-650">
+                  <p>● **Plano Ouro (R$ 199/mês):** Habilita exames de faixa/graus, lembretes de cobrança automáticos e até 150 atletas.</p>
+                  <p>● **Plano BlackBelt (R$ 349/mês):** Habilita controle completo de loja, estoque e atletas ilimitados.</p>
+                </div>
+              )}
+              {academy?.plan === 'Ouro' && (
+                <div className="text-zinc-650">
+                  <p>● **Plano BlackBelt (R$ 349/mês):** Habilita controle completo de estoque da loja, cantina e atletas ilimitados.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 py-2.5 text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl transition-all cursor-pointer"
+              >
+                Voltar
+              </button>
+              <button
+                onClick={() => {
+                  setShowUpgradeModal(false)
+                  handleStripeBillingPortal()
+                }}
+                className="flex-1 py-2.5 text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-800 rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                ⚙️ Fazer Upgrade
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
