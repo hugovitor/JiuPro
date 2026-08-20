@@ -18,6 +18,25 @@ export default function SuperadminPage() {
   const [filterPlan, setFilterPlan] = useState('Todos')
   const [filterStatus, setFilterStatus] = useState('Todos')
 
+  // Diagnostics states
+  const [isDiagnosing, setIsDiagnosing] = useState(false)
+  const [diagnoseResult, setDiagnoseResult] = useState<any>(null)
+
+  const handleRunDiagnostics = async () => {
+    setIsDiagnosing(true)
+    setDiagnoseResult(null)
+    try {
+      const response = await fetch('/api/admin/diagnose')
+      const data = await response.json()
+      setDiagnoseResult(data)
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao rodar diagnóstico. Verifique a conexão.')
+    } finally {
+      setIsDiagnosing(false)
+    }
+  }
+
   // Check auth cookie on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -187,10 +206,60 @@ export default function SuperadminPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 space-y-8">
         
         {/* Title */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gerenciamento Geral</h1>
-          <p className="text-xs text-slate-500 mt-1 font-light">Controle comercial e status de todas as filiais cadastradas no JiuPro.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gerenciamento Geral</h1>
+            <p className="text-xs text-slate-500 mt-1 font-light">Controle comercial e status de todas as filiais cadastradas no JiuPro.</p>
+          </div>
+          <div>
+            <button
+              onClick={handleRunDiagnostics}
+              disabled={isDiagnosing}
+              className="text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-850 px-4 py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md"
+            >
+              {isDiagnosing ? '🩺 Rodando Diagnóstico...' : '🩺 Rodar Diagnóstico Geral'}
+            </button>
+          </div>
         </div>
+
+        {/* Diagnostics Report Card */}
+        {diagnoseResult && (
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                🩺 Relatório de Diagnóstico do Sistema
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${diagnoseResult.success ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+                  {diagnoseResult.success ? 'Sistema Saudável' : 'Problemas Encontrados'}
+                </span>
+              </h2>
+              <button 
+                onClick={() => setDiagnoseResult(null)}
+                className="text-[11px] text-slate-400 hover:text-slate-600 font-semibold"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {diagnoseResult.report.map((t: any, idx: number) => (
+                <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-150 flex items-start gap-2.5">
+                  <span className="text-base">
+                    {t.status === 'success' ? '✅' : '❌'}
+                  </span>
+                  <div className="space-y-0.5">
+                    <h3 className="text-xs font-bold text-slate-800">{t.name}</h3>
+                    <p className="text-[10px] text-slate-500 font-light leading-relaxed">{t.details}</p>
+                    {t.error && (
+                      <pre className="text-[9px] text-rose-600 bg-rose-50/50 p-1.5 rounded border border-rose-100 mt-1.5 overflow-x-auto max-w-full font-mono">
+                        {t.error}
+                      </pre>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

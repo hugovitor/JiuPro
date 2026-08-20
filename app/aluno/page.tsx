@@ -229,6 +229,20 @@ function AreaDoAlunoContent() {
   useEffect(() => {
     loadData()
     const loggedStudent = db.getLoggedInStudent()
+    
+    // Checar status do pagamento vindo do Stripe Checkout
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const payStatus = params.get('status')
+      if (payStatus === 'success_payment') {
+        alert('Pagamento processado com sucesso! A confirmação está sendo processada pela Stripe.')
+        window.history.replaceState({}, document.title, window.location.pathname)
+      } else if (payStatus === 'cancel_payment') {
+        alert('Pagamento cancelado.')
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+    }
+
     if (loggedStudent) {
       db.syncWithSupabase(loggedStudent.academyId).then(() => {
         loadData()
