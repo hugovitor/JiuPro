@@ -13,6 +13,10 @@ export interface Academy {
   diaVencimento: string
   whatsappTemplate?: string
   stripeConnectId?: string
+  pixKey?: string
+  referralCode?: string
+  referredByCode?: string
+  freeMonths?: number
 }
 
 export interface User {

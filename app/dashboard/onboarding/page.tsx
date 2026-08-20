@@ -51,17 +51,49 @@ export default function OnboardingPage() {
       })
   }, [])
 
+  const [referralCodeInput, setReferralCodeInput] = useState('')
+
   const handleSaveStep1 = async () => {
     if (!user || !academyName) return
     setIsSaving(true)
     try {
+      // Gerar um código único para esta academia se não existir
+      let myCode = academy?.referralCode
+      if (!myCode) {
+        myCode = 'JP-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Date.now().toString().slice(-4)
+      }
+
+      let validReferrerCode = null
+
+      // Se usuário digitou um código, validar se ele existe
+      if (referralCodeInput.trim()) {
+        const { data: referrer, error: refErr } = await supabase
+          .from('academies')
+          .select('id, free_months')
+          .eq('referral_code', referralCodeInput.trim().toUpperCase())
+          .single()
+
+        if (referrer) {
+          validReferrerCode = referralCodeInput.trim().toUpperCase()
+          // Dar 1 mês grátis para a academia que indicou
+          await supabase
+            .from('academies')
+            .update({ free_months: (referrer.free_months || 0) + 1 })
+            .eq('id', referrer.id)
+        } else {
+          alert('Código de indicação inválido ou não encontrado. O cadastro continuará sem ele.')
+        }
+      }
+
       const { error } = await supabase
         .from('academies')
         .update({
           name: academyName,
           professor_grade: professorGrade,
           mensalidade_padrao: mensalidade,
-          dia_vencimento: diaVencimento
+          dia_vencimento: diaVencimento,
+          referral_code: myCode,
+          referred_by_code: validReferrerCode
         })
         .eq('id', user.academyId)
 
@@ -171,6 +203,17 @@ export default function OnboardingPage() {
                   className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 text-slate-900 font-medium"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Código de Indicação (Opcional)</label>
+              <input
+                type="text"
+                value={referralCodeInput}
+                onChange={(e) => setReferralCodeInput(e.target.value)}
+                placeholder="Ex: JP-A7B2-1234"
+                className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 text-slate-900 font-medium"
+              />
+              <p className="text-[9px] text-zinc-400 mt-1">Se foi indicado por outra academia, insira o código aqui.</p>
             </div>
             <button
               onClick={handleSaveStep1}

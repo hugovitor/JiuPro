@@ -235,8 +235,40 @@ export default function ConfiguracoesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* Coluna da Esquerda: Configurações Financeiras */}
+        {/* Coluna da Esquerda: Configurações Financeiras e Indicação */}
         <div className="space-y-6 md:col-span-1">
+
+          {/* Indique e Ganhe */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+            <h2 className="font-bold text-sm uppercase tracking-wider text-emerald-700 flex items-center gap-2 border-b border-zinc-100 pb-2">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+              </svg>
+              Indique e Ganhe 1 Mês Grátis
+            </h2>
+            <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+              Indique uma nova academia. Se ela se cadastrar usando seu código, você ganha **1 mês grátis** no JiuPro!
+            </p>
+            
+            <div className="space-y-3 pt-2">
+              <div>
+                <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Seu Código de Indicação</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm font-bold bg-zinc-100 text-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-200 select-all w-full text-center">
+                    {academy?.referralCode || 'Sem Código'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center bg-emerald-50 border border-emerald-100 p-3 rounded-lg">
+                <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Meses Grátis Acumulados</span>
+                <span className="text-xl font-black text-emerald-600">
+                  {academy?.freeMonths || 0}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
             <h2 className="font-bold text-sm uppercase tracking-wider text-zinc-800 border-b border-zinc-100 pb-2">
               Plano & Mensalidade

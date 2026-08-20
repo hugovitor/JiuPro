@@ -59,7 +59,9 @@ export default function SuperadminPage() {
               ownerEmail: a.owner_email,
               plan: a.plan || 'Ouro',
               status: a.status || 'Ativo',
-              stripeConnectId: a.stripe_connect_id
+              stripeConnectId: a.stripe_connect_id,
+              referralCode: a.referral_code,
+              freeMonths: a.free_months || 0
             })))
           }
         })
@@ -115,7 +117,9 @@ export default function SuperadminPage() {
           ownerEmail: a.owner_email,
           plan: a.plan || 'Ouro',
           status: a.status || 'Ativo',
-          stripeConnectId: a.stripe_connect_id
+          stripeConnectId: a.stripe_connect_id,
+          referralCode: a.referral_code,
+          freeMonths: a.free_months || 0
         }))
         setAcademies(mapped)
       }
@@ -482,6 +486,7 @@ export default function SuperadminPage() {
                   <th className="p-4">Mestre Responsável</th>
                   <th className="p-4">E-mail</th>
                   <th className="p-4">Plano Contratado</th>
+                  <th className="p-4">Indicação / Bônus</th>
                   <th className="p-4">Status</th>
                   <th className="p-4 text-right">Ações de Controle</th>
                 </tr>
@@ -507,6 +512,18 @@ export default function SuperadminPage() {
                             <option value="Ouro">Ouro</option>
                             <option value="BlackBelt">BlackBelt</option>
                           </select>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-1">
+                            {ac.referralCode && (
+                              <span className="text-[9px] font-mono bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded inline-block max-w-max">
+                                Código: {ac.referralCode}
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded inline-block max-w-max">
+                              {ac.freeMonths} Mês(es) Grátis
+                            </span>
+                          </div>
                         </td>
                         <td className="p-4">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}`}>
