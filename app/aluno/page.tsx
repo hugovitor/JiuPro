@@ -154,6 +154,7 @@ function AreaDoAlunoContent() {
   const [showPixModal, setShowPixModal] = useState(false)
   const [selectedInvoiceIndex, setSelectedInvoiceIndex] = useState<number | null>(null)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
 
   // Feedback states
@@ -161,6 +162,37 @@ function AreaDoAlunoContent() {
   const [perfSuccess, setPerfSuccess] = useState('')
   const [tourError, setTourError] = useState('')
   const [tourSuccess, setTourSuccess] = useState('')
+
+  const handleCheckoutCartao = async () => {
+    if (!student || !academy) return
+    setIsProcessingCheckout(true)
+    try {
+      const response = await fetch('/api/checkout/stripe-connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: student.id,
+          plano: academy.plan,
+          academyId: academy.id,
+          email: student.email,
+        }),
+      })
+
+      const data = await response.json()
+      if (response.ok && data.url) {
+        window.location.href = data.url
+      } else {
+        alert(data.error || 'Erro ao gerar sessão de pagamento no cartão.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Erro de conexão ao processar checkout de cartão.')
+    } finally {
+      setIsProcessingCheckout(false)
+    }
+  }
 
   const loadData = () => {
     const s = db.getLoggedInStudent()
@@ -1350,7 +1382,7 @@ function AreaDoAlunoContent() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
             <div>
               <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">Mensalidades & Faturas</h3>
-              <p className="text-[10px] text-slate-400 mt-0.5">Veja suas faturas da academia e realize pagamentos via PIX.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Veja suas faturas da academia e realize pagamentos via PIX ou Cartão de Crédito.</p>
             </div>
 
             <div className="divide-y divide-slate-100">
@@ -1369,12 +1401,23 @@ function AreaDoAlunoContent() {
                       {inv.status}
                     </span>
                     {inv.status === 'Atrasado' && (
-                      <button
-                        onClick={() => handleOpenPixModal(idx)}
-                        className="bg-zinc-900 text-white text-[10px] font-bold px-3 py-1 rounded-lg hover:bg-zinc-800 transition-colors shadow-sm"
-                      >
-                        Pagar PIX
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenPixModal(idx)}
+                          className="bg-zinc-100 text-zinc-800 border border-zinc-200 text-[10px] font-bold px-2.5 py-1.5 rounded hover:bg-zinc-200 transition-colors shadow-xs"
+                        >
+                          PIX
+                        </button>
+                        {academy?.stripeConnectId && (
+                          <button
+                            onClick={handleCheckoutCartao}
+                            disabled={isProcessingCheckout}
+                            className="bg-zinc-950 text-white text-[10px] font-bold px-2.5 py-1.5 rounded hover:bg-zinc-850 transition-colors shadow-xs disabled:opacity-50"
+                          >
+                            {isProcessingCheckout ? '...' : 'Cartão'}
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

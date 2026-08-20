@@ -12,6 +12,7 @@ export interface Academy {
   mensalidadePadrao: string
   diaVencimento: string
   whatsappTemplate?: string
+  stripeConnectId?: string
 }
 
 export interface User {
@@ -758,7 +759,8 @@ export const db = {
             ownerEmail: acData.owner_email,
             plan: acData.plan,
             status: acData.status,
-            professorGrade: acData.professor_grade
+            professorGrade: acData.professor_grade,
+            stripeConnectId: acData.stripe_connect_id
           }
           localStorage.setItem('jiupro_academies', JSON.stringify(academies))
         }
@@ -1183,7 +1185,7 @@ export const db = {
     })
   },
 
-  updateAcademySettings(academyId: string, settings: { mensalidadePadrao: string; diaVencimento: string; whatsappTemplate?: string }) {
+  updateAcademySettings(academyId: string, settings: { mensalidadePadrao: string; diaVencimento: string; whatsappTemplate?: string; stripeConnectId?: string }) {
     if (checkDemoBlock(academyId)) return
     initializeStorage()
     const academies: Academy[] = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
@@ -1194,15 +1196,23 @@ export const db = {
       if (settings.whatsappTemplate !== undefined) {
         academies[idx].whatsappTemplate = settings.whatsappTemplate
       }
+      if (settings.stripeConnectId !== undefined) {
+        academies[idx].stripeConnectId = settings.stripeConnectId
+      }
       localStorage.setItem('jiupro_academies', JSON.stringify(academies))
     }
 
     // Supabase update academy settings
-    supabase.from('academies').update({
+    const updatePayload: any = {
       mensalidade_padrao: settings.mensalidadePadrao,
       dia_vencimento: settings.diaVencimento,
       whatsapp_template: settings.whatsappTemplate || ''
-    }).eq('id', academyId).then(({ error }) => {
+    }
+    if (settings.stripeConnectId !== undefined) {
+      updatePayload.stripe_connect_id = settings.stripeConnectId
+    }
+
+    supabase.from('academies').update(updatePayload).eq('id', academyId).then(({ error }) => {
       if (error) console.error('Erro ao salvar configurações no Supabase:', error)
     })
   },

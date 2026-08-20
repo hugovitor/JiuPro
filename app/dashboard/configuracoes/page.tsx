@@ -11,6 +11,7 @@ export default function ConfiguracoesPage() {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [isConnectingStripe, setIsConnectingStripe] = useState(false)
   
   // Estado Financeiro da Academia
   const [mensalidadePadrao, setMensalidadePadrao] = useState('150,00')
@@ -38,6 +39,31 @@ export default function ConfiguracoesPage() {
     setTimeout(() => setLinkCopiado(false), 2000)
   }
 
+  const handleConectarStripe = async () => {
+    if (!user) return
+    setIsConnectingStripe(true)
+    try {
+      const response = await fetch('/api/stripe-connect/onboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ academyId: user.academyId }),
+      })
+      const data = await response.json()
+      if (response.ok && data.url) {
+        window.location.href = data.url
+      } else {
+        alert(data.error || 'Erro ao iniciar integração com a Stripe.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Erro de conexão ao iniciar Stripe Connect.')
+    } finally {
+      setIsConnectingStripe(false)
+    }
+  }
+
   const loadData = (academyId: string) => {
     const currentAcademy = db.getAcademy(academyId)
     if (currentAcademy) {
@@ -60,6 +86,25 @@ export default function ConfiguracoesPage() {
     const loggedUser = db.getLoggedInUser()
     if (loggedUser) {
       setUser(loggedUser)
+      
+      // Checar se retornou do Stripe Connect onboarding
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search)
+        const connectStatus = params.get('connect')
+        const accountId = params.get('accountId')
+        const acadId = params.get('academyId')
+        
+        if (connectStatus === 'success' && accountId && acadId === loggedUser.academyId) {
+          db.updateAcademySettings(loggedUser.academyId, {
+            mensalidadePadrao: db.getAcademy(loggedUser.academyId)?.mensalidadePadrao || '150,00',
+            diaVencimento: db.getAcademy(loggedUser.academyId)?.diaVencimento || '10',
+            stripeConnectId: accountId
+          })
+          window.history.replaceState({}, document.title, window.location.pathname)
+          alert('Conta Stripe Connect vinculada com sucesso! Agora você pode receber mensalidades por cartão de crédito.')
+        }
+      }
+
       loadData(loggedUser.academyId)
     } else {
       setIsPageLoading(false)
@@ -257,6 +302,49 @@ export default function ConfiguracoesPage() {
                   {linkCopiado ? 'Copiado!' : 'Copiar'}
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Card: Stripe Connect */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+            <h2 className="font-bold text-sm uppercase tracking-wider text-zinc-800 border-b border-zinc-100 pb-2 flex items-center gap-1.5">
+              <svg className="h-4 w-4 text-zinc-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+              </svg>
+              Pagamento via Cartão de Crédito
+            </h2>
+            <div className="space-y-3.5">
+              <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
+                Vincule sua academia ao Stripe Connect para habilitar assinaturas mensais recorrentes no cartão de crédito dos seus alunos. A plataforma cobra uma comissão automática de 5% por transação.
+              </p>
+
+              {academy?.stripeConnectId ? (
+                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">Conta Conectada Ativa</span>
+                    <p className="font-mono text-[10px] text-emerald-700 font-bold mt-0.5">{academy.stripeConnectId}</p>
+                  </div>
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleConectarStripe}
+                  disabled={isConnectingStripe}
+                  className="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-zinc-950 hover:bg-zinc-900 rounded-lg shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer animate-none"
+                >
+                  {isConnectingStripe ? (
+                    <span>Carregando Stripe...</span>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <span>Vincular Conta Stripe</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -34,6 +34,34 @@ export async function POST(req: Request) {
         const subscriptionId = session.subscription
         const metadata = session.metadata
 
+        // CASO A: Cobrança de mensalidade de aluno via Stripe Connect (Connected Account ID presente)
+        if (metadata && metadata.studentId) {
+          const { studentId, academyId } = metadata
+          const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
+          const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+
+          console.log(`Webhook Connect: Confirmando faturamento inicial do aluno ${studentId} (Academy: ${academyId})`)
+
+          // 1. Atualizar a fatura do mês corrente para Pago
+          await supabase
+            .from('invoices')
+            .update({ status: 'Pago' })
+            .eq('student_id', studentId)
+            .eq('mes', capitalizedMonth)
+
+          // 2. Salvar os IDs do Stripe no cadastro do estudante
+          await supabase
+            .from('students')
+            .update({
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscriptionId
+            })
+            .eq('id', studentId)
+
+          break
+        }
+
+        // CASO B: Cobrança da mensalidade da própria academia tenant (Plataforma JiuPro)
         if (metadata && metadata.email) {
           const { plano, academyName, ownerName, email, password } = metadata
           const academyId = academyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000)
@@ -64,15 +92,12 @@ export async function POST(req: Request) {
             academy_id: academyId,
             name: ownerName,
             email: email,
-            password: password, // Em produção real, você usaria bcrypt ou supabase auth, mas mantemos o modelo do projeto
+            password: password,
             role: 'Dono',
             grade: 'Faixa Preta'
           })
 
           if (userError) throw userError
-
-          // 3. Cadastra uma turma padrão para a nova academia
-          const { error: classError } = await supabase.from('checkins').insert([]) // apenas se necessário
           console.log(`Academia e Usuário cadastrados com sucesso para o cliente ${email}`)
         }
         break
@@ -83,7 +108,30 @@ export async function POST(req: Request) {
         const customerId = invoice.customer
         const subscriptionId = invoice.subscription
 
-        // Localiza a academia por stripe_customer_id ou stripe_subscription_id e ativa
+        // Se o webhook vem de uma conta conectada (Stripe Connect)
+        if (event.account) {
+          const { data: student, error: stdError } = await supabase
+            .from('students')
+            .select('id')
+            .or(`stripe_customer_id.eq.${customerId},stripe_subscription_id.eq.${subscriptionId}`)
+            .single()
+
+          if (!stdError && student) {
+            const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
+            const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+
+            await supabase
+              .from('invoices')
+              .update({ status: 'Pago' })
+              .eq('student_id', student.id)
+              .eq('mes', capitalizedMonth)
+
+            console.log(`Fatura do aluno ${student.id} marcada como PAGO por renovação Connect.`)
+          }
+          break
+        }
+
+        // Caso padrão: pagamento de assinatura de academia tenant
         const { error } = await supabase
           .from('academies')
           .update({ status: 'Ativo' })
@@ -92,7 +140,7 @@ export async function POST(req: Request) {
         if (error) {
           console.error(`Erro ao ativar academia via webhook (payment succeeded):`, error)
         } else {
-          console.log(`Academia reativada com sucesso via webhook (faturamento compensado). Customer: ${customerId}`)
+          console.log(`Academia reativada com sucesso via webhook. Customer: ${customerId}`)
         }
         break
       }
@@ -103,7 +151,31 @@ export async function POST(req: Request) {
         const customerId = payload.customer
         const subscriptionId = payload.subscription
 
-        // Localiza a academia por stripe_customer_id ou stripe_subscription_id e suspende
+        // Se o webhook vem de uma conta conectada (Stripe Connect)
+        if (event.account) {
+          const { data: student, error: stdError } = await supabase
+            .from('students')
+            .select('id')
+            .or(`stripe_customer_id.eq.${customerId},stripe_subscription_id.eq.${subscriptionId}`)
+            .single()
+
+          if (!stdError && student) {
+            const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
+            const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+
+            // Suspende o aluno marcando a fatura como Atrasada
+            await supabase
+              .from('invoices')
+              .update({ status: 'Atrasado' })
+              .eq('student_id', student.id)
+              .eq('mes', capitalizedMonth)
+
+            console.log(`Fatura do aluno ${student.id} marcada como ATRASADA por falha no Connect.`)
+          }
+          break
+        }
+
+        // Caso padrão: faturamento de academia falhou
         const { error } = await supabase
           .from('academies')
           .update({ status: 'Suspenso' })
@@ -112,7 +184,7 @@ export async function POST(req: Request) {
         if (error) {
           console.error(`Erro ao suspender academia via webhook (payment failed):`, error)
         } else {
-          console.log(`Academia suspensa via webhook (pagamento pendente). Customer: ${customerId}`)
+          console.log(`Academia suspensa via webhook. Customer: ${customerId}`)
         }
         break
       }
