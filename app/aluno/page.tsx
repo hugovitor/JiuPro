@@ -304,7 +304,32 @@ function AreaDoAlunoContent() {
       const params = new URLSearchParams(window.location.search)
       const payStatus = params.get('status')
       if (payStatus === 'success_payment') {
-        alert('Pagamento processado com sucesso! A confirmação está sendo processada pela Stripe.')
+        if (loggedStudent) {
+          // 1. Dar baixa na fatura em atraso no estado local
+          const updated = { ...loggedStudent }
+          const pendingIdx = updated.financeiro.findIndex(f => f.status === 'Atrasado')
+          if (pendingIdx !== -1) {
+            updated.financeiro[pendingIdx].status = 'Pago'
+            const allStds = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+            const sIdx = allStds.findIndex((st: any) => st.id === loggedStudent.id)
+            if (sIdx !== -1) {
+              allStds[sIdx] = updated
+              localStorage.setItem('jiupro_students', JSON.stringify(allStds))
+            }
+            // 2. Dar baixa no Supabase
+            supabase
+              .from('invoices')
+              .update({ status: 'Pago' })
+              .eq('student_id', loggedStudent.id)
+              .eq('status', 'Atrasado')
+              .then(() => {
+                db.syncWithSupabase(loggedStudent.academyId).then(() => loadData())
+              })
+          }
+        }
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 5000)
+        alert('Pagamento confirmado com sucesso! Sua mensalidade já foi quitada. Oss!')
         window.history.replaceState({}, document.title, window.location.pathname)
       } else if (payStatus === 'cancel_payment') {
         alert('Pagamento cancelado.')

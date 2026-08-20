@@ -15,7 +15,6 @@ export async function POST(req: Request) {
   try {
     if (!webhookSecret) {
       console.warn('STRIPE_WEBHOOK_SECRET não está configurado. Rodando em modo de desenvolvimento sem verificação estrita.')
-      // No stripe webhook secret, parse raw event (only in local dev environments if signature verification is bypassed)
       event = JSON.parse(body)
     } else {
       event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
@@ -32,31 +31,59 @@ export async function POST(req: Request) {
         const session = event.data.object as any
         const customerId = session.customer
         const subscriptionId = session.subscription
-        const metadata = session.metadata
+        const metadata = session.metadata || {}
 
-        // CASO A: Cobrança de mensalidade de aluno via Stripe Connect (Connected Account ID presente)
-        if (metadata && metadata.studentId) {
-          const { studentId, academyId } = metadata
+        // CASO A: Cobrança de mensalidade de aluno via Stripe Connect ou direto
+        const studentId = metadata.studentId
+        const academyId = metadata.academyId
+
+        if (studentId) {
           const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
           const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
 
-          console.log(`Webhook Connect: Confirmando faturamento inicial do aluno ${studentId} (Academy: ${academyId})`)
+          console.log(`Webhook: Confirmando pagamento do aluno ${studentId} (Academy: ${academyId})`)
 
-          // 1. Atualizar a fatura do mês corrente para Pago
-          await supabase
+          // 1. Localizar e atualizar fatura em aberto (Atrasado) ou do mês corrente
+          const { data: openInvoices } = await supabase
             .from('invoices')
-            .update({ status: 'Pago' })
+            .select('id')
             .eq('student_id', studentId)
-            .eq('mes', capitalizedMonth)
+            .eq('status', 'Atrasado')
+            .order('created_at', { ascending: false })
 
-          // 2. Salvar os IDs do Stripe no cadastro do estudante
-          await supabase
-            .from('students')
-            .update({
-              stripe_customer_id: customerId,
-              stripe_subscription_id: subscriptionId
-            })
-            .eq('id', studentId)
+          if (openInvoices && openInvoices.length > 0) {
+            await supabase
+              .from('invoices')
+              .update({ status: 'Pago' })
+              .eq('id', openInvoices[0].id)
+            console.log(`Fatura ${openInvoices[0].id} do aluno ${studentId} marcada como PAGO.`)
+          } else {
+            // Tenta por correspondência de mês ou qualquer fatura do aluno
+            await supabase
+              .from('invoices')
+              .update({ status: 'Pago' })
+              .eq('student_id', studentId)
+              .or(`mes.ilike.%${capitalizedMonth}%,status.eq.Atrasado`)
+          }
+
+          // 2. Salvar os IDs do Stripe no cadastro do estudante se houver
+          if (customerId || subscriptionId) {
+            await supabase
+              .from('students')
+              .update({
+                stripe_customer_id: customerId,
+                stripe_subscription_id: subscriptionId
+              })
+              .eq('id', studentId)
+          }
+
+          // 3. Registrar notificação de sucesso para o aluno
+          await supabase.from('notifications').insert({
+            user_id: studentId,
+            title: 'Mensalidade Paga com Sucesso!',
+            description: `Seu pagamento foi confirmado pela Stripe e sua mensalidade foi quitada com sucesso. Oss!`,
+            read: false
+          })
 
           break
         }
@@ -64,13 +91,13 @@ export async function POST(req: Request) {
         // CASO B: Cobrança da mensalidade da própria academia tenant (Plataforma JiuPro)
         if (metadata && metadata.email) {
           const { plano, academyName, ownerName, email, password } = metadata
-          const academyId = academyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000)
+          const newAcademyId = academyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000)
           
-          console.log(`Webhook: Cadastrando nova academia ${academyName} (ID: ${academyId})`)
+          console.log(`Webhook: Cadastrando nova academia ${academyName} (ID: ${newAcademyId})`)
 
           // 1. Cadastra no Supabase - Academia
           const { error: acError } = await supabase.from('academies').upsert({
-            id: academyId,
+            id: newAcademyId,
             name: academyName,
             mensalidade_padrao: '150,00',
             dia_vencimento: '10',
@@ -89,7 +116,7 @@ export async function POST(req: Request) {
           const userId = 'user-' + Math.floor(Math.random() * 100000)
           const { error: userError } = await supabase.from('users').upsert({
             id: userId,
-            academy_id: academyId,
+            academy_id: newAcademyId,
             name: ownerName,
             email: email,
             password: password,
@@ -108,26 +135,38 @@ export async function POST(req: Request) {
         const customerId = invoice.customer
         const subscriptionId = invoice.subscription
 
-        // Se o webhook vem de uma conta conectada (Stripe Connect)
-        if (event.account) {
-          const { data: student, error: stdError } = await supabase
-            .from('students')
+        // Se o webhook vem de uma conta conectada (Stripe Connect) ou possui cliente aluno
+        const { data: student, error: stdError } = await supabase
+          .from('students')
+          .select('id')
+          .or(`stripe_customer_id.eq.${customerId},stripe_subscription_id.eq.${subscriptionId}`)
+          .maybeSingle()
+
+        if (!stdError && student) {
+          const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
+          const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+
+          const { data: openInvoices } = await supabase
+            .from('invoices')
             .select('id')
-            .or(`stripe_customer_id.eq.${customerId},stripe_subscription_id.eq.${subscriptionId}`)
-            .single()
+            .eq('student_id', student.id)
+            .eq('status', 'Atrasado')
+            .order('created_at', { ascending: false })
 
-          if (!stdError && student) {
-            const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
-            const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
-
+          if (openInvoices && openInvoices.length > 0) {
+            await supabase
+              .from('invoices')
+              .update({ status: 'Pago' })
+              .eq('id', openInvoices[0].id)
+          } else {
             await supabase
               .from('invoices')
               .update({ status: 'Pago' })
               .eq('student_id', student.id)
-              .eq('mes', capitalizedMonth)
-
-            console.log(`Fatura do aluno ${student.id} marcada como PAGO por renovação Connect.`)
+              .or(`mes.ilike.%${capitalizedMonth}%,status.eq.Atrasado`)
           }
+
+          console.log(`Fatura do aluno ${student.id} marcada como PAGO por renovação.`)
           break
         }
 
@@ -152,26 +191,24 @@ export async function POST(req: Request) {
         const subscriptionId = payload.subscription
 
         // Se o webhook vem de uma conta conectada (Stripe Connect)
-        if (event.account) {
-          const { data: student, error: stdError } = await supabase
-            .from('students')
-            .select('id')
-            .or(`stripe_customer_id.eq.${customerId},stripe_subscription_id.eq.${subscriptionId}`)
-            .single()
+        const { data: student, error: stdError } = await supabase
+          .from('students')
+          .select('id')
+          .or(`stripe_customer_id.eq.${customerId},stripe_subscription_id.eq.${subscriptionId}`)
+          .maybeSingle()
 
-          if (!stdError && student) {
-            const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
-            const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+        if (!stdError && student) {
+          const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
+          const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
 
-            // Suspende o aluno marcando a fatura como Atrasada
-            await supabase
-              .from('invoices')
-              .update({ status: 'Atrasado' })
-              .eq('student_id', student.id)
-              .eq('mes', capitalizedMonth)
+          // Suspende o aluno marcando a fatura como Atrasada
+          await supabase
+            .from('invoices')
+            .update({ status: 'Atrasado' })
+            .eq('student_id', student.id)
+            .or(`mes.ilike.%${capitalizedMonth}%`)
 
-            console.log(`Fatura do aluno ${student.id} marcada como ATRASADA por falha no Connect.`)
-          }
+          console.log(`Fatura do aluno ${student.id} marcada como ATRASADA por falha de pagamento.`)
           break
         }
 
