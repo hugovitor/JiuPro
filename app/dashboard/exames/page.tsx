@@ -70,7 +70,7 @@ export default function ExameGraduacaoPage() {
       // 2. Criar notificação para o aluno
       await supabase.from('notifications').insert({
         user_id: alunoAtivo.id,
-        title: '🎖️ Nova Graduação!',
+        title: 'Nova Graduação Homologada',
         description: `Parabéns! Você foi graduado à Faixa ${novaFaixa} pelo mestre ${user.name}.`,
         read: false
       })
@@ -81,7 +81,7 @@ export default function ExameGraduacaoPage() {
         student_id: alunoAtivo.id,
         author_name: alunoAtivo.nome,
         author_faixa: novaFaixa,
-        content: `Fui graduado à Faixa ${novaFaixa}! Agradeço ao professor ${user.name} e a todos os parceiros de treino da ${academy?.name || 'academia'}! OSS! 🥋🔥`,
+        content: `Fui graduado à Faixa ${novaFaixa}! Agradeço ao professor ${user.name} e a todos os parceiros de treino da ${academy?.name || 'academia'}! OSS!`,
       })
 
       alert(`Promoção registrada com sucesso! ${alunoAtivo.nome} agora é Faixa ${novaFaixa}.`)
@@ -107,30 +107,30 @@ export default function ExameGraduacaoPage() {
       <div className="print:hidden space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Fichas de Avaliação Técnica</h1>
-          <p className="text-sm text-zinc-500">Gere e imprima folhas de exame individual para avaliação no dia da troca de faixa.</p>
+          <p className="text-xs text-zinc-500 mt-1">Gere e imprima folhas de exame individual para avaliação no dia da troca de faixa.</p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">Atleta Avaliado</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Atleta Avaliado</label>
             <select
               value={alunoSelecionadoId}
               onChange={(e) => setAlunoSelecionadoId(e.target.value)}
-              className="w-full px-3 py-2 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm text-zinc-800"
+              className="w-full px-3 py-2 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900"
             >
-              <option value="">-- Escolha o aluno --</option>
+              <option value="">-- Escolha o atleta --</option>
               {listaAlunos.map((a) => (
-                <option key={a.id} value={a.id}>{a.nome} ({a.faixa})</option>
+                <option key={a.id} value={a.id}>{a.nome} (Faixa {a.faixa})</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">Faixa Pretendida</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Faixa Pretendida</label>
             <select
               value={novaFaixa}
               onChange={(e) => setNovaFaixa(e.target.value)}
-              className="w-full px-3 py-2 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm text-zinc-800"
+              className="w-full px-3 py-2 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900"
             >
               <option value="Cinza">Cinza</option>
               <option value="Amarela">Amarela</option>
@@ -145,7 +145,7 @@ export default function ExameGraduacaoPage() {
 
           <button
             onClick={handleImprimir}
-            className="w-full px-4 py-2 text-sm font-semibold text-zinc-700 bg-slate-100 border border-slate-200 rounded-lg shadow-xs hover:bg-slate-200 transition-colors h-[38px] flex items-center justify-center gap-1.5"
+            className="w-full px-4 py-2 text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-xl shadow-xs transition-all h-[38px] flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <svg className="h-4 w-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12h10.5M18 15.75h-12a1.5 1.5 0 01-1.5-1.5v-6a1.5 1.5 0 011.5-1.5h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5zm-3-8.25v-3H9v3" />
@@ -156,9 +156,9 @@ export default function ExameGraduacaoPage() {
           <button
             onClick={handlePromoverAluno}
             disabled={isPromoting || !alunoSelecionadoId}
-            className="w-full px-4 py-2 text-sm font-black text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-800 transition-colors h-[38px] flex items-center justify-center gap-1.5 disabled:opacity-50"
+            className="w-full px-4 py-2 text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-850 rounded-xl shadow transition-all h-[38px] flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
-            {isPromoting ? 'Processando...' : '🎖️ Promover no Sistema'}
+            {isPromoting ? 'Processando...' : 'Homologar no Sistema'}
           </button>
         </div>
       </div>

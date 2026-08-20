@@ -40,32 +40,58 @@ export default function ListagemAlunosPage() {
     return <div className="text-xs font-semibold text-slate-400">Carregando tatame...</div>
   }
 
+  const totalAtivos = alunos.filter(a => a.status === 'Ativo').length
+  const totalInadimplentes = alunos.filter(a => a.financeiro.some(i => i.status === 'Atrasado')).length
+  const totalPretas = alunos.filter(a => a.faixa === 'Preta').length
+
   return (
     <div className="space-y-6">
       
       {/* Cabeçalho da Seção */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Gestão de Alunos</h1>
-          <p className="text-sm text-zinc-500">Consulte, pesquise e gerencie a ficha cadastral de todos os atletas.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Gestão de Atletas</h1>
+          <p className="text-xs text-zinc-500 mt-1">Consulte, pesquise e gerencie a ficha cadastral de todos os alunos da academia.</p>
         </div>
         <Link
           href="/dashboard/alunos/novo"
-          className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors gap-1.5"
+          className="inline-flex items-center justify-center px-4 py-2.5 text-xs font-bold text-white bg-red-600 rounded-xl shadow hover:bg-red-700 transition-all gap-1.5 cursor-pointer"
         >
-          <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          Novo Aluno
+          Matricular Novo Aluno
         </Link>
       </div>
 
+      {/* Cards de Métricas Rápidas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Total de Alunos</span>
+          <p className="text-2xl font-black text-zinc-950">{alunos.length}</p>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Alunos Ativos</span>
+          <p className="text-2xl font-black text-emerald-600">{totalAtivos}</p>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Com Pendências</span>
+          <p className={`text-2xl font-black ${totalInadimplentes > 0 ? 'text-rose-600' : 'text-zinc-400'}`}>
+            {totalInadimplentes}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Faixas Pretas</span>
+          <p className="text-2xl font-black text-zinc-950">{totalPretas}</p>
+        </div>
+      </div>
+
       {/* Painel de Filtros e Pesquisa */}
-      <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
+      <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm flex flex-col sm:flex-row gap-3 items-center">
         
         {/* Barra de Pesquisa por Nome */}
         <div className="w-full sm:flex-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.602 10.602z" />
             </svg>
@@ -75,13 +101,13 @@ export default function ListagemAlunosPage() {
             placeholder="Buscar atleta por nome..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-medium text-zinc-900 transition-colors"
           />
         </div>
 
         {/* Seletor de Filtro de Faixa */}
-        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Faixa:</span>
+        <div className="w-full sm:w-40 flex items-center gap-2 border border-zinc-200 px-3 py-2 rounded-xl bg-slate-50">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Faixa:</span>
           <select
             value={filtroFaixa}
             onChange={(e) => setFiltroFaixa(e.target.value)}
@@ -89,6 +115,10 @@ export default function ListagemAlunosPage() {
           >
             <option value="Todas">Todas</option>
             <option value="Branca">Branca</option>
+            <option value="Cinza">Cinza</option>
+            <option value="Amarela">Amarela</option>
+            <option value="Laranja">Laranja</option>
+            <option value="Verde">Verde</option>
             <option value="Azul">Azul</option>
             <option value="Roxa">Roxa</option>
             <option value="Marrom">Marrom</option>
@@ -96,9 +126,9 @@ export default function ListagemAlunosPage() {
           </select>
         </div>
 
-        {/* Seletor de Filtro de Status (Novo!) */}
-        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Status:</span>
+        {/* Seletor de Filtro de Status */}
+        <div className="w-full sm:w-36 flex items-center gap-2 border border-zinc-200 px-3 py-2 rounded-xl bg-slate-50">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Status:</span>
           <select
             value={filtroStatus}
             onChange={(e) => setFiltroStatus(e.target.value)}
@@ -110,9 +140,9 @@ export default function ListagemAlunosPage() {
           </select>
         </div>
 
-        {/* Seletor de Filtro Financeiro (Novo!) */}
-        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 p-2 rounded-lg bg-white shadow-sm">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Caixa:</span>
+        {/* Seletor de Filtro Financeiro */}
+        <div className="w-full sm:w-44 flex items-center gap-2 border border-zinc-200 px-3 py-2 rounded-xl bg-slate-50">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Caixa:</span>
           <select
             value={filtroFinanceiro}
             onChange={(e) => setFiltroFinanceiro(e.target.value)}
@@ -127,19 +157,19 @@ export default function ListagemAlunosPage() {
       </div>
 
       {/* Tabela de Alunos */}
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-bold uppercase tracking-wider text-zinc-400">
+              <tr className="border-b border-zinc-200 bg-zinc-50 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="p-4">Nome do Atleta</th>
-                <th className="p-4">Graduação</th>
-                <th className="p-4">Matrícula</th>
+                <th className="p-4">Graduação Atual</th>
+                <th className="p-4">Data de Matrícula</th>
                 <th className="p-4">Status</th>
                 <th className="p-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 text-sm">
+            <tbody className="divide-y divide-zinc-100 text-slate-700">
               {alunosFiltrados.length > 0 ? (
                 alunosFiltrados.map((aluno) => (
                   <tr key={aluno.id} className="hover:bg-zinc-50/50 transition-colors">
@@ -152,39 +182,41 @@ export default function ListagemAlunosPage() {
                           className="h-8 w-8 rounded-full object-cover border border-zinc-200"
                         />
                       ) : (
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center border border-zinc-200 text-zinc-500 font-bold text-xs flex-shrink-0">
+                        <div className="h-8 w-8 rounded-full bg-zinc-950 text-white flex items-center justify-center border border-zinc-800 font-black text-[10px] flex-shrink-0">
                           {aluno.nome.slice(0, 2).toUpperCase()}
                         </div>
                       )}
                       <Link
                         href={`/dashboard/alunos/${aluno.id}`}
-                        className="font-semibold text-zinc-900 hover:text-red-600 hover:underline transition-colors block"
+                        className="font-bold text-zinc-950 hover:text-red-600 transition-colors block"
                       >
                         {aluno.nome}
                       </Link>
                     </td>
                     
                     {/* Faixa e Graus */}
-                    <td className="p-4 text-zinc-600">
-                      <span className="font-medium">Faixa {aluno.faixa}</span>
-                      {aluno.graus > 0 && (
-                        <span className="text-[11px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded ml-1.5">
-                          {aluno.graus}G
-                        </span>
-                      )}
+                    <td className="p-4">
+                      <div className="inline-flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-lg">
+                        <span className="font-bold text-zinc-800">Faixa {aluno.faixa}</span>
+                        {aluno.graus > 0 && (
+                          <span className="text-[9px] font-black bg-zinc-950 text-white px-1.5 py-0.2 rounded">
+                            {aluno.graus}ºG
+                          </span>
+                        )}
+                      </div>
                     </td>
                     
                     {/* Data de Entrada */}
-                    <td className="p-4 text-zinc-500">{aluno.dataMatricula}</td>
+                    <td className="p-4 text-zinc-500 font-medium">{aluno.dataMatricula}</td>
                     
                     {/* Badge de Status */}
                     <td className="p-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
                         aluno.status === 'Ativo'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                           : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
                       }`}>
-                        {aluno.status}
+                        ● {aluno.status}
                       </span>
                     </td>
                     
@@ -192,16 +224,16 @@ export default function ListagemAlunosPage() {
                     <td className="p-4 text-right">
                       <Link
                         href={`/dashboard/alunos/${aluno.id}`}
-                        className="inline-flex items-center text-xs font-semibold text-zinc-600 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-md transition-colors"
+                        className="inline-flex items-center text-[10px] font-bold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
                       >
-                        Ver Ficha
+                        Ver Perfil
                       </Link>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-sm text-zinc-400">
+                  <td colSpan={5} className="p-8 text-center text-xs text-zinc-400 font-light">
                     Nenhum atleta encontrado com os filtros aplicados.
                   </td>
                 </tr>

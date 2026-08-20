@@ -252,7 +252,7 @@ export default function DashboardLayout({
   const initials = user?.name ? user.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : 'JP'
 
   const NavigationMenu = ({ mobile = false }: { mobile?: boolean }) => (
-    <nav className={`space-y-0.5 ${mobile ? 'p-4' : 'p-3 mt-2'}`}>
+    <nav className={`space-y-1 ${mobile ? 'p-4' : 'p-3 mt-2'}`}>
       {menuItems.map((item) => {
         const isActive = pathname === item.path
         return (
@@ -262,16 +262,21 @@ export default function DashboardLayout({
               router.push(item.path)
               if (mobile) setIsMobileMenuOpen(false)
             }}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium tracking-wide transition-all ${
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold tracking-tight transition-all cursor-pointer ${
               isActive
-                ? 'bg-slate-100 text-slate-900 font-semibold'
-                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-805'
+                ? 'bg-zinc-950 text-white shadow-sm'
+                : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950'
             }`}
           >
-            <span className={isActive ? 'text-red-650' : 'text-slate-400 group-hover:text-slate-650'}>
-              {item.icon}
-            </span>
-            <span>{item.name}</span>
+            <div className="flex items-center gap-2.5">
+              <span className={isActive ? 'text-red-500' : 'text-zinc-400'}>
+                {item.icon}
+              </span>
+              <span>{item.name}</span>
+            </div>
+            {isActive && (
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            )}
           </button>
         )
       })}

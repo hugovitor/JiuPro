@@ -60,19 +60,19 @@ export default function PromocoesPage() {
       
       {/* Título da Seção */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Troca de Faixa & Graus</h1>
-        <p className="text-sm text-zinc-500">Registre a evolução técnica e conceda novas graduações aos seus atletas.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Homologação de Graduações</h1>
+        <p className="text-xs text-zinc-500 mt-1">Registre a evolução técnica e conceda novas faixas e graus aos seus atletas.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Formulário Principal (Ocupa 2 colunas no desktop) */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
             
             {/* Campo: Selecionar Aluno */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 Selecionar Atleta
               </label>
               <select
@@ -80,19 +80,18 @@ export default function PromocoesPage() {
                 value={alunoSelecionadoId}
                 onChange={(e) => {
                   setAlunoSelecionadoId(e.target.value)
-                  // Ao mudar o aluno, preenche o formulário com a faixa atual dele por padrão
                   const selecionado = listaAlunos.find(a => a.id === e.target.value)
                   if (selecionado) {
                     setNovaFaixa(selecionado.faixa)
                     setNovosGraus(selecionado.graus)
                   }
                 }}
-                className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors text-zinc-800"
+                className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
               >
                 <option value="">-- Escolha um aluno da lista --</option>
                 {listaAlunos.map((aluno) => (
                   <option key={aluno.id} value={aluno.id}>
-                    {aluno.nome} (Faixa {aluno.faixa})
+                    {aluno.nome} (Faixa {aluno.faixa} • {aluno.graus}ºG)
                   </option>
                 ))}
               </select>
@@ -101,13 +100,13 @@ export default function PromocoesPage() {
             {/* Linha Dupla: Nova Faixa e Novos Graus */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Nova Faixa
                 </label>
                 <select
                   value={novaFaixa}
                   onChange={(e) => setNovaFaixa(e.target.value)}
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
                 >
                   <option value="Branca">Branca</option>
                   <option value="Cinza">Cinza</option>
@@ -122,34 +121,34 @@ export default function PromocoesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Quantidade de Graus
                 </label>
                 <select
                   value={novosGraus}
                   onChange={(e) => setNovosGraus(Number(e.target.value))}
-                  className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-bold text-zinc-900 transition-colors"
                 >
-                  <option value={0}>Sem Graus</option>
-                  <option value={1}>1 Grau</option>
-                  <option value={2}>2 Graus</option>
-                  <option value={3}>3 Graus</option>
-                  <option value={4}>4 Graus</option>
+                  <option value={0}>0 Graus</option>
+                  <option value={1}>1º Grau</option>
+                  <option value={2}>2º Graus</option>
+                  <option value={3}>3º Graus</option>
+                  <option value={4}>4º Graus</option>
                 </select>
               </div>
             </div>
 
             {/* Campo: Data da Cerimônia / Homologação */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                Data da Promoção
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                Data da Cerimônia
               </label>
               <input 
                 type="date"
                 required
                 value={dataPromocao}
                 onChange={(e) => setDataPromocao(e.target.value)}
-                className="w-full px-3 py-2.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                className="w-full px-3 py-2.5 mt-1.5 text-xs bg-slate-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-950 font-medium text-zinc-900 transition-colors"
               />
             </div>
 
@@ -158,9 +157,9 @@ export default function PromocoesPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-850 rounded-xl shadow-sm transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                {isLoading ? 'Homologando...' : 'Confirmar Nova Graduação'}
+                {isLoading ? 'Homologando...' : 'Confirmar e Homologar Graduação'}
               </button>
             </div>
 
@@ -168,41 +167,41 @@ export default function PromocoesPage() {
         </div>
 
         {/* Card Lateral Informativo / Resumo Visual (Ocupa 1 coluna) */}
-        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6 space-y-4 h-fit">
-          <h2 className="font-semibold text-sm text-zinc-900 uppercase tracking-wider border-b border-zinc-100 pb-2">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 space-y-4 h-fit">
+          <h2 className="font-bold text-xs text-zinc-900 uppercase tracking-wider border-b border-zinc-100 pb-2">
             Resumo Técnico
           </h2>
           
           {alunoAtual ? (
             <div className="space-y-4">
               <div>
-                <p className="text-xs text-zinc-400 font-medium uppercase">Atleta Selecionado</p>
-                <p className="text-base font-bold text-zinc-950 mt-0.5">{alunoAtual.nome}</p>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase">Atleta Selecionado</p>
+                <p className="text-sm font-bold text-zinc-950 mt-0.5">{alunoAtual.nome}</p>
               </div>
               
-              <div className="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100">
+              <div className="flex justify-between items-center bg-zinc-50 p-3 rounded-xl border border-zinc-200">
                 <div>
-                  <p className="text-[11px] text-zinc-400 font-medium uppercase">Graduação Atual</p>
-                  <p className="text-sm font-bold text-zinc-800 mt-0.5">Faixa {alunoAtual.faixa}</p>
+                  <p className="text-[9px] text-zinc-400 font-bold uppercase">Graduação Atual</p>
+                  <p className="text-xs font-bold text-zinc-800 mt-0.5">Faixa {alunoAtual.faixa}</p>
                 </div>
-                <span className="text-xs font-semibold bg-zinc-200 px-2 py-0.5 rounded text-zinc-600">
-                  {alunoAtual.graus}G
+                <span className="text-[10px] font-black bg-zinc-200 px-2 py-0.5 rounded text-zinc-700">
+                  {alunoAtual.graus}ºG
                 </span>
               </div>
 
-              <div className="flex justify-between items-center bg-red-50/50 p-3 rounded-lg border border-red-100">
+              <div className="flex justify-between items-center bg-red-50 p-3 rounded-xl border border-red-200">
                 <div>
-                  <p className="text-[11px] text-red-700 font-semibold uppercase">Nova Graduação</p>
-                  <p className="text-sm font-bold text-red-900 mt-0.5">Faixa {novaFaixa}</p>
+                  <p className="text-[9px] text-red-700 font-bold uppercase">Nova Graduação</p>
+                  <p className="text-xs font-bold text-red-900 mt-0.5">Faixa {novaFaixa}</p>
                 </div>
-                <span className="text-xs font-bold bg-red-600 text-white px-2 py-0.5 rounded">
-                  {novosGraus}G
+                <span className="text-[10px] font-black bg-red-600 text-white px-2 py-0.5 rounded">
+                  {novosGraus}ºG
                 </span>
               </div>
             </div>
           ) : (
-            <div className="text-center py-6 text-sm text-zinc-400">
-              Selecione um guerreiro ao lado para visualizar a evolução técnica da graduação.
+            <div className="text-center py-8 text-xs text-zinc-400 font-light">
+              Selecione um atleta ao lado para visualizar o comparativo da graduação.
             </div>
           )}
         </div>

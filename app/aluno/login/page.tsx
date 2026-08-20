@@ -166,7 +166,7 @@ export default function AlunoLoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
               E-mail de acesso
             </label>
             <input 
@@ -175,16 +175,16 @@ export default function AlunoLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="atleta@gmail.com"
-              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors text-slate-900 font-medium"
+              className="w-full px-3 py-2.5 mt-1 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 font-medium text-zinc-900 transition-colors"
             />
           </div>
           
           <div>
             <div className="flex items-center justify-between">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 Senha
               </label>
-              <a href="/login/recuperar-senha" className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors">
+              <a href="/login/recuperar-senha" className="text-[10px] font-bold text-zinc-400 hover:text-red-600 transition-colors">
                 Esqueceu a senha?
               </a>
             </div>
@@ -194,22 +194,20 @@ export default function AlunoLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors text-slate-900 font-semibold"
+              className="w-full px-3 py-2.5 mt-1 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 font-medium text-zinc-900 transition-colors"
             />
           </div>
 
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none transition-colors disabled:opacity-50"
+            className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-xl shadow-sm hover:bg-zinc-850 focus:outline-none transition-all disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
           >
             {isLoading ? 'Autenticando tatame...' : 'Entrar no Tatame'}
           </button>
         </form>
 
-
-
-        <p className="text-center text-[10px] text-slate-400">
+        <p className="text-center text-[10px] text-zinc-400 font-light">
           Ainda não possui matrícula?{' '}
           <a href="/aluno/cadastro" className="font-bold text-red-600 hover:underline">
             Cadastre-se aqui

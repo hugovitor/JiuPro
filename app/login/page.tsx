@@ -115,7 +115,7 @@ export default function LoginPage() {
         {/* Formulário */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
               E-mail de acesso
             </label>
             <input 
@@ -124,16 +124,16 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="professor@jiupro.com"
-              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
+              className="w-full px-3 py-2.5 mt-1 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 font-medium text-zinc-900 transition-colors"
             />
           </div>
           
           <div>
             <div className="flex items-center justify-between">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 Senha
               </label>
-              <a href="/login/recuperar-senha" className="text-[10px] font-medium text-slate-400 hover:text-slate-900 transition-colors">
+              <a href="/login/recuperar-senha" className="text-[10px] font-bold text-zinc-400 hover:text-red-600 transition-colors">
                 Esqueceu a senha?
               </a>
             </div>
@@ -143,25 +143,23 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
+              className="w-full px-3 py-2.5 mt-1 text-xs bg-slate-50 border border-zinc-200 rounded-xl placeholder-zinc-400 focus:outline-none focus:border-zinc-950 font-medium text-zinc-900 transition-colors"
             />
           </div>
 
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none transition-colors disabled:opacity-50"
+            className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-xl shadow-sm hover:bg-zinc-850 focus:outline-none transition-all disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
           >
-            {isLoading ? 'Autenticando tatame...' : 'Entrar no JiuPro'}
+            {isLoading ? 'Acessando tatame...' : 'Entrar no Sistema'}
           </button>
         </form>
 
-
-
-        <p className="text-center text-[10px] text-slate-400">
-          Sua academia ainda não usa o JiuPro?{' '}
-          <a href="/" className="font-semibold text-red-600 hover:text-red-700 underline underline-offset-4 transition-colors">
-            Conheça nossos planos
+        <p className="text-center text-[10px] text-zinc-400 font-light">
+          Quer cadastrar sua academia?{' '}
+          <a href="/#assinar" className="font-bold text-red-600 hover:underline">
+            Conheça os Planos
           </a>
         </p>
 
