@@ -344,6 +344,19 @@ function AreaDoAlunoContent() {
     }
   }, [])
 
+  // Check if checking-in is expired (more than 15 minutes after class start)
+  const isCheckInExpired = (classTime: string) => {
+    const [hours, minutes] = classTime.split(':').map(Number)
+    if (isNaN(hours) || isNaN(minutes)) return false
+
+    const now = new Date()
+    const classDateTime = new Date()
+    classDateTime.setHours(hours, minutes, 0, 0)
+
+    const limitDateTime = new Date(classDateTime.getTime() + 15 * 60 * 1000)
+    return now.getTime() > limitDateTime.getTime()
+  }
+
   // Alterna o agendamento da aula (check-in)
   const handleCheckInToggle = (classTime: string, classTitle: string) => {
     if (!student || !academy) return
@@ -352,7 +365,14 @@ function AreaDoAlunoContent() {
 
     if (jaCheckedIn) {
       db.studentCancelCheckIn(academy.id, student.id)
+      setTimeout(() => {
+        loadData()
+      }, 300)
     } else {
+      if (isCheckInExpired(classTime)) {
+        alert('Este treino já iniciou há mais de 15 minutos. Não é mais possível realizar o check-in.')
+        return
+      }
       db.studentCheckIn(academy.id, student.id, classTime)
       
       // Auto confirm the checkin for simulation and award badges immediately
@@ -973,16 +993,18 @@ function AreaDoAlunoContent() {
                       <button
                         type="button"
                         onClick={() => handleCheckInToggle(treino.horario, treino.nome)}
-                        disabled={isConfirmed}
+                        disabled={isConfirmed || (!checkInFeito && isCheckInExpired(treino.horario))}
                         className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                           checkInFeito
                             ? isConfirmed
                               ? 'bg-emerald-600 text-white opacity-80 cursor-default shadow-sm'
                               : 'bg-red-600 text-white hover:bg-red-700 shadow-sm'
-                            : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'
+                            : isCheckInExpired(treino.horario)
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                              : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'
                         }`}
                       >
-                        {isConfirmed ? 'Confirmado' : checkInFeito ? 'Cancelar' : 'Agendar'}
+                        {isConfirmed ? 'Confirmado' : checkInFeito ? 'Cancelar' : isCheckInExpired(treino.horario) ? 'Expirado' : 'Agendar'}
                       </button>
                     </div>
 
