@@ -744,24 +744,27 @@ export const db = {
       const { data: acData } = await supabase.from('academies').select('*').eq('id', academyId).single()
       if (acData) {
         const academies = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
+        const updatedAcademy = {
+          id: acData.id,
+          name: acData.name,
+          mensalidadePadrao: acData.mensalidade_padrao,
+          diaVencimento: acData.dia_vencimento,
+          whatsappTemplate: acData.whatsapp_template,
+          logoUrl: acData.logo_url,
+          ownerName: acData.owner_name,
+          ownerEmail: acData.owner_email,
+          plan: acData.plan,
+          status: acData.status,
+          professorGrade: acData.professor_grade,
+          stripeConnectId: acData.stripe_connect_id
+        }
         const idx = academies.findIndex((a: any) => a.id === academyId)
         if (idx !== -1) {
-          academies[idx] = {
-            id: acData.id,
-            name: acData.name,
-            mensalidadePadrao: acData.mensalidade_padrao,
-            diaVencimento: acData.dia_vencimento,
-            whatsappTemplate: acData.whatsapp_template,
-            logoUrl: acData.logo_url,
-            ownerName: acData.owner_name,
-            ownerEmail: acData.owner_email,
-            plan: acData.plan,
-            status: acData.status,
-            professorGrade: acData.professor_grade,
-            stripeConnectId: acData.stripe_connect_id
-          }
-          localStorage.setItem('jiupro_academies', JSON.stringify(academies))
+          academies[idx] = updatedAcademy
+        } else {
+          academies.push(updatedAcademy)
         }
+        localStorage.setItem('jiupro_academies', JSON.stringify(academies))
       }
 
       // 2. Sync Students
@@ -1186,6 +1189,7 @@ export const db = {
     initializeStorage()
     const academies: Academy[] = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
     const idx = academies.findIndex(a => a.id === academyId)
+    
     if (idx !== -1) {
       academies[idx].mensalidadePadrao = settings.mensalidadePadrao
       academies[idx].diaVencimento = settings.diaVencimento
@@ -1195,8 +1199,22 @@ export const db = {
       if (settings.stripeConnectId !== undefined) {
         academies[idx].stripeConnectId = settings.stripeConnectId
       }
-      localStorage.setItem('jiupro_academies', JSON.stringify(academies))
+    } else {
+      academies.push({
+        id: academyId,
+        name: '',
+        ownerName: '',
+        ownerEmail: '',
+        professorGrade: '',
+        mensalidadePadrao: settings.mensalidadePadrao,
+        diaVencimento: settings.diaVencimento,
+        whatsappTemplate: settings.whatsappTemplate || '',
+        stripeConnectId: settings.stripeConnectId || '',
+        plan: 'Ouro',
+        status: 'Ativo'
+      })
     }
+    localStorage.setItem('jiupro_academies', JSON.stringify(academies))
 
     // Supabase update academy settings
     const updatePayload: any = {
