@@ -51,10 +51,18 @@ function AlunoCadastroContent() {
     fetchAcademies()
   }, [academyIdParam])
 
+  const [aceitouTermos, setAceitouTermos] = useState(false)
+  const [showTermosModal, setShowTermosModal] = useState(false)
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess('')
+
+    if (!aceitouTermos) {
+      setError('Você precisa ler e aceitar o Termo de Matrícula e Normas do Tatame para prosseguir.')
+      return
+    }
 
     if (!selectedAcademyId) {
       setError('Por favor, selecione uma academia para se vincular.')
@@ -326,14 +334,74 @@ function AlunoCadastroContent() {
             </div>
           </div>
 
+          <div className="flex items-start gap-2 pt-1">
+            <input 
+              type="checkbox"
+              id="termos-checkbox"
+              checked={aceitouTermos}
+              onChange={(e) => setAceitouTermos(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+            />
+            <label htmlFor="termos-checkbox" className="text-[11px] text-zinc-600 leading-tight">
+              Li e concordo com o{' '}
+              <button 
+                type="button" 
+                onClick={() => setShowTermosModal(true)}
+                className="text-red-600 font-bold hover:underline cursor-pointer"
+              >
+                Termo de Matrícula e Normas do Tatame
+              </button>
+            </label>
+          </div>
+
           <button 
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !aceitouTermos}
             className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none transition-colors disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
           >
             {isLoading ? 'Cadastrando no tatame...' : 'Concluir Matrícula'}
           </button>
         </form>
+
+        {/* Modal de Termos de Adesão e Normas */}
+        {showTermosModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+                <h3 className="font-bold text-sm text-zinc-950 uppercase tracking-wider">
+                  Termo de Matrícula & Normas da Academia
+                </h3>
+                <button 
+                  onClick={() => setShowTermosModal(false)}
+                  className="text-xs text-zinc-400 hover:text-zinc-700 font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="text-xs text-zinc-600 space-y-3 overflow-y-auto pr-1 flex-1 leading-relaxed">
+                <p><strong>1. Objeto:</strong> O presente termo estabelece as condições de prestação de serviços esportivos e aulas de Jiu-Jitsu pela academia ao atleta matriculado.</p>
+                <p><strong>2. Pagamentos e Mensalidades:</strong> As mensalidades devem ser quitadas até a data de vencimento acordada. Atrasos superiores a 30 dias poderão acarretar em bloqueio do acesso aos treinos.</p>
+                <p><strong>3. Aptidão Física e Saúde:</strong> O atleta declara estar em plenas condições de saúde e fisicamente apto para a prática de artes marciais de contato. A academia não se responsabiliza por lesões decorrentes da prática desportiva ou do descumprimento de orientações dos instrutores.</p>
+                <p><strong>4. Conduta no Tatame:</strong> É estritamente obrigatório manter a higiene pessoal, unhas curtas, kimono limpo e demonstrar respeito irrestrito aos mestres, faixas-pretas e companheiros de treino.</p>
+                <p><strong>5. Uso de Imagem:</strong> O atleta autoriza o uso de fotos e vídeos colhidos durante os treinos para fins de divulgação nas mídias sociais oficiais da academia.</p>
+              </div>
+
+              <div className="border-t border-zinc-100 pt-3 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAceitouTermos(true)
+                    setShowTermosModal(false)
+                  }}
+                  className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                >
+                  Li e Concordo com os Termos
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <p className="text-center text-[10px] text-slate-400">
           Já possui cadastro?{' '}

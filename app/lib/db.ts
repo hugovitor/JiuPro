@@ -1440,6 +1440,65 @@ export const db = {
     return newSale
   },
 
+  addProduct(academyId: string, nome: string, preco: string, estoque: number): Product {
+    if (checkDemoBlock(academyId)) return {} as Product
+    initializeStorage()
+    const products: Product[] = JSON.parse(localStorage.getItem('jiupro_products') || '[]')
+    const newProduct: Product = {
+      id: 'prod-' + Date.now(),
+      academyId,
+      nome,
+      preco,
+      estoque: Math.max(0, estoque)
+    }
+    products.push(newProduct)
+    localStorage.setItem('jiupro_products', JSON.stringify(products))
+
+    // Background push to Supabase
+    supabase.from('products').insert({
+      id: newProduct.id,
+      academy_id: academyId,
+      nome: newProduct.nome,
+      preco: newProduct.preco,
+      estoque: newProduct.estoque
+    }).then(({ error }) => {
+      if (error) console.error('Erro ao adicionar produto no Supabase:', error)
+    })
+
+    return newProduct
+  },
+
+  updateProductStock(academyId: string, productId: string, deltaQty: number): Product | null {
+    if (checkDemoBlock(academyId)) return null
+    initializeStorage()
+    const products: Product[] = JSON.parse(localStorage.getItem('jiupro_products') || '[]')
+    const idx = products.findIndex(p => p.id === productId && p.academyId === academyId)
+    if (idx === -1) return null
+
+    products[idx].estoque = Math.max(0, products[idx].estoque + deltaQty)
+    localStorage.setItem('jiupro_products', JSON.stringify(products))
+
+    // Background push to Supabase
+    supabase.from('products').update({ estoque: products[idx].estoque }).eq('id', productId).then(({ error }) => {
+      if (error) console.error('Erro ao atualizar estoque no Supabase:', error)
+    })
+
+    return products[idx]
+  },
+
+  removeProduct(academyId: string, productId: string) {
+    if (checkDemoBlock(academyId)) return
+    initializeStorage()
+    const products: Product[] = JSON.parse(localStorage.getItem('jiupro_products') || '[]')
+    const updated = products.filter(p => !(p.id === productId && p.academyId === academyId))
+    localStorage.setItem('jiupro_products', JSON.stringify(updated))
+
+    // Background push to Supabase
+    supabase.from('products').delete().eq('id', productId).then(({ error }) => {
+      if (error) console.error('Erro ao excluir produto no Supabase:', error)
+    })
+  },
+
   // Performance and Tournament Logging
   updateStudentPerformance(studentId: string, peso: string, altura: string) {
     const student = this.getStudent(studentId)

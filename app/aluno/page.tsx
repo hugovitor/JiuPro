@@ -483,6 +483,92 @@ function AreaDoAlunoContent() {
     }, 1200)
   }
 
+  const handleBaixarTermoMatriculaPDF = async () => {
+    if (!student || !academy) return
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const doc = new jsPDF()
+      
+      const academyName = academy?.name || 'Academia de Jiu-Jitsu'
+      const masterName = academy?.ownerName || 'Professor Responsável'
+
+      // Header
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS & TERMO DE MATRÍCULA', 14, 18)
+      
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Unidade / Academia: ${academyName}`, 14, 25)
+      doc.text(`Responsável Técnico: ${masterName}`, 14, 30)
+      doc.text(`Data de Emissão (2ª Via): ${new Date().toLocaleDateString('pt-BR')}`, 14, 35)
+
+      doc.setDrawColor(200, 200, 200)
+      doc.line(14, 38, 196, 38)
+
+      // Section 1: Qualificação do Atleta
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.text('1. DADOS DO(A) ATLETA / CONTRATANTE', 14, 45)
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8.5)
+      doc.text(`Nome Completo: ${student.nome}`, 14, 52)
+      doc.text(`E-mail: ${student.email}`, 14, 57)
+      doc.text(`Graduação Atual: Faixa ${student.faixa} (${student.graus} Graus)`, 14, 62)
+      doc.text(`Data de Matrícula: ${student.dataMatricula || new Date().toLocaleDateString('pt-BR')}`, 14, 67)
+      doc.text(`Valor da Mensalidade: R$ ${student.mensalidade}`, 14, 72)
+
+      doc.line(14, 76, 196, 76)
+
+      // Section 2: Cláusulas do Contrato
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.text('2. CLÁUSULAS CONTRATUAIS E REGULAMENTO DO TATAME', 14, 83)
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8)
+      const clausulas = [
+        'CLÁUSULA 1ª (DO OBJETO): O presente contrato tem por objeto a ministração de aulas práticas e teóricas de Jiu-Jitsu e artes marciais pela CONTRATADA ao(à) ALUNO(A).',
+        'CLÁUSULA 2ª (DAS MENSALIDADES): O pagamento das mensalidades deverá ser efetuado até a data de vencimento estipulada neste termo, sob pena de suspensão do acesso às dependências e treinos da academia.',
+        'CLÁUSULA 3ª (DA APTIDÃO FÍSICA E ISENÇÃO DE RESPONSABILIDADE): O(a) ATLETA declara estar em perfeitas condições físicas e de saúde para a prática de artes marciais de contato. A CONTRATADA e seus instrutores não se responsabilizam por lesões decorrentes da prática natural esportiva ou de desrespeito às orientações.',
+        'CLÁUSULA 4ª (DAS NORMAS DE CONDUTA E HIGIENE): É obrigatório o uso de kimono oficial limpo, unhas cortadas, higiene pessoal adequada e total respeito aos mestres, instrutores e colegas de treino, zelando pela integridade moral e física de todos.',
+        'CLÁUSULA 5ª (DO USO DE IMAGEM): O(a) CONTRATANTE autoriza a utilização de sua imagem e voz, colhidas no ambiente de treino ou eventos esportivos, para fins de divulgação da academia nas redes sociais e mídias institucionais.',
+        'CLÁUSULA 6ª (DO CANCELAMENTO OU TRANCAMENTO): O cancelamento ou trancamento da matrícula deverá ser comunicado formalmente à recepção da academia com antecedência mínima de 30 (trinta) dias.'
+      ]
+
+      let yPos = 90
+      clausulas.forEach(c => {
+        const splitText = doc.splitTextToSize(c, 182)
+        doc.text(splitText, 14, yPos)
+        yPos += (splitText.length * 4) + 2
+      })
+
+      // Section 3: Assinaturas
+      yPos = Math.max(yPos + 8, 230)
+      doc.line(14, yPos - 5, 196, yPos - 5)
+
+      doc.text('Declaro que li, compreendi e concordo plenamente com todas as cláusulas e regulamentos descritos acima.', 14, yPos)
+
+      yPos += 20
+      doc.line(20, yPos, 90, yPos)
+      doc.line(120, yPos, 190, yPos)
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.text(`${student.nome}`, 55, yPos + 4, { align: 'center' })
+      doc.text('Assinatura Digital do(a) Aluno(a)', 55, yPos + 8, { align: 'center' })
+
+      doc.text(`${academyName}`, 155, yPos + 4, { align: 'center' })
+      doc.text('Diretoria / Mestre Responsável', 155, yPos + 8, { align: 'center' })
+
+      doc.save(`Termo_Matricula_${student.nome.replace(/\s+/g, '_')}.pdf`)
+    } catch (err: any) {
+      console.error(err)
+      alert('Erro ao gerar documento.')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
@@ -1493,18 +1579,29 @@ function AreaDoAlunoContent() {
         {activeTab === 'financeiro' && (
           <div className="space-y-4">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
                   <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">Mensalidades & Faturas</h3>
                   <p className="text-[10px] text-slate-400 mt-0.5">Histórico completo de pagamentos. PIX ou Cartão.</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded font-bold">
-                    ✅ Pagas: {student.financeiro.filter(i => i.status === 'Pago').length}
-                  </span>
-                  <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded font-bold">
-                    ❌ Atrasadas: {student.financeiro.filter(i => i.status === 'Atrasado').length}
-                  </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={handleBaixarTermoMatriculaPDF}
+                    className="text-[10px] font-bold text-zinc-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <svg className="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                    2ª Via do Contrato (PDF)
+                  </button>
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                    <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded font-bold">
+                      ✅ Pagas: {student.financeiro.filter(i => i.status === 'Pago').length}
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded font-bold">
+                      ❌ Atrasadas: {student.financeiro.filter(i => i.status === 'Atrasado').length}
+                    </span>
+                  </div>
                 </div>
               </div>
 
