@@ -39,52 +39,78 @@ export default function SuperadminPage() {
     }
   }
 
-  // Check auth cookie on mount
+  // Check auth cookie on mount — carrega academias do Supabase
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const cookies = document.cookie.split(';')
       const adminCookie = cookies.find(c => c.trim().startsWith('jiupro_superadmin='))
-      if (adminCookie && adminCookie.split('=')[1] === 'true') {
+      const cookieVal = adminCookie ? adminCookie.split('=')[1] : null
+      if (cookieVal && cookieVal !== '' && cookieVal !== 'false') {
         setIsAuthenticated(true)
-        setAcademies(db.superadminGetAcademies())
+        // Carrega academias do Supabase
+        supabase.from('academies').select('*').order('name').then(({ data }) => {
+          if (data) {
+            setAcademies(data.map((a: any) => ({
+              id: a.id,
+              name: a.name,
+              mensalidadePadrao: a.mensalidade_padrao,
+              diaVencimento: a.dia_vencimento,
+              ownerName: a.owner_name,
+              ownerEmail: a.owner_email,
+              plan: a.plan || 'Ouro',
+              status: a.status || 'Ativo',
+              stripeConnectId: a.stripe_connect_id
+            })))
+          }
+        })
       }
     }
   }, [])
 
-  // Handle superadmin login
+  // Handle superadmin login — valida exclusivamente no Supabase
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoginError('')
     setIsLoading(true)
 
     try {
-      // Query the 'users' table in Supabase where role is 'SuperAdmin'
+      // Busca o usuário no Supabase com role='SuperAdmin'
       const { data: user, error } = await supabase
         .from('users')
         .select('*')
-        .eq('email', email)
+        .eq('email', email.trim().toLowerCase())
         .eq('password', password)
         .eq('role', 'SuperAdmin')
         .single()
 
       if (error || !user) {
-        // Fallback for default hardcoded admin in case they haven't registered one yet
-        if (email === 'admin@jiupro.com.br' && password === 'admin') {
-          document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Lax;'
-          setIsAuthenticated(true)
-          setAcademies(db.superadminGetAcademies())
-          setIsLoading(false)
-          return
-        }
-        setLoginError('Credenciais administrativas inválidas. Acesso restrito ao proprietário.')
-      } else {
-        document.cookie = 'jiupro_superadmin=true; path=/; max-age=86400; SameSite=Lax;'
-        setIsAuthenticated(true)
-        setAcademies(db.superadminGetAcademies())
+        setLoginError('Credenciais inválidas ou conta sem permissão de SuperAdmin. Verifique sua conta no Supabase.')
+        setIsLoading(false)
+        return
       }
+
+      // Login bem-sucedido — busca academias direto do Supabase
+      const { data: acadData } = await supabase.from('academies').select('*').order('name')
+      if (acadData) {
+        const mapped = acadData.map((a: any) => ({
+          id: a.id,
+          name: a.name,
+          mensalidadePadrao: a.mensalidade_padrao,
+          diaVencimento: a.dia_vencimento,
+          ownerName: a.owner_name,
+          ownerEmail: a.owner_email,
+          plan: a.plan || 'Ouro',
+          status: a.status || 'Ativo',
+          stripeConnectId: a.stripe_connect_id
+        }))
+        setAcademies(mapped)
+      }
+
+      document.cookie = `jiupro_superadmin=${user.email}; path=/; max-age=86400; SameSite=Lax;`
+      setIsAuthenticated(true)
     } catch (err) {
       console.error(err)
-      setLoginError('Erro de conexão ao autenticar.')
+      setLoginError('Erro de conexão ao autenticar. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -96,16 +122,30 @@ export default function SuperadminPage() {
     setIsAuthenticated(false)
   }
 
-  // Administrative mutations
-  const handleToggleStatus = (academyId: string, currentStatus: 'Ativo' | 'Suspenso') => {
+  // Administrative mutations — persistem direto no Supabase
+  const handleToggleStatus = async (academyId: string, currentStatus: 'Ativo' | 'Suspenso') => {
     const nextStatus = currentStatus === 'Ativo' ? 'Suspenso' : 'Ativo'
-    db.superadminSetAcademyStatus(academyId, nextStatus)
-    setAcademies(db.superadminGetAcademies())
+    const { error } = await supabase
+      .from('academies')
+      .update({ status: nextStatus })
+      .eq('id', academyId)
+    if (error) {
+      alert('Erro ao alterar status da academia.')
+      return
+    }
+    setAcademies(prev => prev.map(a => a.id === academyId ? { ...a, status: nextStatus } : a))
   }
 
-  const handleChangePlan = (academyId: string, plan: 'Prata' | 'Ouro' | 'BlackBelt') => {
-    db.superadminSetAcademyPlan(academyId, plan)
-    setAcademies(db.superadminGetAcademies())
+  const handleChangePlan = async (academyId: string, plan: 'Prata' | 'Ouro' | 'BlackBelt') => {
+    const { error } = await supabase
+      .from('academies')
+      .update({ plan })
+      .eq('id', academyId)
+    if (error) {
+      alert('Erro ao alterar plano da academia.')
+      return
+    }
+    setAcademies(prev => prev.map(a => a.id === academyId ? { ...a, plan } : a))
   }
 
   // Computations
