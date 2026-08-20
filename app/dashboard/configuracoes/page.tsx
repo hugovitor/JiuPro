@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { db, User, Academy, ClassSession } from '../../lib/db'
+import { supabase } from '../../lib/supabase'
 
 export default function ConfiguracoesPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -195,6 +196,28 @@ export default function ConfiguracoesPage() {
   }
 
   // Função para salvar as configurações gerais
+  const handleGerarCodigoIndicacao = async () => {
+    if (!user || !academy) return
+    setIsLoading(true)
+    try {
+      const newCode = 'JP-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Date.now().toString().slice(-4)
+      const { error } = await supabase
+        .from('academies')
+        .update({ referral_code: newCode })
+        .eq('id', user.academyId)
+      
+      if (error) throw error
+      
+      await db.syncWithSupabase(user.academyId)
+      loadData(user.academyId)
+      alert('Código gerado com sucesso!')
+    } catch (err: any) {
+      alert(`Erro ao gerar código: ${err.message}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleSalvarConfiguracoes = () => {
     if (!user) return
     setIsLoading(true)
@@ -254,9 +277,19 @@ export default function ConfiguracoesPage() {
               <div>
                 <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Seu Código de Indicação</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-bold bg-zinc-100 text-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-200 select-all w-full text-center">
-                    {academy?.referralCode || 'Sem Código'}
-                  </span>
+                  {academy?.referralCode ? (
+                    <span className="font-mono text-sm font-bold bg-zinc-100 text-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-200 select-all w-full text-center">
+                      {academy.referralCode}
+                    </span>
+                  ) : (
+                    <button 
+                      onClick={handleGerarCodigoIndicacao}
+                      disabled={isLoading}
+                      className="w-full py-1.5 px-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-300 transition-colors"
+                    >
+                      {isLoading ? 'Gerando...' : 'Gerar Código Agora'}
+                    </button>
+                  )}
                 </div>
               </div>
 
