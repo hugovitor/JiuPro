@@ -1016,19 +1016,36 @@ function AreaDoAlunoContent() {
                           Parceiros escalados:
                         </p>
                         <div className="flex flex-wrap gap-1.5 items-center">
-                          {parceiros.map((p, idx) => (
-                            <div 
-                              key={idx} 
-                              className={`h-6 px-2.5 rounded-md flex items-center gap-1 font-bold text-[9px] border ${
-                                checkInFeito 
-                                  ? 'bg-zinc-900 border-zinc-800 text-zinc-200' 
-                                  : 'bg-slate-50 border-slate-200/60 text-slate-700'
-                              }`}
-                            >
-                              <span>{p.nome}</span>
-                              <span className="w-1 h-1 rounded-full bg-red-600" />
-                            </div>
-                          ))}
+                          {parceiros.map((p, idx) => {
+                            const getBeltColorClass = (faixa: string) => {
+                              const f = (faixa || '').toLowerCase()
+                              if (f === 'branca') return 'bg-white border border-slate-300'
+                              if (f === 'azul') return 'bg-blue-600'
+                              if (f === 'roxa') return 'bg-purple-600'
+                              if (f === 'marrom') return 'bg-amber-800'
+                              if (f === 'preta') return 'bg-zinc-950 border border-zinc-800'
+                              if (f.includes('laranja')) return 'bg-orange-500'
+                              if (f.includes('amarela')) return 'bg-yellow-400'
+                              if (f.includes('verde')) return 'bg-emerald-600'
+                              if (f.includes('cinza')) return 'bg-slate-400'
+                              if (f.includes('vermelha') || f.includes('coral')) return 'bg-red-650'
+                              return 'bg-slate-300'
+                            }
+
+                            return (
+                              <div 
+                                key={idx} 
+                                className={`h-6 px-2.5 rounded-md flex items-center gap-1.5 font-bold text-[9px] border ${
+                                  checkInFeito 
+                                    ? 'bg-zinc-900 border-zinc-800 text-zinc-200' 
+                                    : 'bg-slate-50 border-slate-200/60 text-slate-700'
+                                }`}
+                              >
+                                <span>{p.nome} <span className="opacity-60 font-medium">({p.faixa})</span></span>
+                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getBeltColorClass(p.faixa)}`} />
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     )}
