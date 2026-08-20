@@ -74,13 +74,13 @@ export default function SuperadminPage() {
     setIsLoading(true)
 
     try {
-      // Busca o usuário no Supabase com role='SuperAdmin'
+      // Busca o usuário no Supabase com role='SuperAdmin' ou role='Dono'
       const { data: user, error } = await supabase
         .from('users')
         .select('*')
         .eq('email', email.trim().toLowerCase())
         .eq('password', password)
-        .eq('role', 'SuperAdmin')
+        .in('role', ['SuperAdmin', 'Dono'])
         .single()
 
       if (error || !user) {
