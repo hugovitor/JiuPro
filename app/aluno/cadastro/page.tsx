@@ -3,13 +3,14 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { db, Academy } from '../../lib/db'
+import { db } from '../../lib/db'
+import { supabase } from '../../lib/supabase'
 
 function AlunoCadastroContent() {
   const searchParams = useSearchParams()
   const academyIdParam = searchParams.get('academyId') || ''
 
-  const [academies, setAcademies] = useState<Academy[]>([])
+  const [academies, setAcademies] = useState<any[]>([])
   const [selectedAcademyId, setSelectedAcademyId] = useState('')
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -23,19 +24,34 @@ function AlunoCadastroContent() {
   const router = useRouter()
 
   useEffect(() => {
-    const list = db.getAcademies().filter(a => a.status === 'Ativo')
-    setAcademies(list)
-    
-    // Auto-select from parameter if valid
-    const match = list.find(a => a.id === academyIdParam)
-    if (match) {
-      setSelectedAcademyId(match.id)
-    } else if (list.length > 0) {
-      setSelectedAcademyId(list[0].id)
+    // Carregar as academias ativas diretamente do Supabase
+    const fetchAcademies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('academies')
+          .select('*')
+          .eq('status', 'Ativo')
+        
+        if (!error && data) {
+          setAcademies(data)
+          
+          // Auto-selecionar pelo parâmetro ou escolher a primeira
+          const match = data.find(a => a.id === academyIdParam)
+          if (match) {
+            setSelectedAcademyId(match.id)
+          } else if (data.length > 0) {
+            setSelectedAcademyId(data[0].id)
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao buscar academias:', err)
+      }
     }
+    
+    fetchAcademies()
   }, [academyIdParam])
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess('')
@@ -57,25 +73,132 @@ function AlunoCadastroContent() {
 
     setIsLoading(true)
 
-    setTimeout(() => {
-      try {
-        const student = db.registerStudent(selectedAcademyId, nome, email, password)
-        if (student) {
-          // Auto log in student
-          db.loginStudent(email, password)
-          setSuccess('Matrícula realizada com sucesso! Acessando tatame...')
-          setTimeout(() => {
-            router.push('/aluno')
-          }, 1500)
-        } else {
-          setError('Ocorreu um erro ao realizar seu cadastro.')
-          setIsLoading(false)
-        }
-      } catch (err: any) {
-        setError(err.message || 'E-mail já cadastrado.')
+    try {
+      // 1. Verificar se o e-mail já existe no Supabase
+      const { data: existingStudent } = await supabase
+        .from('students')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .maybeSingle()
+
+      if (existingStudent) {
+        setError('E-mail já cadastrado!')
         setIsLoading(false)
+        return
       }
-    }, 800)
+
+      // 2. Buscar a academia selecionada para herdar valores padrão
+      const { data: academyData, error: acError } = await supabase
+        .from('academies')
+        .select('*')
+        .eq('id', selectedAcademyId)
+        .single()
+
+      if (acError || !academyData) {
+        setError('Academia selecionada inválida.')
+        setIsLoading(false)
+        return
+      }
+
+      const newStudentId = 'student-' + Date.now().toString()
+      const defaultMonthlyFee = academyData.mensalidade_padrao || '150,00'
+      const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())
+      const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+      const formattedDueDate = new Date(Date.now() + 86400000 * 5).toLocaleDateString('pt-BR')
+
+      // 3. Cadastrar Aluno no Supabase
+      const { error: regError } = await supabase.from('students').insert({
+        id: newStudentId,
+        academy_id: selectedAcademyId,
+        nome: nome,
+        email: email,
+        password: password,
+        faixa: 'Branca',
+        graus: 0,
+        status: 'Ativo',
+        data_matricula: new Date().toISOString().split('T')[0],
+        mensalidade: defaultMonthlyFee,
+        dia_vencimento: '10',
+        chave_pix: academyData.owner_email,
+        peso: '',
+        altura: '',
+        graduado_por: 'Auto-cadastro',
+        mestre_original: academyData.owner_name,
+        badges: []
+      })
+
+      if (regError) throw regError
+
+      // 4. Criar Fatura Inicial do Aluno no Supabase
+      await supabase.from('invoices').insert({
+        student_id: newStudentId,
+        mes: capitalizedMonth,
+        vencimento: formattedDueDate,
+        valor: defaultMonthlyFee,
+        status: 'Atrasado'
+      })
+
+      // 5. Salvar na sessão local/cache do navegador para login imediato
+      const mappedStudent = {
+        id: newStudentId,
+        academyId: selectedAcademyId,
+        nome: nome,
+        email: email,
+        faixa: 'Branca',
+        graus: 0,
+        status: 'Ativo',
+        dataMatricula: new Date().toISOString().split('T')[0],
+        mensalidade: defaultMonthlyFee,
+        chavePix: academyData.owner_email,
+        graduadoPor: 'Auto-cadastro',
+        mestreOriginal: academyData.owner_name,
+        password: password,
+        financeiro: [
+          {
+            mes: capitalizedMonth,
+            vencimento: formattedDueDate,
+            valor: defaultMonthlyFee,
+            status: 'Atrasado'
+          }
+        ],
+        presencas: [],
+        tournaments: []
+      }
+
+      const localStudents = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+      localStudents.push(mappedStudent)
+      localStorage.setItem('jiupro_students', JSON.stringify(localStudents))
+
+      // Salvar academia no cache local
+      const localAcademies = JSON.parse(localStorage.getItem('jiupro_academies') || '[]')
+      const otherAcademies = localAcademies.filter((a: any) => a.id !== selectedAcademyId)
+      otherAcademies.push({
+        id: academyData.id,
+        name: academyData.name,
+        mensalidadePadrao: academyData.mensalidade_padrao,
+        diaVencimento: academyData.dia_vencimento,
+        whatsappTemplate: academyData.whatsapp_template,
+        logoUrl: academyData.logo_url,
+        ownerName: academyData.owner_name,
+        ownerEmail: academyData.owner_email,
+        plan: academyData.plan,
+        status: academyData.status,
+        stripeConnectId: academyData.stripe_connect_id
+      })
+      localStorage.setItem('jiupro_academies', JSON.stringify(otherAcademies))
+
+      // 6. Criar cookie de sessão
+      document.cookie = `jiupro_student_session=${newStudentId}; path=/; max-age=86400; SameSite=Strict;`
+      
+      setSuccess('Matrícula realizada com sucesso! Acessando tatame...')
+      setTimeout(() => {
+        router.push('/aluno')
+      }, 1500)
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || 'Erro ao realizar matrícula no banco de dados.')
+      setIsLoading(false)
+    }
   }
 
   const activeAcademy = academies.find(a => a.id === selectedAcademyId)
@@ -148,7 +271,7 @@ function AlunoCadastroContent() {
               onChange={(e) => setNome(e.target.value)}
               required
               placeholder="Ex: Carlos Gracie"
-              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 text-slate-900 font-medium"
+              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-950 focus:ring-1 focus:ring-slate-950 text-slate-900 font-medium"
             />
           </div>
 
@@ -162,7 +285,7 @@ function AlunoCadastroContent() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="Ex: atleta@provedor.com"
-              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 text-slate-900 font-medium"
+              className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-950 focus:ring-1 focus:ring-slate-950 text-slate-900 font-medium"
             />
           </div>
 
@@ -177,7 +300,7 @@ function AlunoCadastroContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 text-slate-900 font-semibold"
+                className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-950 focus:ring-1 focus:ring-slate-950 text-slate-900 font-semibold"
               />
             </div>
             <div>
@@ -190,7 +313,7 @@ function AlunoCadastroContent() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 text-slate-900 font-semibold"
+                className="w-full px-3 py-2 mt-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-950 focus:ring-1 focus:ring-slate-950 text-slate-900 font-semibold"
               />
             </div>
           </div>
@@ -198,7 +321,7 @@ function AlunoCadastroContent() {
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+            className="w-full py-2.5 text-xs font-bold text-white bg-zinc-950 rounded-lg shadow hover:bg-zinc-850 focus:outline-none transition-colors disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
           >
             {isLoading ? 'Cadastrando no tatame...' : 'Concluir Matrícula'}
           </button>

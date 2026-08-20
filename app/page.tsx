@@ -108,7 +108,6 @@ export default function SaaSLandingPage() {
           
           <div className="flex items-center gap-7">
             <a href="#precos" className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wider">Planos</a>
-            <a href="#simulador" className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wider">Demonstrações</a>
             <button
               onClick={() => router.push('/login')}
               className="text-[11px] font-bold text-white bg-zinc-950 hover:bg-zinc-850 px-4.5 py-2 rounded shadow-sm transition-all cursor-pointer uppercase tracking-wider"
@@ -161,12 +160,6 @@ export default function SaaSLandingPage() {
               >
                 Criar Unidade Administrativa
               </a>
-              <a
-                href="#simulador"
-                className="w-full sm:w-auto text-center px-7 py-3 text-xs font-bold uppercase tracking-wider text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded transition-all border border-zinc-200/50"
-              >
-                Visualizar Demonstrações
-              </a>
             </div>
           </div>
         </section>
@@ -215,57 +208,6 @@ export default function SaaSLandingPage() {
             </div>
           </div>
         </div>
-
-        {/* 4. Simulador Sandbox (Demonstrações) */}
-        <section id="simulador" className="py-20 px-6 sm:px-8 scroll-mt-20">
-          <div className="max-w-5xl mx-auto space-y-12">
-            <div className="text-center space-y-2">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-900 uppercase tracking-widest text-xs">Unidades de Demonstração</h2>
-              <p className="text-xs text-zinc-400 max-w-md mx-auto font-light">
-                Experimente o painel de controle administrativo em modo de leitura protegida.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {academias.map((ac) => {
-                const statusColor = ac.status === 'Ativo' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
-                const planBorder = ac.plan === 'BlackBelt' ? 'border-t-zinc-900' : ac.plan === 'Ouro' ? 'border-t-red-600' : 'border-t-zinc-300'
-                return (
-                  <div key={ac.id} className={`bg-white rounded-xl border border-zinc-200 border-t-4 ${planBorder} shadow-sm p-6 flex flex-col justify-between space-y-5 hover:border-zinc-300 transition-all`}>
-                    <div className="space-y-3.5">
-                      <div className="flex items-center justify-between">
-                        <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold border ${statusColor}`}>
-                          {ac.status}
-                        </span>
-                        <span className="text-[9px] font-bold text-zinc-400 bg-zinc-50 border border-zinc-200 px-2 py-0.5 rounded uppercase tracking-wider">
-                          Plano {ac.plan}
-                        </span>
-                      </div>
-                      
-                      <h3 className="font-bold text-sm text-zinc-900 tracking-tight">{ac.name}</h3>
-                      <p className="text-xs text-zinc-500 leading-relaxed font-light">
-                        Responsável: <span className="font-semibold text-zinc-800">{ac.ownerName}</span> <br />
-                        E-mail: <span className="font-mono text-[10px] text-zinc-400">{ac.ownerEmail}</span>
-                      </p>
-                    </div>
-
-                    <div className="pt-2">
-                      <button
-                        onClick={() => handleQuickLogin(ac.id)}
-                        className="w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded bg-zinc-950 hover:bg-zinc-850 text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                      >
-                        <span>Acessar Unidade</span>
-                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
 
         {/* 5. Cadastro & Checkout */}
         <section id="assinar" className="py-20 px-6 sm:px-8 max-w-5xl mx-auto space-y-12 scroll-mt-20">

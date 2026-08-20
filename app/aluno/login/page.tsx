@@ -196,22 +196,7 @@ export default function AlunoLoginPage() {
           </button>
         </form>
 
-        <div className="space-y-3 pt-2">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-100" />
-            </div>
-            <div className="relative flex justify-center text-[9px] uppercase tracking-wider">
-              <span className="bg-white px-2.5 text-slate-400 font-bold">Demonstração</span>
-            </div>
-          </div>
-          
-          <div className="text-[10px] text-zinc-500 bg-zinc-50 rounded-xl p-3 border border-zinc-200 space-y-1">
-            <p className="font-semibold text-zinc-700">Acessos de Teste:</p>
-            <p>E-mail: <span className="font-mono font-bold text-red-600">carlos.silva@gmail.com</span></p>
-            <p>Senha: <span className="font-mono font-bold text-red-600">123456</span></p>
-          </div>
-        </div>
+
 
         <p className="text-center text-[10px] text-slate-400">
           Ainda não possui matrícula?{' '}

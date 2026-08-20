@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "JiuPro - Gestão inteligente para sua academia",
   description: "Gestão inteligente de treinos, mensalidades e evolução de graus para academias de Jiu-Jitsu.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192.png",
+    shortcut: "/icon-192.png",
+    apple: "/icon-512.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
