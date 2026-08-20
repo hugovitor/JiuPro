@@ -122,8 +122,6 @@ function AlunoCadastroContent() {
         chave_pix: academyData.owner_email,
         peso: '',
         altura: '',
-        graduado_por: 'Auto-cadastro',
-        mestre_original: academyData.owner_name,
         badges: []
       })
 

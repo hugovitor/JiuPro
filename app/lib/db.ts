@@ -687,8 +687,6 @@ export const db = {
             chave_pix: s.chavePix,
             peso: s.peso || '',
             altura: s.altura || '',
-            graduado_por: s.graduadoPor || '',
-            mestre_original: s.mestreOriginal || '',
             badges: s.badges || []
           })
 
@@ -788,8 +786,8 @@ export const db = {
           chavePix: s.chave_pix,
           peso: s.peso || '',
           altura: s.altura || '',
-          graduadoPor: s.graduado_por || '',
-          mestreOriginal: s.mestre_original || '',
+          graduadoPor: 'Auto-cadastro',
+          mestreOriginal: '',
           badges: s.badges || [],
           financeiro: (s.invoices || []).map((i: any) => ({ mes: i.mes, vencimento: i.vencimento, valor: i.valor, status: i.status })),
           presencas: (s.attendances || []).map((a: any) => ({ data: a.data, horario: a.horario, treino: a.treino })),
@@ -994,8 +992,6 @@ export const db = {
       chave_pix: target.chavePix,
       peso: target.peso || '',
       altura: target.altura || '',
-      graduado_por: target.graduadoPor || '',
-      mestre_original: target.mestreOriginal || '',
       badges: target.badges || []
     }).then(({ error }) => {
       if (error) console.error('Erro ao salvar atleta no Supabase:', error)
@@ -1427,8 +1423,6 @@ export const db = {
       chave_pix: newStudent.chavePix,
       peso: '',
       altura: '',
-      graduado_por: newStudent.graduadoPor,
-      mestre_original: newStudent.mestreOriginal,
       badges: []
     }).then(({ error }) => {
       if (error) console.error('Erro ao registrar atleta no Supabase:', error)
