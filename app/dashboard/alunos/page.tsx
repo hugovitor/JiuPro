@@ -144,7 +144,18 @@ export default function ListagemAlunosPage() {
                 alunosFiltrados.map((aluno) => (
                   <tr key={aluno.id} className="hover:bg-zinc-50/50 transition-colors">
                     {/* Link para a ficha individual no Nome */}
-                    <td className="p-4">
+                    <td className="p-4 flex items-center gap-3">
+                      {aluno.avatarUrl ? (
+                        <img
+                          src={aluno.avatarUrl}
+                          alt={aluno.nome}
+                          className="h-8 w-8 rounded-full object-cover border border-zinc-200"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center border border-zinc-200 text-zinc-500 font-bold text-xs flex-shrink-0">
+                          {aluno.nome.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <Link
                         href={`/dashboard/alunos/${aluno.id}`}
                         className="font-semibold text-zinc-900 hover:text-red-600 hover:underline transition-colors block"

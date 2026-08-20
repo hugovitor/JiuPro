@@ -37,13 +37,23 @@ export default function AlunoLoginPage() {
         }
 
         setIsLoading(false)
-        setError('E-mail ou senha incorretos. A senha padrão de demonstração é 123456.')
+        setError('E-mail ou senha incorretos.')
         return
       }
 
-      // 2. Validate password
+      // 2. Validate password — suporta bcrypt hash e texto puro (migração gradual)
       const dbPassword = student.password || '123456'
-      if (dbPassword !== password) {
+      let passwordValid = false
+      if (dbPassword.startsWith('$2')) {
+        // É um hash bcrypt
+        const { default: bcrypt } = await import('bcryptjs')
+        passwordValid = await bcrypt.compare(password, dbPassword)
+      } else {
+        // Texto puro (contas antigas antes da migração)
+        passwordValid = dbPassword === password
+      }
+
+      if (!passwordValid) {
         setIsLoading(false)
         setError('Senha incorreta para o e-mail informado.')
         return
@@ -71,6 +81,7 @@ export default function AlunoLoginPage() {
         password: student.password,
         peso: student.peso,
         altura: student.altura,
+        avatarUrl: student.avatar_url,
         badges: student.badges || [],
         financeiro: (invoices || []).map((inv: any) => ({
           mes: inv.mes,

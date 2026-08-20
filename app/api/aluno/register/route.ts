@@ -1,6 +1,7 @@
 // app/api/aluno/register/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import bcrypt from 'bcryptjs'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,10 +15,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Dados do aluno inválidos.' }, { status: 400 })
     }
 
+    // Hash da senha antes de salvar
+    const hashedPassword = await bcrypt.hash(student.password || '123456', 10)
+    const studentToInsert = { ...student, password: hashedPassword }
+
     // Insert student
     const { error: stdError } = await supabaseAdmin
       .from('students')
-      .insert(student)
+      .insert(studentToInsert)
 
     if (stdError) {
       console.error('Erro ao registrar aluno no Supabase:', stdError)

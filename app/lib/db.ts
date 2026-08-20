@@ -84,6 +84,7 @@ export interface Student {
   tournaments?: TournamentResult[]
   peso?: string
   altura?: string
+  avatarUrl?: string
 }
 
 export interface Notification {
@@ -518,6 +519,7 @@ export const db = {
           chavePix: s.chave_pix,
           peso: s.peso || '',
           altura: s.altura || '',
+          avatarUrl: s.avatar_url,
           graduadoPor: 'Auto-cadastro',
           mestreOriginal: '',
           badges: s.badges || [],

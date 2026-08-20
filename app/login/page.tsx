@@ -43,8 +43,16 @@ export default function LoginPage() {
         return
       }
 
-      // 2. Valida a senha do usuário
-      if (user.password !== password) {
+      // 2. Valida a senha — suporta bcrypt hash e texto puro (migração gradual)
+      let passwordValid = false
+      if (user.password && user.password.startsWith('$2')) {
+        const { default: bcrypt } = await import('bcryptjs')
+        passwordValid = await bcrypt.compare(password, user.password)
+      } else {
+        passwordValid = user.password === password
+      }
+
+      if (!passwordValid) {
         setIsLoading(false)
         setError('Senha incorreta para o e-mail informado!')
         return

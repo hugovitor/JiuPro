@@ -157,6 +157,41 @@ export default function RelatoriosPage() {
     document.body.removeChild(link)
   }
 
+  const handleExportFrequencyPDF = async () => {
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+      
+      const doc = new jsPDF()
+      doc.text('Relatório JiuPro — Alunos Sumidos (Risco de Evasão)', 14, 15)
+      doc.setFontSize(10)
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 22)
+      
+      const headers = [['Atleta', 'Faixa', 'Graus', 'Treinos (30d)', 'Dias Afastado', 'Risco']]
+      const rows = alunosSumidos.map(a => [
+        a.nome,
+        a.faixa,
+        a.graus.toString(),
+        a.ultimos30Dias.toString(),
+        `${a.diasAfastado} dias`,
+        a.status
+      ])
+
+      autoTable(doc, {
+        head: headers,
+        body: rows,
+        startY: 28,
+        theme: 'striped',
+        headStyles: { fillColor: [9, 9, 11] }, // Zinc 950 color
+      })
+
+      doc.save(`jiupro_alunos_afastados_${new Date().toISOString().split('T')[0]}.pdf`)
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao gerar PDF.')
+    }
+  }
+
   const handleExportFinanceCSV = () => {
     const headers = ['Data', 'Tipo', 'Descricao', 'Valor (R$)']
     const rows = ledgerEntries.map(e => [
@@ -175,6 +210,40 @@ export default function RelatoriosPage() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const handleExportFinancePDF = async () => {
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+      
+      const doc = new jsPDF()
+      doc.text('Relatório JiuPro — Fluxo de Caixa', 14, 15)
+      doc.setFontSize(10)
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 22)
+      doc.text(`Faturamento Total: R$ ${faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, 28)
+      
+      const headers = [['Data', 'Origem', 'Descrição', 'Valor']]
+      const rows = ledgerEntries.map(e => [
+        new Date(e.data).toLocaleDateString('pt-BR'),
+        e.tipo,
+        e.descricao,
+        `R$ ${e.valor.toFixed(2)}`
+      ])
+
+      autoTable(doc, {
+        head: headers,
+        body: rows,
+        startY: 34,
+        theme: 'striped',
+        headStyles: { fillColor: [9, 9, 11] },
+      })
+
+      doc.save(`jiupro_caixa_transacoes_${new Date().toISOString().split('T')[0]}.pdf`)
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao gerar PDF.')
+    }
   }
 
   if (isLoading || !user) {
@@ -258,12 +327,21 @@ export default function RelatoriosPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportFrequencyCSV}
-                  className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-250 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1"
+                  className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  <svg className="h-3.5 w-3.5 text-zinc-550" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="h-3.5 w-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                   </svg>
                   <span>Exportar CSV</span>
+                </button>
+                <button
+                  onClick={handleExportFrequencyPDF}
+                  className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <svg className="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  <span>Exportar PDF</span>
                 </button>
                 <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-100 uppercase tracking-wider leading-none flex items-center">
                   Ação Recomendada
@@ -397,10 +475,19 @@ export default function RelatoriosPage() {
                   onClick={handleExportFinanceCSV}
                   className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0"
                 >
-                  <svg className="h-3.5 w-3.5 text-zinc-550" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="h-3.5 w-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                   </svg>
                   <span>Exportar CSV</span>
+                </button>
+                <button
+                  onClick={handleExportFinancePDF}
+                  className="text-xs font-bold text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0"
+                >
+                  <svg className="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  <span>Exportar PDF</span>
                 </button>
               </div>
             </div>

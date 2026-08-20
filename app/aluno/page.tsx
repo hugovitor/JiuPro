@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, Student, Academy, ClassSession, Post, TournamentResult, Announcement, JournalEntry } from '../lib/db'
 import { supabase } from '../lib/supabase'
+import PwaBanner from '../components/PwaBanner'
 
 function AreaDoAlunoContent() {
   const router = useRouter()
@@ -213,6 +214,51 @@ function AreaDoAlunoContent() {
       alert('Erro de conexão ao processar checkout de cartão.')
     } finally {
       setIsProcessingCheckout(false)
+    }
+  }
+
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !student) return
+
+    setIsUploadingAvatar(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('studentId', student.id)
+
+    try {
+      const res = await fetch('/api/aluno/upload-avatar', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (res.ok && data.url) {
+        // Atualizar localStorage local
+        const s = db.getLoggedInStudent()
+        if (s) {
+          s.avatarUrl = data.url
+          // Salvar de volta no localStorage
+          const allStds = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+          const idx = allStds.findIndex((st: any) => st.id === student.id)
+          if (idx !== -1) {
+            allStds[idx] = s
+            localStorage.setItem('jiupro_students', JSON.stringify(allStds))
+          }
+          // Forçar recarregamento local
+          setStudent({ ...student, avatarUrl: data.url } as any)
+        }
+        alert('Foto de perfil atualizada com sucesso!')
+      } else {
+        alert(data.error || 'Erro ao carregar imagem de perfil.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Erro de conexão ao enviar imagem.')
+    } finally {
+      setIsUploadingAvatar(false)
     }
   }
 
@@ -554,6 +600,36 @@ function AreaDoAlunoContent() {
                 Faixa {student.faixa}
               </span>
             </div>
+            {/* Foto de perfil / Avatar clicável */}
+            <div className="relative group cursor-pointer flex-shrink-0">
+              <label htmlFor="avatar-input" className="cursor-pointer block relative">
+                {student.avatarUrl ? (
+                  <img
+                    src={student.avatarUrl}
+                    alt={student.nome}
+                    className="h-9 w-9 rounded-full object-cover border border-slate-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-500 font-black text-xs">
+                    {student.nome.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                {isUploadingAvatar && (
+                  <div className="absolute inset-0 bg-slate-900/45 rounded-full flex items-center justify-center">
+                    <span className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </label>
+              <input
+                id="avatar-input"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                disabled={isUploadingAvatar}
+              />
+            </div>
+
             <div className="min-w-0">
               <h1 className="text-sm font-bold text-slate-900 leading-tight truncate">{student.nome}</h1>
               <p className="text-[10px] text-slate-400 font-bold truncate">{academy.name}</p>
@@ -1415,49 +1491,64 @@ function AreaDoAlunoContent() {
 
         {/* ABA: PAINEL FINANCEIRO */}
         {activeTab === 'financeiro' && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
-            <div>
-              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">Mensalidades & Faturas</h3>
-              <p className="text-[10px] text-slate-400 mt-0.5">Veja suas faturas da academia e realize pagamentos via PIX ou Cartão de Crédito.</p>
-            </div>
-
-            <div className="divide-y divide-slate-100">
-              {student.financeiro.map((inv, idx) => (
-                <div key={idx} className="py-3 flex justify-between items-center text-xs">
-                  <div>
-                    <p className="font-bold text-slate-900 capitalize">{inv.mes}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Vencimento: {inv.vencimento} • R$ {inv.valor}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                      inv.status === 'Pago' 
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
-                        : 'bg-rose-50 text-rose-700 border border-rose-100'
-                    }`}>
-                      {inv.status}
-                    </span>
-                    {inv.status === 'Atrasado' && (
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => handleOpenPixModal(idx)}
-                          className="bg-zinc-100 text-zinc-800 border border-zinc-200 text-[10px] font-bold px-2.5 py-1.5 rounded hover:bg-zinc-200 transition-colors shadow-xs"
-                        >
-                          PIX
-                        </button>
-                        {academy?.stripeConnectId && (
-                          <button
-                            onClick={handleCheckoutCartao}
-                            disabled={isProcessingCheckout}
-                            className="bg-zinc-950 text-white text-[10px] font-bold px-2.5 py-1.5 rounded hover:bg-zinc-850 transition-colors shadow-xs disabled:opacity-50"
-                          >
-                            {isProcessingCheckout ? '...' : 'Cartão'}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">Mensalidades & Faturas</h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Histórico completo de pagamentos. PIX ou Cartão.</p>
                 </div>
-              ))}
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded font-bold">
+                    ✅ Pagas: {student.financeiro.filter(i => i.status === 'Pago').length}
+                  </span>
+                  <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded font-bold">
+                    ❌ Atrasadas: {student.financeiro.filter(i => i.status === 'Atrasado').length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-100">
+                {[...student.financeiro].reverse().map((inv, idx) => (
+                  <div key={idx} className="py-3 flex justify-between items-center text-xs">
+                    <div>
+                      <p className="font-bold text-slate-900 capitalize">{inv.mes}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Vencimento: {inv.vencimento} • R$ {inv.valor}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                        inv.status === 'Pago'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                          : 'bg-rose-50 text-rose-700 border border-rose-100'
+                      }`}>
+                        {inv.status === 'Pago' ? '✅ Pago' : '❌ Atrasado'}
+                      </span>
+                      {inv.status === 'Atrasado' && (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleOpenPixModal(student.financeiro.indexOf(inv))}
+                            className="bg-zinc-100 text-zinc-800 border border-zinc-200 text-[10px] font-bold px-2.5 py-1.5 rounded hover:bg-zinc-200 transition-colors"
+                          >
+                            PIX
+                          </button>
+                          {academy?.stripeConnectId && (
+                            <button
+                              onClick={handleCheckoutCartao}
+                              disabled={isProcessingCheckout}
+                              className="bg-zinc-950 text-white text-[10px] font-bold px-2.5 py-1.5 rounded hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                            >
+                              {isProcessingCheckout ? '...' : 'Cartão'}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {student.financeiro.length === 0 && (
+                  <p className="py-6 text-center text-[10px] text-slate-400">Nenhuma fatura registrada ainda.</p>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -1542,8 +1633,11 @@ function AreaDoAlunoContent() {
 
 export default function AreaDoAlunoPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans text-xs text-slate-400">Carregando tatame do aluno...</div>}>
-      <AreaDoAlunoContent />
-    </Suspense>
+    <>
+      <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans text-xs text-slate-400">Carregando tatame do aluno...</div>}>
+        <AreaDoAlunoContent />
+      </Suspense>
+      <PwaBanner />
+    </>
   )
 }

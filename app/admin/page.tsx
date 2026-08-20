@@ -79,12 +79,26 @@ export default function SuperadminPage() {
         .from('users')
         .select('*')
         .eq('email', email.trim().toLowerCase())
-        .eq('password', password)
         .in('role', ['SuperAdmin', 'Dono'])
         .single()
 
       if (error || !user) {
         setLoginError('Credenciais inválidas ou conta sem permissão de SuperAdmin. Verifique sua conta no Supabase.')
+        setIsLoading(false)
+        return
+      }
+
+      // Valida senha — suporta bcrypt hash e texto puro (migração gradual)
+      let passwordValid = false
+      if (user.password && user.password.startsWith('$2')) {
+        const { default: bcrypt } = await import('bcryptjs')
+        passwordValid = await bcrypt.compare(password, user.password)
+      } else {
+        passwordValid = user.password === password
+      }
+
+      if (!passwordValid) {
+        setLoginError('Senha incorreta para o e-mail informado.')
         setIsLoading(false)
         return
       }
@@ -364,6 +378,56 @@ export default function SuperadminPage() {
             </div>
           </div>
 
+        </div>
+
+        {/* Distribuição de Planos (Analytics) */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">Distribuição de Planos (Filiais Ativas)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Prata */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-semibold text-slate-600">Plano Prata</span>
+                <span className="font-black text-slate-900">{academies.filter(a => a.status === 'Ativo' && a.plan === 'Prata').length} filiais ({activeAcademies > 0 ? Math.round((academies.filter(a => a.status === 'Ativo' && a.plan === 'Prata').length / activeAcademies) * 100) : 0}%)</span>
+              </div>
+              <div className="w-full bg-slate-150 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-slate-400 h-full transition-all duration-500" 
+                  style={{ width: `${activeAcademies > 0 ? (academies.filter(a => a.status === 'Ativo' && a.plan === 'Prata').length / activeAcademies) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Ouro */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-semibold text-amber-600">Plano Ouro</span>
+                <span className="font-black text-amber-850">{academies.filter(a => a.status === 'Ativo' && a.plan === 'Ouro').length} filiais ({activeAcademies > 0 ? Math.round((academies.filter(a => a.status === 'Ativo' && a.plan === 'Ouro').length / activeAcademies) * 100) : 0}%)</span>
+              </div>
+              <div className="w-full bg-slate-150 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-amber-500 h-full transition-all duration-500" 
+                  style={{ width: `${activeAcademies > 0 ? (academies.filter(a => a.status === 'Ativo' && a.plan === 'Ouro').length / activeAcademies) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* BlackBelt */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-semibold text-zinc-950 font-bold">Plano BlackBelt</span>
+                <span className="font-black text-zinc-900">{academies.filter(a => a.status === 'Ativo' && a.plan === 'BlackBelt').length} filiais ({activeAcademies > 0 ? Math.round((academies.filter(a => a.status === 'Ativo' && a.plan === 'BlackBelt').length / activeAcademies) * 100) : 0}%)</span>
+              </div>
+              <div className="w-full bg-slate-150 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-zinc-950 h-full transition-all duration-500" 
+                  style={{ width: `${activeAcademies > 0 ? (academies.filter(a => a.status === 'Ativo' && a.plan === 'BlackBelt').length / activeAcademies) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* Filter Toolbar */}
