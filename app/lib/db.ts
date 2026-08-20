@@ -77,6 +77,7 @@ export interface Student {
   status: 'Ativo' | 'Inativo'
   dataMatricula: string
   mensalidade: string
+  diaVencimento?: string
   chavePix: string
   email: string
   graduadoPor: string
