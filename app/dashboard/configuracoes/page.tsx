@@ -83,56 +83,60 @@ export default function ConfiguracoesPage() {
   }
 
   useEffect(() => {
-    const loggedUser = db.getLoggedInUser()
-    if (loggedUser) {
-      setUser(loggedUser)
+    // 1. Checar se retornou do Stripe Connect onboarding
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const connectStatus = params.get('connect')
+      const accountId = params.get('accountId')
+      const acadId = params.get('academyId')
       
-      // Checar se retornou do Stripe Connect onboarding
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search)
-        const connectStatus = params.get('connect')
-        const accountId = params.get('accountId')
-        const acadId = params.get('academyId')
-        
-        if (connectStatus === 'success' && accountId && acadId === loggedUser.academyId) {
-          // Atualizar banco de dados via API primeiro
-          fetch('/api/academy/settings', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              academyId: loggedUser.academyId,
-              settings: {
-                mensalidadePadrao: db.getAcademy(loggedUser.academyId)?.mensalidadePadrao || '150,00',
-                diaVencimento: db.getAcademy(loggedUser.academyId)?.diaVencimento || '10',
-                stripeConnectId: accountId
-              }
-            })
-          }).then(async (res) => {
-            if (res.ok) {
-              // Salvar no local storage local
+      if (connectStatus === 'success' && accountId && acadId) {
+        // Atualizar banco de dados via API independente de estar logado no cache local
+        fetch('/api/academy/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            academyId: acadId,
+            settings: {
+              mensalidadePadrao: '150,00',
+              diaVencimento: '10',
+              stripeConnectId: accountId
+            }
+          })
+        }).then(async (res) => {
+          if (res.ok) {
+            // Sincronizar cache local se estiver logado
+            const loggedUser = db.getLoggedInUser()
+            if (loggedUser && loggedUser.academyId === acadId) {
               db.updateAcademySettings(loggedUser.academyId, {
                 mensalidadePadrao: db.getAcademy(loggedUser.academyId)?.mensalidadePadrao || '150,00',
                 diaVencimento: db.getAcademy(loggedUser.academyId)?.diaVencimento || '10',
                 stripeConnectId: accountId
               })
-              alert('Conta Stripe Connect vinculada com sucesso! Agora você pode receber mensalidades por cartão de crédito.')
-              window.history.replaceState({}, document.title, window.location.pathname)
               // Forçar sincronização para recarregar tudo atualizado
               await db.syncWithSupabase(loggedUser.academyId)
-              loadData(loggedUser.academyId)
-            } else {
-              alert('Erro ao salvar vinculação com a Stripe no banco de dados.')
             }
-          }).catch(err => {
-            console.error(err)
-            alert('Erro de conexão ao salvar vinculação.')
-          })
-          return
-        }
+            alert('Conta Stripe Connect vinculada com sucesso! Agora você pode receber mensalidades por cartão de crédito.')
+            window.history.replaceState({}, document.title, window.location.pathname)
+            window.location.reload()
+          } else {
+            alert('Erro ao salvar vinculação com a Stripe no banco de dados.')
+          }
+        }).catch(err => {
+          console.error(err)
+          alert('Erro de conexão ao salvar vinculação.')
+        })
+        return
       }
+    }
 
+    // 2. Fluxo normal de carregamento do painel
+    const loggedUser = db.getLoggedInUser()
+    if (loggedUser) {
+      setUser(loggedUser)
+      
       // Sincronizar com o Supabase no início para garantir que o cache local está preenchido
       db.syncWithSupabase(loggedUser.academyId).then(() => {
         loadData(loggedUser.academyId)
