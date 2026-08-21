@@ -1,24 +1,24 @@
-# Walkthrough - Ajuste e Sincronização da Comunidade de Alunos
+# Walkthrough - Cadastro Detalhado de Grade de Treinos (Turmas)
 
-Implementamos a persistência real dos posts da comunidade no banco de dados e adicionamos a exibição dinâmica dos avatares/fotos dos autores nos posts.
-
----
-
-## 🛠️ O que foi corrigido e implementado:
-
-### 💾 1. Persistência de Posts em Tempo Real (Supabase)
-* **O Problema:** Os métodos de rede social (`addPost`, `likePost`, `addComment`) gravavam dados somente na memória local (`localStorage`). No recarregamento de página, a sincronização de dados (`syncWithSupabase`) sobrescrevia a memória local puxando a tabela limpa do banco de dados, excluindo os posts recém-criados.
-* **A Solução:** Vinculamos as ações da comunidade de forma síncrona ao Supabase:
-  * **Criar Post (`addPost`):** Insere diretamente uma nova linha na tabela `posts` do Supabase.
-  * **Curtir Post (`likePost`):** Atualiza a array de IDs que curtiram a publicação no banco.
-  * **Comentar no Post (`addComment`):** Salva os dados de comentários em tempo real no formato JSONB na linha correspondente do post.
-* **O Resultado:** Os posts agora são salvos de verdade na nuvem e persistem normalmente ao atualizar ou trocar de dispositivo.
-
-### 🖼️ 2. Exibição da Foto do Autor do Post
-* **UI atualizada:** Modificamos a renderização do cabeçalho de posts na aba de **Comunidade** (`app/aluno/page.tsx`).
-* **Busca Dinâmica:** Em vez de exibir apenas um círculo com as iniciais do nome, o sistema busca dinamicamente a foto de perfil (`avatarUrl`) do autor da postagem a partir do banco de dados. Caso ele não possua imagem cadastrada, o sistema apresenta graciosamente o círculo clássico com as iniciais do atleta.
+Refatoramos o formulário de cadastro de turmas no painel do professor para permitir a seleção personalizada de dias, horários e categorias dos treinos.
 
 ---
 
-## 🧪 Homologação & Build de Produção
-* O build final passou com sucesso (código `0`) e as correções já estão publicadas em produção no GitHub no commit `f831d1f`.
+## 🛠️ O que foi implementado:
+
+### 🥋 1. Cadastro Avançado de Turmas (`/dashboard/configuracoes`)
+* **Seleção Dinâmica de Dias (Semana):** Substituímos o campo estático de dias por botões do tipo checkbox interativos para cada dia da semana (Seg, Ter, Qua, Qui, Sex, Sáb, Dom). O professor pode marcar exatamente quais dias a turma possui treino.
+* **Categoria da Turma:** Adicionamos um menu de seleção (`select`) com categorias predefinidas mais comuns do Jiu-Jitsu para o professor escolher:
+  * *Treino Livre*
+  * *Treino Iniciante / Fundamental*
+  * *Jiu-Jitsu Infantil*
+  * *Jiu-Jitsu Adolescentes / Juvenil*
+  * *Treino Avançado*
+  * *Treino de Competição*
+* **Personalização Completa ("Outro"):** Se o professor selecionar a opção "Outro", o sistema abre automaticamente um campo de texto adicional para ele digitar o nome que desejar (ex: *"Treino NoGi"*, *"Classe Feminina"*).
+* **Horário:** O seletor de horas clássico (`input type="time"`) foi mantido para máxima precisão de horário de início.
+
+---
+
+## 🧪 Verificação do Sistema
+* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `7c1e813`.
