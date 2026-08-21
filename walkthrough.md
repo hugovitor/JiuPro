@@ -1,24 +1,24 @@
-# Walkthrough - Ajuste no Cancelamento de Treinos (Frequência Aluno)
+# Walkthrough - Ajuste e Sincronização da Comunidade de Alunos
 
-Ajustamos o comportamento de agendamentos no Portal do Aluno para corrigir a marcação de dias duplicados no calendário e permitir o cancelamento flexível de aulas reservadas.
+Implementamos a persistência real dos posts da comunidade no banco de dados e adicionamos a exibição dinâmica dos avatares/fotos dos autores nos posts.
 
 ---
 
 ## 🛠️ O que foi corrigido e implementado:
 
-### 1. 📅 Explicação dos Dois Dias Marcados (Calendário)
-* O calendário de frequência do aluno marca em verde os dias em que há presenças registradas no histórico do banco de dados do aluno (`presencas`).
-* O aluno de demonstração já possuía uma presença cadastrada no dia **20 de Agosto** (ontem) vinda dos dados de teste iniciais (seeds).
-* Ao realizar o agendamento de teste para as 20h no dia **21 de Agosto** (hoje), o sistema registrou esta nova presença de hoje. Portanto, o calendário passou a exibir corretamente os dois dias de treino em verde (20 e 21). Não houve duplicidade no registro do mesmo treino.
+### 💾 1. Persistência de Posts em Tempo Real (Supabase)
+* **O Problema:** Os métodos de rede social (`addPost`, `likePost`, `addComment`) gravavam dados somente na memória local (`localStorage`). No recarregamento de página, a sincronização de dados (`syncWithSupabase`) sobrescrevia a memória local puxando a tabela limpa do banco de dados, excluindo os posts recém-criados.
+* **A Solução:** Vinculamos as ações da comunidade de forma síncrona ao Supabase:
+  * **Criar Post (`addPost`):** Insere diretamente uma nova linha na tabela `posts` do Supabase.
+  * **Curtir Post (`likePost`):** Atualiza a array de IDs que curtiram a publicação no banco.
+  * **Comentar no Post (`addComment`):** Salva os dados de comentários em tempo real no formato JSONB na linha correspondente do post.
+* **O Resultado:** Os posts agora são salvos de verdade na nuvem e persistem normalmente ao atualizar ou trocar de dispositivo.
 
-### ❌ 2. Botão "Desistir" Ativo e Funcional (Cancelamento Completo)
-* **Permissão de Cancelamento:** Removemos o bloqueio que desabilitava o botão de check-in assim que a presença era marcada como "Confirmado". Agora, mesmo que o treino tenha sido confirmado (automaticamente ou via receptor QR), o botão exibirá **"Desistir"** em vermelho e continuará clicável.
-* **Limpeza de Histórico:** Atualizamos a rotina `studentCancelCheckIn` em `app/lib/db.ts`. Agora, quando o aluno clica em **Desistir**:
-  1. A reserva de check-in é deletada.
-  2. O registro de presença correspondente ao dia de hoje é **excluído** do histórico de treinos do aluno (`student.presencas`).
-  3. O dia de hoje no calendário mensal volta a ficar **branco (sem registro)** e a contagem de treinos diminui na hora!
+### 🖼️ 2. Exibição da Foto do Autor do Post
+* **UI atualizada:** Modificamos a renderização do cabeçalho de posts na aba de **Comunidade** (`app/aluno/page.tsx`).
+* **Busca Dinâmica:** Em vez de exibir apenas um círculo com as iniciais do nome, o sistema busca dinamicamente a foto de perfil (`avatarUrl`) do autor da postagem a partir do banco de dados. Caso ele não possua imagem cadastrada, o sistema apresenta graciosamente o círculo clássico com as iniciais do atleta.
 
 ---
 
-## 🧪 Verificação de Build
-* O build final passou com sucesso (código `0`) e as correções já estão publicadas em produção no GitHub no commit `b6c21e6`.
+## 🧪 Homologação & Build de Produção
+* O build final passou com sucesso (código `0`) e as correções já estão publicadas em produção no GitHub no commit `f831d1f`.
