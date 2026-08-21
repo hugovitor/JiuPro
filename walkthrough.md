@@ -1,19 +1,19 @@
-# Walkthrough - Sincronização da Grade de Horários (Supabase)
+# Walkthrough - Resolução de Conflito de Agendamento no Mesmo Horário
 
-Corrigimos a sincronização de turmas/horários da academia no banco de dados Supabase para garantir que as classes criadas pelo professor apareçam instantaneamente no aplicativo do aluno.
+Corrigimos a validação de agendamentos para permitir múltiplos treinos diferentes acontecendo no mesmo horário sem que a presença em um marque automaticamente o outro.
 
 ---
 
 ## 🛠️ O que foi corrigido e implementado:
 
-### 🌐 1. Sincronização da Tabela `classes` com o Supabase
-* **O Problema:** Os horários de treinos criados no painel de configurações do professor eram gravados apenas no `localStorage` do navegador do professor. Quando o aluno entrava no aplicativo (/aluno) de outro dispositivo, os treinos não apareciam porque a tabela `classes` no Supabase estava vazia.
-* **A Solução:** Vinculamos as operações de controle de turmas diretamente ao banco de dados em tempo real:
-  * **Adicionar/Editar Horário (`saveClass`):** Executa um `upsert` na tabela `classes` do Supabase para registrar/atualizar o dia, horário e nome do treino na nuvem.
-  * **Remover Horário (`removeClass`):** Deleta a linha correspondente na tabela `classes` do Supabase.
-  * **Sincronização ao Carregar (`syncWithSupabase`):** No portal do aluno, sempre que a tela é carregada ou sincronizada, o sistema busca os dados atualizados das turmas do Supabase e atualiza o estado do app.
+### 🎯 1. Resolução do Conflito de Horário Único (`classId`)
+* **O Problema:** O sistema mapeava os agendamentos na tela do aluno comparando apenas o horário (ex: `"14:00"`). Se a academia possuísse dois treinos cadastrados às 14:00 (como *Jiu-Jitsu Infantil* e *Treino Avançado*), ao agendar um deles, o sistema via que existia um check-in para "14:00" e exibia ambos como agendados (botão vermelho "Desistir").
+* **A Solução:** Alteramos o fluxo de identificação de agendamentos no banco de dados e na interface:
+  * **Identificação Única:** Agora, o sistema utiliza o **`id` único da turma (classId)** em vez do horário textual para controlar a fila de check-ins e parceiros de treino.
+  * **Exibição Organizada:** Na tela do aluno (`app/aluno/page.tsx`), a busca do status do check-in agora é feita por `c.horario === treino.id`. Como os IDs das turmas são completamente diferentes, cada card funciona de forma independente e isolada.
+  * **Histórico Elegante:** Ao confirmar a presença, o sistema mapeia o `classId` de volta para o nome descritivo do treino (ex: `"14:00h (Jiu-Jitsu Infantil)"`) para salvar na timeline do atleta com fácil leitura.
 
 ---
 
-## 🧪 Verificação e Build
-* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `db5a3ee`.
+## 🧪 Homologação e Build de Produção
+* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `f5e80fa`.
