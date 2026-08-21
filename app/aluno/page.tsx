@@ -1583,9 +1583,23 @@ function AreaDoAlunoContent() {
                       {/* Cabeçalho do Post */}
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 uppercase">
-                            {post.authorName.substring(0, 2)}
-                          </div>
+                          {(() => {
+                            const authorStudent = db.getStudent(post.authorId)
+                            if (authorStudent && authorStudent.avatarUrl) {
+                              return (
+                                <img
+                                  src={authorStudent.avatarUrl}
+                                  alt={post.authorName}
+                                  className="h-8 w-8 rounded-full object-cover border border-slate-200"
+                                />
+                              )
+                            }
+                            return (
+                              <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 uppercase">
+                                {post.authorName.substring(0, 2)}
+                              </div>
+                            )
+                          })()}
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs font-bold text-slate-900 leading-none">{post.authorName}</span>

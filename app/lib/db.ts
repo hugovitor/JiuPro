@@ -1301,6 +1301,22 @@ export const db = {
     }
     all.push(newPost)
     localStorage.setItem('jiupro_posts', JSON.stringify(all))
+
+    // Sync to Supabase
+    supabase.from('posts').insert({
+      id: newPost.id,
+      academy_id: academyId,
+      author_id: authorId,
+      author_name: authorName,
+      author_faixa: authorFaixa || 'Sem Faixa',
+      content: content,
+      timestamp: newPost.timestamp,
+      likes: [],
+      comments: []
+    }).then(({ error }) => {
+      if (error) console.error('Erro ao salvar post no Supabase:', error)
+    })
+
     return newPost
   },
 
@@ -1318,6 +1334,11 @@ export const db = {
       }
       all[idx] = post
       localStorage.setItem('jiupro_posts', JSON.stringify(all))
+
+      // Sync to Supabase
+      supabase.from('posts').update({ likes: post.likes }).eq('id', postId).then(({ error }) => {
+        if (error) console.error('Erro ao atualizar likes no Supabase:', error)
+      })
     }
   },
 
