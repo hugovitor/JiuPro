@@ -42,6 +42,10 @@ Esta é a documentação completa do **JiuPro**, uma plataforma B2B SaaS desenvo
    * Ao marcar presença para um aluno (seja aceitando o check-in do app ou fazendo chamada direta na lista de atletas):
      * O sistema verifica se o aluno possui faturas com status **"Atrasado"**.
      * Se houver pendências, exibe um alerta de inadimplência exigindo que o professor confirme explicitamente a autorização de entrada (cortesia) para prosseguir.
+4. **Isolamento de Turmas no Mesmo Horário:**
+   * Para permitir múltiplos treinos simultâneos na academia (ex: Jiu-Jitsu Infantil e Treino Avançado ocorrendo ambos às 14:00h), os agendamentos e presenças são controlados através do `classId` único da turma, impedindo que o agendamento em um treino marque a presença no outro.
+5. **Reavaliação Dinâmica de Conquistas (Medalhas):**
+   * Caso o aluno desista de uma aula agendada e sua contagem de presenças diminua, as conquistas do atleta são reavaliadas na hora, removendo as medalhas correspondentes caso ele não atinja mais os critérios exigidos (ex: "Frequência de Ferro" exige 3 presenças).
 
 ---
 
@@ -60,6 +64,7 @@ Toda a interação com os dados passa pelo wrapper do banco de dados `app/lib/db
 1. Os dados são salvos localmente e de forma síncrona no `localStorage`.
 2. Uma promessa assíncrona (`db.syncWithSupabase()`) é disparada para persistir as modificações nas tabelas do Supabase.
 3. Em caso de falha de conexão, as alterações continuam seguras no dispositivo local até a próxima sincronização.
+4. **Sincronização em Tempo Real (Grade e Lançamentos):** Modificações na grade de treinos (adições/remocões), faturas lançadas manualmente pelo professor (`addManualInvoice`) e presenças creditadas manualmente pelo painel (`addManualPresence`) realizam chamadas diretas ao banco de dados Supabase em tempo de execução, garantindo que os dados sejam imediatamente salvos na nuvem e fiquem visíveis para os alunos em múltiplos dispositivos.
 
 ---
 
@@ -125,7 +130,7 @@ O modelo de dados relacional é estruturado com as seguintes tabelas no PostgreS
 ## 4. Documentação de APIs & Rotas
 
 ### 4.1. Endpoints de Integração (API Router)
-* `/api/webhooks/stripe` (POST): Recebe eventos de checkout do Stripe e Stripe Connect, limpando faturas com status "Atrasado" automaticamente na confirmação do pagamento.
+* `/api/webhooks/stripe` (POST): Recebe eventos de checkout do Stripe e Stripe Connect, limpando faturas com status "Atrasado" automaticamente na confirmação do pagamento. Possui validação dual de chaves: utiliza `STRIPE_WEBHOOK_SECRET` para eventos da conta principal ("Sua conta") e realiza fallback para `STRIPE_CONNECT_WEBHOOK_SECRET` para os eventos de contas conectadas de academias ("Contas conectadas").
 * `/api/stripe-connect/onboard` (GET): Redireciona a academia para o portal de Onboarding do Stripe Express.
 * `/api/checkout/stripe` (POST): Cria a sessão de checkout de adesão do aluno à academia.
 * `/api/cron/gerar-faturas` (GET): Executado mensalmente para gerar faturas automaticamente para os alunos ativos cadastrados.
@@ -150,6 +155,12 @@ O modelo de dados relacional é estruturado com as seguintes tabelas no PostgreS
 2. Ele visualiza a lista **"Fila de Chamada"** contendo os atletas que reservaram presença pelo aplicativo. Clicando em **"Confirmar Presença"**, a presença é registrada no histórico.
 3. Para crianças e atletas sem celular: o professor usa a lista à direita **"Chamada Rápida (Lista de Atletas)"**, busca o nome do aluno no campo de busca e clica em **"Marcar"** para registrar a presença dele diretamente na turma selecionada.
 4. O sistema valida na hora a adimplência de cada atleta. Caso possua mensalidades atrasadas, o sistema exibe um alerta de inadimplência exigindo confirmação de cortesia para liberar a entrada.
+
+### 5.3. Como Desvincular ou Trocar a Conta Stripe Connect da Academia
+1. O professor/administrador acessa `/dashboard/configuracoes`.
+2. No card **Pagamento via Cartão de Crédito**, localiza a seção que exibe o ID da conta conectada ativa (ex: `acct_...`).
+3. Clica no botão vermelho **"Desconectar / Trocar de Conta"** e confirma a ação no aviso do navegador.
+4. O sistema limpa as configurações anteriores da nuvem e exibe novamente o botão de vínculo original. O professor pode então prosseguir clicando em **"Vincular Conta Stripe"** para associar outra conta da Stripe.
 
 ---
 
