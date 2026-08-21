@@ -933,6 +933,16 @@ export const db = {
     }
 
     const today = new Date().toISOString().split('T')[0]
+    
+    // Also remove the corresponding presence from the student record for today
+    const students: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+    const sIdx = students.findIndex(s => s.id === studentId)
+    if (sIdx !== -1) {
+      const student = students[sIdx]
+      student.presencas = student.presencas.filter(p => p.data !== today)
+      localStorage.setItem('jiupro_students', JSON.stringify(students))
+    }
+
     // Supabase delete check-in
     supabase.from('checkins').delete().eq('student_id', studentId).eq('data', today).then(({ error }) => {
       if (error) console.error('Erro ao cancelar checkin no Supabase:', error)

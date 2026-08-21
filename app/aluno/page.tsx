@@ -1062,18 +1062,16 @@ function AreaDoAlunoContent() {
                       <button
                         type="button"
                         onClick={() => handleCheckInToggle(treino.horario, treino.nome)}
-                        disabled={isConfirmed || (!checkInFeito && isCheckInExpired(treino.horario))}
+                        disabled={!checkInFeito && isCheckInExpired(treino.horario)}
                         className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                           checkInFeito
-                            ? isConfirmed
-                              ? 'bg-emerald-600 text-white opacity-80 cursor-default shadow-sm'
-                              : 'bg-red-600 text-white hover:bg-red-700 shadow-sm'
+                            ? 'bg-red-600 text-white hover:bg-red-700 shadow-sm cursor-pointer'
                             : isCheckInExpired(treino.horario)
                               ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                              : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'
+                              : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm cursor-pointer'
                         }`}
                       >
-                        {isConfirmed ? 'Confirmado' : checkInFeito ? 'Cancelar' : isCheckInExpired(treino.horario) ? 'Expirado' : 'Agendar'}
+                        {checkInFeito ? 'Desistir' : isCheckInExpired(treino.horario) ? 'Expirado' : 'Agendar'}
                       </button>
                     </div>
 
