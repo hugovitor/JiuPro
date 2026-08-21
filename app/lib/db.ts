@@ -90,6 +90,9 @@ export interface Student {
   peso?: string
   altura?: string
   avatarUrl?: string
+  alergias?: string
+  lesoes?: string
+  observacoesMedicas?: string
 }
 
 export interface Notification {
@@ -422,7 +425,10 @@ export const db = {
             chave_pix: s.chavePix,
             peso: s.peso || '',
             altura: s.altura || '',
-            badges: s.badges || []
+            badges: s.badges || [],
+            alergias: s.alergias || '',
+            lesoes: s.lesoes || '',
+            observacoes_medicas: s.observacoesMedicas || ''
           })
 
           // Invoices
@@ -528,6 +534,9 @@ export const db = {
           peso: s.peso || '',
           altura: s.altura || '',
           avatarUrl: s.avatar_url,
+          alergias: s.alergias || '',
+          lesoes: s.lesoes || '',
+          observacoesMedicas: s.observacoes_medicas || '',
           graduadoPor: 'Auto-cadastro',
           mestreOriginal: '',
           badges: s.badges || [],
@@ -734,7 +743,10 @@ export const db = {
       chave_pix: target.chavePix,
       peso: target.peso || '',
       altura: target.altura || '',
-      badges: target.badges || []
+      badges: target.badges || [],
+      alergias: target.alergias || '',
+      lesoes: target.lesoes || '',
+      observacoes_medicas: target.observacoesMedicas || ''
     }).then(({ error }) => {
       if (error) console.error('Erro ao salvar atleta no Supabase:', error)
     })
@@ -1512,6 +1524,35 @@ export const db = {
       all[idx].altura = altura
       localStorage.setItem('jiupro_students', JSON.stringify(all))
     }
+
+    supabase.from('students').update({
+      peso,
+      altura
+    }).eq('id', studentId).then(({ error }) => {
+      if (error) console.error('Erro ao atualizar peso/altura no Supabase:', error)
+    })
+  },
+
+  updateStudentMedical(studentId: string, alergias: string, lesoes: string, observacoesMedicas: string) {
+    const student = this.getStudent(studentId)
+    if (student && checkDemoBlock(student.academyId)) return
+    initializeStorage()
+    const all: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
+    const idx = all.findIndex(s => s.id === studentId)
+    if (idx !== -1) {
+      all[idx].alergias = alergias
+      all[idx].lesoes = lesoes
+      all[idx].observacoesMedicas = observacoesMedicas
+      localStorage.setItem('jiupro_students', JSON.stringify(all))
+    }
+
+    supabase.from('students').update({
+      alergias,
+      lesoes,
+      observacoes_medicas: observacoesMedicas
+    }).eq('id', studentId).then(({ error }) => {
+      if (error) console.error('Erro ao atualizar prontuario medico no Supabase:', error)
+    })
   },
 
   addTournamentResult(studentId: string, campeonato: string, data: string, categoria: string, resultado: 'Ouro' | 'Prata' | 'Bronze' | 'Participação'): TournamentResult {

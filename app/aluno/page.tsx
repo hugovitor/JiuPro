@@ -19,7 +19,7 @@ function AreaDoAlunoContent() {
   const [notifications, setNotifications] = useState<any[]>([])
   
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'treinos' | 'feed' | 'performance' | 'financeiro'>('treinos')
+  const [activeTab, setActiveTab] = useState<'treinos' | 'feed' | 'performance' | 'financeiro' | 'carteirinha'>('treinos')
   
   // Post states
   const [newPostContent, setNewPostContent] = useState('')
@@ -848,6 +848,14 @@ function AreaDoAlunoContent() {
         >
           Financeiro
         </button>
+        <button
+          onClick={() => setActiveTab('carteirinha')}
+          className={`flex-1 min-w-[80px] py-3 text-center border-b-2 transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === 'carteirinha' ? 'border-red-600 text-zinc-950' : 'border-transparent hover:text-slate-700'
+          }`}
+        >
+          Carteirinha
+        </button>
       </div>
 
       <main className="max-w-md mx-auto p-4 space-y-5">
@@ -1675,6 +1683,96 @@ function AreaDoAlunoContent() {
                   <p className="py-6 text-center text-[10px] text-slate-400">Nenhuma fatura registrada ainda.</p>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ABA: CARTEIRINHA DIGITAL */}
+        {activeTab === 'carteirinha' && (
+          <div className="space-y-4 animate-fade-in font-sans">
+            {/* Card Premium */}
+            <div className="w-full bg-zinc-950 text-white rounded-2xl border border-zinc-800 shadow-2xl relative overflow-hidden p-6 space-y-6">
+              {/* Background gradient effect */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 opacity-10 rounded-full blur-3xl pointer-events-none" />
+              
+              {/* Top Row: Brand & Academy */}
+              <div className="flex justify-between items-center border-b border-zinc-900 pb-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 bg-white rounded flex items-center justify-center border-r-[2.5px] border-red-600 shadow-sm flex-shrink-0">
+                    <span className="text-zinc-950 font-black text-[10px] italic tracking-tighter">JP</span>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white">Carteirinha Digital Atleta</span>
+                </div>
+                <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">
+                  {academy?.name || 'JiuPro'}
+                </span>
+              </div>
+
+              {/* Middle Row: Photo, Belt Visual and Name */}
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-xl text-white shadow-inner flex-shrink-0 relative overflow-hidden">
+                  {student.avatarUrl ? (
+                    <img src={student.avatarUrl} alt={student.nome} className="h-full w-full object-cover" />
+                  ) : (
+                    student.nome.slice(0, 2).toUpperCase()
+                  )}
+                </div>
+
+                <div className="space-y-1.5 min-w-0">
+                  <h2 className="text-base font-bold tracking-tight truncate text-white">{student.nome}</h2>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Graus & Graduação:</span>
+                    <div className="flex items-center gap-2">
+                      <BeltVisual beltName={student.faixa} degrees={student.graus} size="sm" />
+                      <span className="text-[10px] font-bold text-zinc-350">{student.faixa} • {student.graus}G</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Row: Date & QR Code Scan */}
+              <div className="flex justify-between items-end pt-2 border-t border-zinc-900">
+                <div className="space-y-1">
+                  <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wide block">Membro Desde</span>
+                  <span className="text-[10px] text-zinc-200 font-bold">{student.dataMatricula || '10/08/2026'}</span>
+                </div>
+                
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wide block text-right">Validação Presencial</span>
+                  <div className="h-20 w-20 bg-white p-1 rounded-lg border border-zinc-800 flex items-center justify-center">
+                    <img 
+                      src={`https://chart.googleapis.com/chart?chs=100x100&cht=qr&chl=jiupro:checkin:${student.id}:${student.academyId}&choe=UTF-8`} 
+                      alt="Check-in QR" 
+                      className="h-full w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ficha Médica e de Segurança de Acesso rápido */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                🩺 Histórico de Saúde & Prontuário
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-3 text-xs leading-relaxed">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide block">Alergias</span>
+                  <p className="font-bold text-slate-700">{student.alergias || 'Nenhuma alergia relatada'}</p>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide block">Lesões e Restrições</span>
+                  <p className="font-bold text-rose-600">{student.lesoes || 'Nenhuma lesão ativa'}</p>
+                </div>
+              </div>
+
+              {student.observacoesMedicas && (
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs space-y-1">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide block">Observações do Mestre</span>
+                  <p className="font-semibold text-slate-600">{student.observacoesMedicas}</p>
+                </div>
+              )}
             </div>
           </div>
         )}

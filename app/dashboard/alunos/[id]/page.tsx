@@ -31,6 +31,9 @@ export default function FichaAlunoPage({ params }: PageProps) {
   const [editGraus, setEditGraus] = useState(0)
   const [editGraduadoPor, setEditGraduadoPor] = useState('')
   const [editMestreOriginal, setEditMestreOriginal] = useState('')
+  const [editAlergias, setEditAlergias] = useState('')
+  const [editLesoes, setEditLesoes] = useState('')
+  const [editObservacoesMedicas, setEditObservacoesMedicas] = useState('')
 
   // Manual Attendance form states
   const [manualDate, setManualDate] = useState('')
@@ -79,6 +82,9 @@ export default function FichaAlunoPage({ params }: PageProps) {
       setEditGraus(athlete.graus)
       setEditGraduadoPor(athlete.graduadoPor)
       setEditMestreOriginal(athlete.mestreOriginal)
+      setEditAlergias(athlete.alergias || '')
+      setEditLesoes(athlete.lesoes || '')
+      setEditObservacoesMedicas(athlete.observacoesMedicas || '')
       
       setManualValor(athlete.mensalidade)
 
@@ -118,7 +124,10 @@ export default function FichaAlunoPage({ params }: PageProps) {
       chavePix: athleteEmailAsPixKey(),
       graduadoPor: editGraduadoPor,
       mestreOriginal: editMestreOriginal,
-      id: aluno.id
+      id: aluno.id,
+      alergias: editAlergias,
+      lesoes: editLesoes,
+      observacoesMedicas: editObservacoesMedicas
     }
 
     db.saveStudent(updatedStudent)
@@ -428,6 +437,39 @@ export default function FichaAlunoPage({ params }: PageProps) {
                   <option value="Ativo">Ativo</option>
                   <option value="Inativo">Inativo</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Alergias</label>
+                <input 
+                  type="text" 
+                  value={editAlergias} 
+                  onChange={(e) => setEditAlergias(e.target.value)} 
+                  placeholder="Ex: Antiinflamatorios, Dipirona"
+                  className="w-full px-3 py-2 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 transition-colors text-slate-900 font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Lesões Ativas / Restrições</label>
+                <input 
+                  type="text" 
+                  value={editLesoes} 
+                  onChange={(e) => setEditLesoes(e.target.value)} 
+                  placeholder="Ex: Joelho esquerdo, Lombar"
+                  className="w-full px-3 py-2 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 transition-colors text-slate-900 font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Observações Médicas</label>
+                <input 
+                  type="text" 
+                  value={editObservacoesMedicas} 
+                  onChange={(e) => setEditObservacoesMedicas(e.target.value)} 
+                  placeholder="Observacoes adicionais de saude"
+                  className="w-full px-3 py-2 mt-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-red-600 transition-colors text-slate-900 font-semibold"
+                />
               </div>
             </div>
 
@@ -798,6 +840,29 @@ export default function FichaAlunoPage({ params }: PageProps) {
                   <span className="text-[9px] font-bold text-slate-400 uppercase">Altura</span>
                   <p className="text-sm font-bold text-slate-900 mt-0.5">{aluno.altura || '1.75'} m</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Prontuário Médico */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3.5 h-fit text-xs">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-1.5 flex items-center gap-1.5">
+                🩺 Prontuário Médico
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase">Alergias</span>
+                  <p className="font-bold text-slate-800 mt-0.5">{aluno.alergias || 'Nenhuma alergia registrada'}</p>
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase">Lesões Ativas / Restrições</span>
+                  <p className="font-bold text-rose-600 mt-0.5">{aluno.lesoes || 'Nenhuma lesão ativa'}</p>
+                </div>
+                {aluno.observacoesMedicas && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">Observações do Mestre</span>
+                    <p className="font-semibold text-slate-650 mt-0.5">{aluno.observacoesMedicas}</p>
+                  </div>
+                )}
               </div>
             </div>
 

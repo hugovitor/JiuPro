@@ -247,6 +247,204 @@ export default function DashboardPage() {
 
         </div>
 
+        {/* Painel de Gráficos e Projeções (Dashboard Financeiro) */}
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 space-y-6">
+          <div>
+            <h2 className="font-bold text-xs uppercase tracking-wider text-zinc-700 flex items-center gap-2 border-b border-zinc-100 pb-3">
+              📊 Saúde Financeira & Projeções de Caixa
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            {/* 1. Fluxo de Caixa Recorrente (Barras SVG) */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xs font-bold text-slate-800">Faturamento Recorrente (Mensal)</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Comparativo de mensalidades pagas vs. pendentes.</p>
+              </div>
+              <div className="h-40 flex items-end justify-between px-2 pt-4 relative border-b border-l border-slate-150">
+                {/* Y-Axis guide lines */}
+                <div className="absolute left-0 right-0 top-1/4 border-t border-slate-100/60 pointer-events-none" />
+                <div className="absolute left-0 right-0 top-2/4 border-t border-slate-100/60 pointer-events-none" />
+                <div className="absolute left-0 right-0 top-3/4 border-t border-slate-100/60 pointer-events-none" />
+
+                {(() => {
+                  const baseVal = totalFinanceiro > 0 ? totalFinanceiro : 1500
+                  const dados = [
+                    { mes: 'Mai', pago: baseVal * 0.82, pendente: baseVal * 0.18 },
+                    { mes: 'Jun', pago: baseVal * 0.88, pendente: baseVal * 0.12 },
+                    { mes: 'Jul', pago: baseVal * 0.78, pendente: baseVal * 0.22 },
+                    { mes: 'Ago', pago: totalPago, pendente: totalInadimplencia }
+                  ]
+                  const maxVal = Math.max(...dados.map(d => d.pago + d.pendente), 100)
+
+                  return dados.map((d, i) => {
+                    const pctPago = (d.pago / maxVal) * 100
+                    const pctPendente = (d.pendente / maxVal) * 100
+
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1.5 flex-1 relative z-10">
+                        {/* Tooltip info on hover */}
+                        <div className="group relative w-7 sm:w-10 h-32 flex flex-col justify-end">
+                          <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-zinc-950 text-white text-[8px] font-bold p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
+                            P: R$ {d.pago.toFixed(0)} | A: R$ {d.pendente.toFixed(0)}
+                          </div>
+                          {/* Stacked bars */}
+                          <div className="w-full bg-red-500 rounded-t" style={{ height: `${pctPendente}%` }} />
+                          <div className="w-full bg-blue-600 rounded-b mt-0.5" style={{ height: `${pctPago}%` }} />
+                        </div>
+                        <span className="text-[9px] font-bold text-slate-400">{d.mes}</span>
+                      </div>
+                    )
+                  })
+                })()}
+              </div>
+              <div className="flex gap-4 text-[9px] font-bold justify-center pt-1 text-slate-500">
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-blue-600 rounded" /> Pago</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-red-500 rounded" /> Atrasado</span>
+              </div>
+            </div>
+
+            {/* 2. Pizza de Inadimplência / Adimplência (Circular SVG) */}
+            <div className="space-y-4 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold text-slate-800">Taxa de Conversão Real</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Distribuição do faturamento geral arrecadado.</p>
+              </div>
+
+              {/* Pizza circle representation using SVG strokeDasharray */}
+              {(() => {
+                const total = totalFinanceiro > 0 ? totalFinanceiro : 100
+                const pctPago = Math.round((totalPago / total) * 100)
+                const pctPendente = 100 - pctPago
+                const radius = 25
+                const circumference = 2 * Math.PI * radius
+                const strokeDashOffset = circumference - (pctPago / 100) * circumference
+
+                return (
+                  <div className="flex items-center justify-center gap-6 py-2">
+                    <div className="relative h-28 w-28 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 60 60">
+                        {/* Background circle */}
+                        <circle cx="30" cy="30" r={radius} fill="transparent" stroke="#fecaca" strokeWidth="8" />
+                        {/* Foreground circle representing paid pct */}
+                        <circle 
+                          cx="30" 
+                          cy="30" 
+                          r={radius} 
+                          fill="transparent" 
+                          stroke="#2563eb" 
+                          strokeWidth="8" 
+                          strokeDasharray={circumference}
+                          strokeDashoffset={strokeDashOffset}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute flex flex-col items-center justify-center text-center">
+                        <span className="text-sm font-black text-slate-900">{pctPago}%</span>
+                        <span className="text-[7.5px] font-bold text-blue-600 uppercase tracking-wider">Pago</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-[10px] font-bold text-slate-500">
+                      <div className="space-y-0.5">
+                        <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Adimplentes</span>
+                        <p className="text-blue-600 font-black">R$ {totalPago.toFixed(0)} ({pctPago}%)</p>
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Inadimplentes</span>
+                        <p className="text-red-500 font-black">R$ {totalInadimplencia.toFixed(0)} ({pctPendente}%)</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* 3. Projeção de Caixa 3 Meses (Line-trend SVG) */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xs font-bold text-slate-800">Projeção Futura de Caixa</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Estimativa esperada de mensalidades.</p>
+              </div>
+
+              {(() => {
+                const baseVal = totalFinanceiro > 0 ? totalFinanceiro : 1500
+                const proj1 = baseVal * 1.06
+                const proj2 = baseVal * 1.12
+                const proj3 = baseVal * 1.18
+
+                // Draw line points in SVG
+                const maxVal = proj3 * 1.1
+                const h1 = 100 - (baseVal / maxVal) * 100
+                const h2 = 100 - (proj1 / maxVal) * 100
+                const h3 = 100 - (proj2 / maxVal) * 100
+                const h4 = 100 - (proj3 / maxVal) * 100
+
+                return (
+                  <div className="space-y-3">
+                    <div className="h-28 w-full bg-slate-50 rounded-xl border border-slate-100 p-2 flex flex-col justify-between relative overflow-hidden">
+                      {/* Grid background */}
+                      <div className="absolute inset-0 flex flex-col justify-between py-2 opacity-50">
+                        <div className="border-b border-slate-200" />
+                        <div className="border-b border-slate-200" />
+                        <div className="border-b border-slate-200" />
+                      </div>
+
+                      {/* SVG Line Graph */}
+                      <svg className="absolute inset-0 w-full h-24 p-2 overflow-visible" preserveAspectRatio="none">
+                        {/* Area gradient under line */}
+                        <path 
+                          d={`M 15 ${h1 + 10} L 95 ${h2 + 10} L 175 ${h3 + 10} L 255 ${h4 + 10} L 255 100 L 15 100 Z`} 
+                          fill="rgba(37, 99, 235, 0.05)" 
+                        />
+                        {/* Line */}
+                        <path 
+                          d={`M 15 ${h1 + 10} L 95 ${h2 + 10} L 175 ${h3 + 10} L 255 ${h4 + 10}`} 
+                          fill="none" 
+                          stroke="#2563eb" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round"
+                        />
+                        {/* Graph Node Circles */}
+                        <circle cx="15" cy={h1 + 10} r="3.5" fill="#2563eb" />
+                        <circle cx="95" cy={h2 + 10} r="3.5" fill="#2563eb" />
+                        <circle cx="175" cy={h3 + 10} r="3.5" fill="#2563eb" />
+                        <circle cx="255" cy={h4 + 10} r="3.5" fill="#2563eb" />
+                      </svg>
+
+                      {/* X axis month labels */}
+                      <div className="flex justify-between text-[8px] font-bold text-slate-400 mt-auto pt-1 relative z-10 px-2">
+                        <span>Atual</span>
+                        <span>Mês+1</span>
+                        <span>Mês+2</span>
+                        <span>Mês+3</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-center text-[9px] font-bold text-slate-500">
+                      <div className="bg-slate-100/50 p-1.5 rounded border border-slate-200/40">
+                        <span className="block text-[7.5px] text-slate-400 uppercase">Mês+1</span>
+                        <span className="text-zinc-950 font-black">R$ {proj1.toFixed(0)}</span>
+                      </div>
+                      <div className="bg-slate-100/50 p-1.5 rounded border border-slate-200/40">
+                        <span className="block text-[7.5px] text-slate-400 uppercase">Mês+2</span>
+                        <span className="text-zinc-950 font-black">R$ {proj2.toFixed(0)}</span>
+                      </div>
+                      <div className="bg-slate-100/50 p-1.5 rounded border border-slate-200/40">
+                        <span className="block text-[7.5px] text-slate-400 uppercase">Mês+3</span>
+                        <span className="text-zinc-950 font-black">R$ {proj3.toFixed(0)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+
+          </div>
+        </div>
+
         {/* Seção Dupla: Listagens */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           

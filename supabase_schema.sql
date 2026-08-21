@@ -42,7 +42,10 @@ CREATE TABLE IF NOT EXISTS students (
   chave_pix TEXT NOT NULL,
   peso TEXT,
   altura TEXT,
-  badges TEXT[] DEFAULT '{}'
+  badges TEXT[] DEFAULT '{}',
+  alergias TEXT DEFAULT '',
+  lesoes TEXT DEFAULT '',
+  observacoes_medicas TEXT DEFAULT ''
 );
 
 -- 4. Faturas Financeiras
