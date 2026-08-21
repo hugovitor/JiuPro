@@ -27,6 +27,11 @@ export default function ConfirmacaoFrequenciaPage() {
   // QR simulation states
   const [selectedStudentForQr, setSelectedStudentForQr] = useState('')
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
+  
+  // Real QR scanning states
+  const [cameraActive, setCameraActive] = useState(false)
+  const [manualCodeInput, setManualCodeInput] = useState('')
+  const [activeScannerType, setActiveScannerType] = useState<'usb' | 'camera'>('usb')
 
   const loadData = (academyId: string) => {
     const classList = db.getClasses(academyId)
@@ -71,13 +76,31 @@ export default function ConfirmacaoFrequenciaPage() {
     setTodosAlunos(studentsList)
   }
 
-  const handleSimulateQrScan = () => {
-    if (!selectedStudentForQr || !user) return
-    
-    const student = todosAlunos.find(a => a.id === selectedStudentForQr)
-    if (!student) return
+  const handleProcessQrCode = (codeStr: string) => {
+    if (!codeStr || !user) return
 
-    // Check financial status (has any overdue invoice)
+    // Format: jiupro:checkin:studentId:academyId
+    if (!codeStr.startsWith('jiupro:checkin:')) {
+      alert('Código QR inválido ou ilegível. Certifique-se de usar a carteirinha digital JiuPro.')
+      return
+    }
+
+    const parts = codeStr.split(':')
+    const studentId = parts[2]
+    const academyId = parts[3]
+
+    if (academyId !== user.academyId) {
+      alert('Atenção: Este atleta pertence a outra unidade/academia do JiuPro.')
+      return
+    }
+
+    const student = todosAlunos.find(a => a.id === studentId)
+    if (!student) {
+      alert('Atleta não cadastrado nesta unidade.')
+      return
+    }
+
+    // Check financial status
     const hasOverdue = student.financeiro.some(inv => inv.status === 'Atrasado')
 
     setScanResult({
@@ -100,9 +123,52 @@ export default function ConfirmacaoFrequenciaPage() {
       // Reload lists
       loadData(user.academyId)
     }
-    
+  }
+
+  const handleSimulateQrScan = () => {
+    if (!selectedStudentForQr || !user) return
+    const mockCode = `jiupro:checkin:${selectedStudentForQr}:${user.academyId}`
+    handleProcessQrCode(mockCode)
     setSelectedStudentForQr('')
   }
+
+  // Camera check-in trigger
+  useEffect(() => {
+    if (!cameraActive) return
+
+    let scanner: any = null
+
+    // Dynamically import client-side scanner library to prevent Next.js SSR build crashes
+    import('html5-qrcode').then((lib) => {
+      scanner = new lib.Html5QrcodeScanner(
+        'reader',
+        { 
+          fps: 10, 
+          qrbox: { width: 220, height: 220 },
+          aspectRatio: 1.0
+        },
+        /* verbose= */ false
+      )
+
+      scanner.render(
+        (decodedText: string) => {
+          handleProcessQrCode(decodedText)
+          scanner.clear().then(() => {
+            setCameraActive(false)
+          }).catch((err: any) => console.error(err))
+        },
+        (error: any) => {
+          // Silent scan failures
+        }
+      )
+    }).catch(err => console.error('Erro ao instanciar camera QR:', err))
+
+    return () => {
+      if (scanner) {
+        scanner.clear().catch((err: any) => console.error("Error clearing scanner on unmount:", err))
+      }
+    }
+  }, [cameraActive])
 
   const handleForceCheckIn = (studentId: string) => {
     if (!user) return
@@ -288,16 +354,61 @@ export default function ConfirmacaoFrequenciaPage() {
               <p className="text-[10px] text-slate-400 mt-0.5">Simule a leitura física da carteirinha digital do atleta na entrada da academia.</p>
             </div>
 
-            {/* Simulated camera scanning box */}
-            <div className="border border-dashed border-zinc-300 bg-slate-50 rounded-xl p-4 text-center space-y-3 relative overflow-hidden flex flex-col items-center justify-center min-h-[140px]">
-              <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-red-500" />
-              <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-red-500" />
-              <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-red-500" />
-              <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-red-500" />
-
-              <span className="text-[28px] animate-pulse">📱</span>
-              <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Aguardando escaneamento...</p>
+            {/* Seletor do Tipo de Leitor (Físico vs Câmera) */}
+            <div className="flex border-b border-zinc-200 text-[10px] font-bold uppercase tracking-wider">
+              <button 
+                onClick={() => {
+                  setCameraActive(false)
+                  setActiveScannerType('usb')
+                }}
+                className={`flex-1 py-2 text-center border-b-2 transition-all ${activeScannerType === 'usb' ? 'border-red-600 text-zinc-950' : 'border-transparent text-slate-400'}`}
+              >
+                ⌨️ Leitor USB / Manual
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveScannerType('camera')
+                  setCameraActive(true)
+                }}
+                className={`flex-1 py-2 text-center border-b-2 transition-all ${activeScannerType === 'camera' ? 'border-red-600 text-zinc-950' : 'border-transparent text-slate-400'}`}
+              >
+                📷 Usar Webcam
+              </button>
             </div>
+
+            {activeScannerType === 'usb' ? (
+              <div className="space-y-3 pt-1">
+                <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Modo Leitor de Código de Barras USB / Bip</p>
+                <input 
+                  type="text" 
+                  value={manualCodeInput}
+                  onChange={(e) => setManualCodeInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleProcessQrCode(manualCodeInput)
+                      setManualCodeInput('')
+                    }
+                  }}
+                  autoFocus
+                  placeholder="Clique aqui e use o leitor físico..." 
+                  className="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-600 transition-colors"
+                />
+                <p className="text-[8px] text-slate-400 leading-normal">Bipe o QR Code do aluno no receptor USB. O sistema detecta o código e faz a validação imediata.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-1">
+                {cameraActive ? (
+                  <div id="reader" className="w-full rounded-xl overflow-hidden shadow-inner border border-zinc-200"></div>
+                ) : (
+                  <button
+                    onClick={() => setCameraActive(true)}
+                    className="w-full py-3 bg-zinc-950 hover:bg-zinc-850 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    Iniciar Câmera de Leitura
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* QR Scanner dropdown selector */}
             <div className="space-y-2 pt-2">

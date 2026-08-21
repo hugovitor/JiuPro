@@ -68,6 +68,70 @@ export default function DashboardPage() {
   const totalFinanceiro = totalPago + totalInadimplencia
   const adimplenciaPercent = totalFinanceiro > 0 ? Math.round((totalPago / totalFinanceiro) * 100) : 100
 
+  // Real grouped invoices data from database
+  const allInvoices = alunos.flatMap(a => a.financeiro || [])
+  const groupedInvoices: Record<string, { pago: number, pendente: number }> = {}
+
+  allInvoices.forEach(inv => {
+    const mes = inv.mes || 'Agosto/2026'
+    const cleanVal = parseFloat(inv.valor.replace(',', '.'))
+    const valor = isNaN(cleanVal) ? 0 : cleanVal
+
+    if (!groupedInvoices[mes]) {
+      groupedInvoices[mes] = { pago: 0, pendente: 0 }
+    }
+    if (inv.status === 'Pago') {
+      groupedInvoices[mes].pago += valor
+    } else {
+      groupedInvoices[mes].pendente += valor
+    }
+  })
+
+  // Calendar month ordering helper
+  const monthOrder = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+  const getMonthIndex = (mesName: string) => {
+    const pureMonth = mesName.split('/')[0].trim().substring(0, 3)
+    return monthOrder.findIndex(m => m.toLowerCase().startsWith(pureMonth.toLowerCase()))
+  }
+
+  const sortedMonths = Object.keys(groupedInvoices).sort((a, b) => {
+    const yearA = parseInt(a.split('/')[1]) || 2026
+    const yearB = parseInt(b.split('/')[1]) || 2026
+    if (yearA !== yearB) return yearA - yearB
+    return getMonthIndex(a) - getMonthIndex(b)
+  })
+
+  // Take the last 4 months for comparison
+  const ultimosMeses = sortedMonths.slice(-4)
+  const realChartDados = ultimosMeses.map(mes => ({
+    mes: mes.split('/')[0],
+    pago: groupedInvoices[mes].pago,
+    pendente: groupedInvoices[mes].pendente
+  }))
+
+  // Fallback if no invoices exist yet
+  const now = new Date()
+  const currentMonthName = now.toLocaleString('pt-BR', { month: 'long' })
+  const currentMonthCapitalized = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
+
+  if (realChartDados.length === 0) {
+    realChartDados.push({
+      mes: currentMonthCapitalized.substring(0, 3),
+      pago: totalPago,
+      pendente: totalInadimplencia
+    })
+  }
+
+  // Calculate real average billing for projections
+  const totalMonthsCount = Object.keys(groupedInvoices).length
+  const avgMonthlyBilling = totalMonthsCount > 0
+    ? Object.values(groupedInvoices).reduce((acc, curr) => acc + curr.pago + curr.pendente, 0) / totalMonthsCount
+    : (totalFinanceiro > 0 ? totalFinanceiro : 1500)
+
+  const proj1 = avgMonthlyBilling * 1.05
+  const proj2 = avgMonthlyBilling * 1.10
+  const proj3 = avgMonthlyBilling * 1.15
+
   // Safe hash generator from string for deterministic mock values
   const getStringHash = (str: string) => {
     let hash = 0
@@ -78,9 +142,6 @@ export default function DashboardPage() {
     return Math.abs(hash)
   }
 
-  const now = new Date()
-  const currentMonthName = now.toLocaleString('pt-BR', { month: 'long' })
-  const currentMonthCapitalized = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)
   const currentMonthShort = now.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')
   const monthAbbr = currentMonthShort.charAt(0).toUpperCase() + currentMonthShort.slice(1)
 
@@ -270,13 +331,7 @@ export default function DashboardPage() {
                 <div className="absolute left-0 right-0 top-3/4 border-t border-slate-100/60 pointer-events-none" />
 
                 {(() => {
-                  const baseVal = totalFinanceiro > 0 ? totalFinanceiro : 1500
-                  const dados = [
-                    { mes: 'Mai', pago: baseVal * 0.82, pendente: baseVal * 0.18 },
-                    { mes: 'Jun', pago: baseVal * 0.88, pendente: baseVal * 0.12 },
-                    { mes: 'Jul', pago: baseVal * 0.78, pendente: baseVal * 0.22 },
-                    { mes: 'Ago', pago: totalPago, pendente: totalInadimplencia }
-                  ]
+                  const dados = realChartDados
                   const maxVal = Math.max(...dados.map(d => d.pago + d.pendente), 100)
 
                   return dados.map((d, i) => {
@@ -370,10 +425,8 @@ export default function DashboardPage() {
               </div>
 
               {(() => {
-                const baseVal = totalFinanceiro > 0 ? totalFinanceiro : 1500
-                const proj1 = baseVal * 1.06
-                const proj2 = baseVal * 1.12
-                const proj3 = baseVal * 1.18
+                const baseVal = avgMonthlyBilling
+                // proj1, proj2, proj3 are already calculated in the component scope
 
                 // Draw line points in SVG
                 const maxVal = proj3 * 1.1
