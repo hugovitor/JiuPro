@@ -18,8 +18,8 @@ Esta é a documentação completa do **JiuPro**, uma plataforma B2B SaaS desenvo
 
 ### 1.1. Requisitos Funcionais
 * **Gestão de Atletas:** Cadastro completo de alunos, dados de contato, foto de perfil, métricas físicas (peso/altura) e prontuário médico.
-* **Portal do Aluno:** Visualização de progresso de aulas para graduação, agendamento de treinos, histórico financeiro com checkout PIX e **Carteirinha Digital** com QR Code.
-* **Validação de Frequência:** Chamada manual de presença ou **validação automatizada** via leitura de QR Code (câmera frontal ou leitor USB).
+* **Portal do Aluno:** Visualização de progresso de aulas para graduação, agendamento de treinos e histórico financeiro com checkout PIX.
+* **Validação de Frequência:** Chamada manual de presença (basta o professor clicar em "Confirmar" na fila de agendamentos) ou **chamada rápida/direta** via lista de busca (ideal para crianças e atletas sem celular).
 * **Módulo de Exames e Graduações:** Controle de graus e faixas seguindo as regras oficiais de idades e tempos de carência da IBJJF.
 * **Mural de Avisos:** Publicação de alertas e eventos fixados no topo do painel da academia.
 * **Fluxo Financeiro:** Dashboard com controle de inadimplência, faturamento mensal, adimplência geral e estimativas futuras de faturamento (projeção de caixa).
@@ -38,10 +38,10 @@ Esta é a documentação completa do **JiuPro**, uma plataforma B2B SaaS desenvo
 2. **Tempo Limite de Reserva/Cancelamento de Aula:**
    * O aluno só pode reservar presença no treino se faltarem mais de **15 minutos para o início do treino**. Após esse prazo, a reserva é bloqueada e exibe o estado "Expirado".
    * O aluno pode cancelar a presença reservada a qualquer momento antes do início do treino.
-3. **Validação Financeira na Entrada (Check-in QR Code):**
-   * Ao ler o QR Code da carteirinha digital do aluno (`jiupro:checkin:studentId:academyId`) na recepção:
-     * Se o aluno possuir faturas com status **"Atrasado"**, a entrada é **recusada automaticamente** no painel de controle, exigindo liberação manual do professor (cortesia).
-     * Se estiver em dia, a entrada é **liberada na hora** e o check-in é computado como "Confirmado".
+3. **Validação Financeira na Entrada (Frequência):**
+   * Ao marcar presença para um aluno (seja aceitando o check-in do app ou fazendo chamada direta na lista de atletas):
+     * O sistema verifica se o aluno possui faturas com status **"Atrasado"**.
+     * Se houver pendências, exibe um alerta de inadimplência exigindo que o professor confirme explicitamente a autorização de entrada (cortesia) para prosseguir.
 
 ---
 
@@ -53,8 +53,6 @@ O sistema é construído sobre a seguinte pilha tecnológica moderna:
 * **CSS/Design:** Tailwind CSS.
 * **Banco de Dados Relacional:** Supabase (PostgreSQL) com migrações em SQL puro.
 * **Geração de PDF:** Biblioteca `jspdf` para exportação rápida de contratos de prestação de serviços.
-* **Geração de QR Code:** Renderização de URLs seguras através da API do Google Charts.
-* **Leitura de QR Code:** Biblioteca `html5-qrcode` para ativação direta da câmera do dispositivo do usuário.
 * **Gráficos Financeiros:** Desenhados inteiramente em SVG dinâmico nativo em React para performance e compatibilidade móvel.
 
 ### 2.1. Arquitetura Offline-First (`db.ts`)
@@ -133,27 +131,25 @@ O modelo de dados relacional é estruturado com as seguintes tabelas no PostgreS
 * `/api/cron/gerar-faturas` (GET): Executado mensalmente para gerar faturas automaticamente para os alunos ativos cadastrados.
 
 ### 4.2. Rotas Front-end
-* `/aluno`: Portal do aluno (exibe Carteirinha, Grade de Graus, Histórico Financeiro e Agenda de Treino).
+* `/aluno`: Portal do aluno (exibe Grade de Graus, Histórico Financeiro e Agenda de Treino).
 * `/login`: Tela de autenticação unificada.
 * `/dashboard`: Tela principal do professor com o faturamento, gráficos de adimplência e alertas.
 * `/dashboard/alunos`: Listagem de atletas e gerenciamento de prontuário médico.
-* `/dashboard/frequencia`: Scanner de QR Code e chamada eletrônica do tatame.
+* `/dashboard/frequencia`: Frequência ativa e chamada manual direta/lista de alunos (Kids).
 
 ---
 
 ## 5. Guia de Operação (Manual do Usuário)
 
-### 5.1. Como o Aluno realiza o Check-in e visualiza a Carteirinha
-1. O aluno acessa `/aluno` e entra na aba **"Carteirinha"**.
-2. Ele visualiza seu documento digital com o design premium e o QR Code.
-3. Para reservar aula, ele entra na aba **"Agenda"** e clica em **"Agendar Presença"** (respeitando o limite de até 15 minutos do treino).
+### 5.1. Como o Aluno realiza o Agendamento de Treino
+1. Para reservar sua presença na aula, o aluno acessa o portal `/aluno`, vai na aba **Evolução** e clica em **"Agendar"** no horário desejado (respeitando o limite de até 15 minutos do início do treino).
+2. Se precisar desistir ou não puder comparecer, basta clicar no botão vermelho **"Desistir"** para remover o check-in e limpar o dia do calendário automaticamente.
 
-### 5.2. Como o Professor valida a entrada via Receptor de QR Code
-1. O professor acessa `/dashboard/frequencia` em um computador, tablet ou celular.
-2. Ele escolhe a aba de leitura:
-   * **Leitor USB:** Basta conectar um leitor USB no computador, clicar no campo de texto e bipar o celular do aluno.
-   * **Webcam:** Clicar em "Usar Webcam" e apontar o celular do aluno para a câmera.
-3. O sistema valida automaticamente se a mensalidade está em dia e registra a presença. Em caso de atraso, o sistema alerta em vermelho para controle do mestre.
+### 5.2. Como o Professor realiza a Chamada e Validação de Alunos (Manual / Kids)
+1. O professor acessa `/dashboard/frequencia` em seu tablet, celular ou computador.
+2. Ele visualiza a lista **"Fila de Chamada"** contendo os atletas que reservaram presença pelo aplicativo. Clicando em **"Confirmar Presença"**, a presença é registrada no histórico.
+3. Para crianças e atletas sem celular: o professor usa a lista à direita **"Chamada Rápida (Lista de Atletas)"**, busca o nome do aluno no campo de busca e clica em **"Marcar"** para registrar a presença dele diretamente na turma selecionada.
+4. O sistema valida na hora a adimplência de cada atleta. Caso possua mensalidades atrasadas, o sistema exibe um alerta de inadimplência exigindo confirmação de cortesia para liberar a entrada.
 
 ---
 

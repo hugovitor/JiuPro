@@ -5,17 +5,6 @@ import { useState, useEffect } from 'react'
 import { db, User, ClassSession, CheckIn, Student } from '../../lib/db'
 import BeltVisual from '../../components/BeltVisual'
 
-interface ScanResult {
-  studentName: string
-  studentId: string
-  belt: string
-  degrees: number
-  hasOverdue: boolean
-  alergias: string
-  lesoes: string
-  status: 'Liberado' | 'Bloqueado'
-}
-
 export default function ConfirmacaoFrequenciaPage() {
   const [user, setUser] = useState<User | null>(null)
   const [classes, setClasses] = useState<ClassSession[]>([])
@@ -24,14 +13,8 @@ export default function ConfirmacaoFrequenciaPage() {
   const [treinoFiltro, setTreinoFiltro] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
-  // QR simulation states
-  const [selectedStudentForQr, setSelectedStudentForQr] = useState('')
-  const [scanResult, setScanResult] = useState<ScanResult | null>(null)
-  
-  // Real QR scanning states
-  const [cameraActive, setCameraActive] = useState(false)
-  const [manualCodeInput, setManualCodeInput] = useState('')
-  const [activeScannerType, setActiveScannerType] = useState<'usb' | 'camera'>('usb')
+  // Manual search state for kids/other students
+  const [searchQuery, setSearchQuery] = useState('')
 
   const loadData = (academyId: string) => {
     const classList = db.getClasses(academyId)
@@ -62,121 +45,38 @@ export default function ConfirmacaoFrequenciaPage() {
   // Altera o status do check-in do aluno
   const mudarStatus = (studentId: string, novoStatus: 'Confirmado' | 'Faltou') => {
     if (!user) return
-    db.confirmCheckIn(user.academyId, studentId, novoStatus)
+    db.confirmCheckIn(user.academyId, studentId, novoStatus, treinoFiltro)
     
     // Refresh state
-    setAgendamentos(
-      agendamentos.map((item) =>
-        item.id === studentId ? { ...item, status: novoStatus } : item
-      )
-    )
-    
-    // Reload student list to catch any badge award changes
-    const studentsList = db.getStudents(user.academyId)
-    setTodosAlunos(studentsList)
+    loadData(user.academyId)
   }
 
-  const handleProcessQrCode = (codeStr: string) => {
-    if (!codeStr || !user) return
-
-    // Format: jiupro:checkin:studentId:academyId
-    if (!codeStr.startsWith('jiupro:checkin:')) {
-      alert('Código QR inválido ou ilegível. Certifique-se de usar a carteirinha digital JiuPro.')
-      return
-    }
-
-    const parts = codeStr.split(':')
-    const studentId = parts[2]
-    const academyId = parts[3]
-
-    if (academyId !== user.academyId) {
-      alert('Atenção: Este atleta pertence a outra unidade/academia do JiuPro.')
-      return
-    }
-
-    const student = todosAlunos.find(a => a.id === studentId)
-    if (!student) {
-      alert('Atleta não cadastrado nesta unidade.')
-      return
-    }
-
-    // Check financial status
-    const hasOverdue = student.financeiro.some(inv => inv.status === 'Atrasado')
-
-    setScanResult({
-      studentName: student.nome,
-      studentId: student.id,
-      belt: student.faixa,
-      degrees: student.graus,
-      hasOverdue,
-      alergias: student.alergias || '',
-      lesoes: student.lesoes || '',
-      status: hasOverdue ? 'Bloqueado' : 'Liberado'
-    })
-
-    if (!hasOverdue) {
-      // Auto check-in and confirm attendance
-      db.studentCheckIn(user.academyId, student.id, treinoFiltro)
-      db.confirmCheckIn(user.academyId, student.id, 'Confirmado')
-      db.checkAndAwardBadges(student.id)
-      
-      // Reload lists
-      loadData(user.academyId)
-    }
-  }
-
-  const handleSimulateQrScan = () => {
-    if (!selectedStudentForQr || !user) return
-    const mockCode = `jiupro:checkin:${selectedStudentForQr}:${user.academyId}`
-    handleProcessQrCode(mockCode)
-    setSelectedStudentForQr('')
-  }
-
-  // Camera check-in trigger
-  useEffect(() => {
-    if (!cameraActive) return
-
-    let scanner: any = null
-
-    // Dynamically import client-side scanner library to prevent Next.js SSR build crashes
-    import('html5-qrcode').then((lib) => {
-      scanner = new lib.Html5QrcodeScanner(
-        'reader',
-        { 
-          fps: 10, 
-          qrbox: { width: 220, height: 220 },
-          aspectRatio: 1.0
-        },
-        /* verbose= */ false
-      )
-
-      scanner.render(
-        (decodedText: string) => {
-          handleProcessQrCode(decodedText)
-          scanner.clear().then(() => {
-            setCameraActive(false)
-          }).catch((err: any) => console.error(err))
-        },
-        (error: any) => {
-          // Silent scan failures
-        }
-      )
-    }).catch(err => console.error('Erro ao instanciar camera QR:', err))
-
-    return () => {
-      if (scanner) {
-        scanner.clear().catch((err: any) => console.error("Error clearing scanner on unmount:", err))
-      }
-    }
-  }, [cameraActive])
-
-  const handleForceCheckIn = (studentId: string) => {
+  // Realiza a chamada manual direta (para crianças / quem está sem celular)
+  const handlePresencaManual = (student: Student) => {
     if (!user) return
-    db.studentCheckIn(user.academyId, studentId, treinoFiltro)
-    db.confirmCheckIn(user.academyId, studentId, 'Confirmado')
-    db.checkAndAwardBadges(studentId)
-    
-    setScanResult(prev => prev ? { ...prev, status: 'Liberado' } : null)
+
+    // Financial check
+    const hasOverdue = student.financeiro.some(inv => inv.status === 'Atrasado')
+    if (hasOverdue) {
+      const confirmar = window.confirm(
+        `⚠️ ALERTA FINANCEIRO: O aluno ${student.nome} possui faturas em atraso.\n\nDeseja confirmar a presença mesmo assim?`
+      )
+      if (!confirmar) return
+    }
+
+    // Process check-in and confirm attendance
+    db.studentCheckIn(user.academyId, student.id, treinoFiltro)
+    db.confirmCheckIn(user.academyId, student.id, 'Confirmado', treinoFiltro)
+    db.checkAndAwardBadges(student.id)
+
+    // Reload list
+    loadData(user.academyId)
+  }
+
+  // Remove presença/check-in de um aluno
+  const handleDesistirPresenca = (studentId: string) => {
+    if (!user) return
+    db.studentCancelCheckIn(user.academyId, studentId, treinoFiltro)
     loadData(user.academyId)
   }
 
@@ -184,6 +84,14 @@ export default function ConfirmacaoFrequenciaPage() {
   const agendamentosFiltrados = agendamentos.filter(
     (item) => item.horario === treinoFiltro
   )
+
+  // Filter all students of the gym for the manual call list (excluding inactive ones)
+  const alunosFiltradosBusca = todosAlunos
+    .filter(a => a.status === 'Ativo')
+    .filter(a => 
+      a.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.faixa.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
   // Contadores para o resumo do painel
   const totalAgendados = agendamentosFiltrados.length
@@ -204,19 +112,18 @@ export default function ConfirmacaoFrequenciaPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Validação de Presenças & Recepção</h1>
-          <p className="text-xs text-zinc-500 mt-1">Confirme e valide a presença dos atletas no tatame em tempo real ou simule leituras de QR Code.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-950">Frequência e Chamada de Treino</h1>
+          <p className="text-xs text-zinc-500 mt-1">Gerencie a chamada do tatame em tempo real para cada horário e faça chamadas manuais para crianças ou alunos sem celular.</p>
         </div>
 
         {/* Seleção do treino focado no dia/horário detalhado */}
         {classes.length > 0 && (
           <div className="flex items-center gap-2 bg-white border border-zinc-200 px-3 py-2 rounded-xl shadow-sm">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Classe Ativa:</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Turma Selecionada:</span>
             <select
               value={treinoFiltro}
               onChange={(e) => {
                 setTreinoFiltro(e.target.value)
-                setScanResult(null)
               }}
               className="text-xs font-bold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-900"
             >
@@ -230,10 +137,10 @@ export default function ConfirmacaoFrequenciaPage() {
         )}
       </div>
 
-      {/* Mini Painel de Controle de fluxo no Tatame */}
+      {/* Resumo do Tatame */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Total de Check-ins</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Check-ins Feitos (App)</span>
           <p className="text-2xl font-black text-zinc-950 mt-1">{totalAgendados} Atletas</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
@@ -241,35 +148,33 @@ export default function ConfirmacaoFrequenciaPage() {
           <p className="text-2xl font-black text-emerald-600 mt-1">{totalConfirmados} Presentes</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Aguardando Validação</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Aguardando Confirmação</span>
           <p className="text-2xl font-black text-amber-600 mt-1">{totalPendentes} Pendentes</p>
         </div>
       </div>
 
-      {/* Layout principal: Fila de chamadas vs Scanner Simulador */}
+      {/* Layout principal: Fila de chamadas vs Chamada Manual (Crianças/Direta) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Lado Esquerdo: Fila de Chamadas */}
+        {/* Lado Esquerdo: Fila de Chamadas (Alunos com Celular que agendaram) */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-zinc-100 bg-zinc-50/50 flex justify-between items-center">
-              <h2 className="font-bold text-xs uppercase tracking-wider text-zinc-800">Atletas que deram Check-in</h2>
-              <span className="text-[10px] font-bold text-zinc-400">{agendamentosFiltrados.length} no treino selecionado</span>
+              <h2 className="font-bold text-xs uppercase tracking-wider text-zinc-800">Fila de Chamada (Agendados via App)</h2>
+              <span className="text-[10px] font-bold text-zinc-400">{agendamentosFiltrados.length} agendados</span>
             </div>
 
             <div className="divide-y divide-zinc-100 min-h-[220px]">
               {agendamentosFiltrados.length > 0 ? (
                 agendamentosFiltrados.map((alunoCheckin) => {
-                  // Get full student object to read medical status
                   const fullStudent = todosAlunos.find(st => st.id === alunoCheckin.id)
                   const hasHealthAlert = !!(fullStudent?.alergias || fullStudent?.lesoes)
 
                   return (
                     <div key={alunoCheckin.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-zinc-50/50">
                       
-                      {/* Informações do Aluno com Alertas Médicos */}
                       <div className="flex items-center gap-3">
-                        <BeltVisual belt={alunoCheckin.faixa} degrees={alunoCheckin.graus} size="xs" />
+                        <BeltVisual belt={alunoCheckin.faixa} degrees={alunoCheckin.graus} size="xs" showLabel={false} />
                         <div>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <p className="text-xs font-bold text-zinc-950">{alunoCheckin.nome}</p>
@@ -293,7 +198,6 @@ export default function ConfirmacaoFrequenciaPage() {
                         </div>
                       </div>
 
-                      {/* Botões de Ação Baseados no Status */}
                       <div className="flex items-center gap-2 self-end sm:self-auto">
                         {alunoCheckin.status === 'Pendente' && (
                           <>
@@ -301,32 +205,39 @@ export default function ConfirmacaoFrequenciaPage() {
                               onClick={() => mudarStatus(alunoCheckin.id, 'Faltou')}
                               className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
                             >
-                              Marcar Falta
+                              Falta
                             </button>
                             <button
                               onClick={() => mudarStatus(alunoCheckin.id, 'Confirmado')}
                               className="px-4 py-1.5 text-[10px] font-bold text-white bg-zinc-950 hover:bg-zinc-800 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1"
                             >
-                              <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                              </svg>
-                              Validar Presença
+                              Confirmar Presença
                             </button>
                           </>
                         )}
 
                         {alunoCheckin.status === 'Confirmado' && (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                            <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                            </svg>
-                            Presença Validada
+                            Presente
+                            <button 
+                              onClick={() => handleDesistirPresenca(alunoCheckin.id)}
+                              className="text-[9px] text-emerald-600 hover:text-rose-600 ml-1 font-bold cursor-pointer"
+                              title="Remover presença"
+                            >
+                              ✕
+                            </button>
                           </span>
                         )}
 
                         {alunoCheckin.status === 'Faltou' && (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-[10px] font-bold bg-zinc-100 text-zinc-400 line-through">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold bg-zinc-100 text-zinc-400 line-through">
                             Falta Registrada
+                            <button 
+                              onClick={() => handleDesistirPresenca(alunoCheckin.id)}
+                              className="text-[9px] text-zinc-400 hover:text-rose-600 ml-1 font-bold cursor-pointer"
+                            >
+                              ✕
+                            </button>
                           </span>
                         )}
                       </div>
@@ -336,161 +247,77 @@ export default function ConfirmacaoFrequenciaPage() {
                 })
               ) : (
                 <div className="p-8 text-center text-xs text-zinc-400 font-light flex flex-col items-center justify-center min-h-[220px]">
-                  <p>Nenhum check-in registrado para o horário selecionado.</p>
-                  <p className="text-[10px] text-slate-400 mt-1">Os atletas devem realizar o check-in no aplicativo ou passar no leitor de QR Code ao lado.</p>
+                  <p>Nenhum check-in agendado pelo aplicativo para este horário.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Use a lista ao lado para fazer a chamada manual diretamente.</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Lado Direito: Recepção & Simulador QR Code */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm space-y-4">
+        {/* Lado Direito: Chamada Direta / Lista de Alunos (Manual - Crianças e sem Celular) */}
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm space-y-4 h-fit">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1">
-                📷 Receptor de Check-in QR Code
+                📋 Chamada Rápida (Lista de Atletas)
               </h2>
-              <p className="text-[10px] text-slate-400 mt-0.5">Simule a leitura física da carteirinha digital do atleta na entrada da academia.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Dê presença direta para crianças e atletas que não possuem ou não usam celular.</p>
             </div>
 
-            {/* Seletor do Tipo de Leitor (Físico vs Câmera) */}
-            <div className="flex border-b border-zinc-200 text-[10px] font-bold uppercase tracking-wider">
-              <button 
-                onClick={() => {
-                  setCameraActive(false)
-                  setActiveScannerType('usb')
-                }}
-                className={`flex-1 py-2 text-center border-b-2 transition-all ${activeScannerType === 'usb' ? 'border-red-600 text-zinc-950' : 'border-transparent text-slate-400'}`}
-              >
-                ⌨️ Leitor USB / Manual
-              </button>
-              <button 
-                onClick={() => {
-                  setActiveScannerType('camera')
-                  setCameraActive(true)
-                }}
-                className={`flex-1 py-2 text-center border-b-2 transition-all ${activeScannerType === 'camera' ? 'border-red-600 text-zinc-950' : 'border-transparent text-slate-400'}`}
-              >
-                📷 Usar Webcam
-              </button>
+            {/* Campo de Busca Rápida */}
+            <div>
+              <input 
+                type="text" 
+                placeholder="🔍 Buscar por nome ou graduação..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-600 transition-colors"
+              />
             </div>
 
-            {activeScannerType === 'usb' ? (
-              <div className="space-y-3 pt-1">
-                <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Modo Leitor de Código de Barras USB / Bip</p>
-                <input 
-                  type="text" 
-                  value={manualCodeInput}
-                  onChange={(e) => setManualCodeInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleProcessQrCode(manualCodeInput)
-                      setManualCodeInput('')
-                    }
-                  }}
-                  autoFocus
-                  placeholder="Clique aqui e use o leitor físico..." 
-                  className="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-600 transition-colors"
-                />
-                <p className="text-[8px] text-slate-400 leading-normal">Bipe o QR Code do aluno no receptor USB. O sistema detecta o código e faz a validação imediata.</p>
-              </div>
-            ) : (
-              <div className="space-y-3 pt-1">
-                {cameraActive ? (
-                  <div id="reader" className="w-full rounded-xl overflow-hidden shadow-inner border border-zinc-200"></div>
-                ) : (
-                  <button
-                    onClick={() => setCameraActive(true)}
-                    className="w-full py-3 bg-zinc-950 hover:bg-zinc-850 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    Iniciar Câmera de Leitura
-                  </button>
-                )}
-              </div>
-            )}
+            {/* Lista dos atletas filtrados */}
+            <div className="space-y-2.5 max-h-[350px] overflow-y-auto pr-1">
+              {alunosFiltradosBusca.length > 0 ? (
+                alunosFiltradosBusca.map((student) => {
+                  const checkinAtivo = agendamentosFiltrados.find(c => c.id === student.id)
+                  const isPresent = checkinAtivo?.status === 'Confirmado'
 
-            {/* QR Scanner dropdown selector */}
-            <div className="space-y-2 pt-2">
-              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Escolha o atleta para simular:</label>
-              <div className="flex gap-2">
-                <select
-                  value={selectedStudentForQr}
-                  onChange={(e) => setSelectedStudentForQr(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs text-slate-700 font-bold focus:outline-none focus:border-red-650"
-                >
-                  <option value="">Selecione um atleta...</option>
-                  {todosAlunos.map(a => (
-                    <option key={a.id} value={a.id}>
-                      {a.nome} ({a.faixa})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={handleSimulateQrScan}
-                  disabled={!selectedStudentForQr}
-                  className="bg-zinc-950 hover:bg-zinc-850 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow disabled:opacity-50 cursor-pointer"
-                >
-                  Escanear
-                </button>
-              </div>
+                  return (
+                    <div key={student.id} className="flex items-center justify-between p-2 rounded-lg border border-slate-100 bg-slate-50/40 hover:bg-slate-50 transition-colors">
+                      <div className="min-w-0 pr-2">
+                        <p className="text-xs font-bold text-slate-900 truncate">{student.nome}</p>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                          {student.faixa} • {student.grupoFamiliar ? `Família: ${student.grupoFamiliar}` : 'Individual'}
+                        </p>
+                      </div>
+
+                      <div>
+                        {isPresent ? (
+                          <button
+                            onClick={() => handleDesistirPresenca(student.id)}
+                            className="px-2.5 py-1 text-[9px] font-black text-emerald-800 bg-emerald-100 border border-emerald-200 rounded-lg transition-all cursor-pointer flex items-center gap-1 shadow-sm"
+                            title="Clique para remover presença"
+                          >
+                            ✓ Presente
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handlePresencaManual(student)}
+                            className="px-2.5 py-1 text-[9px] font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-all cursor-pointer shadow-sm"
+                          >
+                            Marcar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <p className="text-[10px] text-center text-slate-400 py-6">Nenhum atleta ativo localizado.</p>
+              )}
             </div>
 
-            {/* Scan Results Screen */}
-            {scanResult && (
-              <div className={`p-4 rounded-xl border space-y-3.5 animate-scale-up ${
-                scanResult.status === 'Liberado' 
-                  ? 'bg-emerald-50/55 border-emerald-100 text-emerald-950' 
-                  : 'bg-rose-50/55 border-rose-100 text-rose-950'
-              }`}>
-                <div className="flex justify-between items-start border-b border-emerald-250/20 pb-2">
-                  <div>
-                    <h3 className="font-bold text-xs">{scanResult.studentName}</h3>
-                    <p className="text-[9px] font-semibold opacity-80">Check-in na classe de {treinoFiltro}h</p>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
-                    scanResult.status === 'Liberado' 
-                      ? 'bg-emerald-100 border-emerald-200 text-emerald-800' 
-                      : 'bg-rose-100 border-rose-200 text-rose-800'
-                  }`}>
-                    {scanResult.status === 'Liberado' ? '✅ LIBERADO' : '🚨 INADIMPLENTE'}
-                  </span>
-                </div>
-
-                <div className="flex gap-2 items-center">
-                  <BeltVisual belt={scanResult.belt} degrees={scanResult.degrees} size="sm" />
-                  <span className="text-[10px] font-bold">{scanResult.belt} • {scanResult.degrees}G</span>
-                </div>
-
-                {/* Medical remarks on scan */}
-                {(scanResult.alergias || scanResult.lesoes) && (
-                  <div className="bg-white/80 p-2.5 rounded-lg border border-rose-100 text-[10px] space-y-1">
-                    <p className="font-bold text-rose-700">🩺 Ficha Médica Atleta:</p>
-                    {scanResult.alergias && <p>● **Alergias:** {scanResult.alergias}</p>}
-                    {scanResult.lesoes && <p>● **Lesões:** {scanResult.lesoes}</p>}
-                  </div>
-                )}
-
-                {scanResult.status === 'Bloqueado' ? (
-                  <div className="space-y-2 pt-1.5">
-                    <p className="text-[9px] font-medium text-rose-600">
-                      ⚠️ O aluno possui pendências financeiras e a entrada automática foi recusada.
-                    </p>
-                    <button
-                      onClick={() => handleForceCheckIn(scanResult.studentId)}
-                      className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      Aprovar Entrada Manualmente (Cortesia)
-                    </button>
-                  </div>
-                ) : (
-                  <p className="text-[9px] font-semibold text-emerald-700">
-                    🎉 Entrada aprovada! Presença validada automaticamente no tatame. Bons treinos!
-                  </p>
-                )}
-              </div>
-            )}
           </div>
         </div>
 

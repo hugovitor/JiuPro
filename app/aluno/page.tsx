@@ -364,7 +364,7 @@ function AreaDoAlunoContent() {
     const jaCheckedIn = checkins.some(c => c.id === student.id && c.horario === classTime)
 
     if (jaCheckedIn) {
-      db.studentCancelCheckIn(academy.id, student.id)
+      db.studentCancelCheckIn(academy.id, student.id, classTime)
       setTimeout(() => {
         loadData()
       }, 300)
@@ -377,12 +377,17 @@ function AreaDoAlunoContent() {
       
       // Auto confirm the checkin for simulation and award badges immediately
       setTimeout(() => {
-        db.confirmCheckIn(academy.id, student.id, 'Confirmado')
+        db.confirmCheckIn(academy.id, student.id, 'Confirmado', classTime)
         
         // Rewrite manual treino name if class title is available
         const updatedStudent = db.getLoggedInStudent()
         if (updatedStudent && updatedStudent.presencas.length > 0) {
-          updatedStudent.presencas[0].treino = classTitle
+          const pIdx = updatedStudent.presencas.findIndex(p => p.data === new Date().toISOString().split('T')[0] && p.horario === classTime)
+          if (pIdx !== -1) {
+            updatedStudent.presencas[pIdx].treino = classTitle
+          } else {
+            updatedStudent.presencas[0].treino = classTitle
+          }
           // Save it back
           const allStds = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
           const idx = allStds.findIndex((st: any) => st.id === student.id)
@@ -887,14 +892,7 @@ function AreaDoAlunoContent() {
         >
           Financeiro
         </button>
-        <button
-          onClick={() => setActiveTab('carteirinha')}
-          className={`flex-1 min-w-[80px] py-3 text-center border-b-2 transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === 'carteirinha' ? 'border-red-600 text-zinc-950' : 'border-transparent hover:text-slate-700'
-          }`}
-        >
-          Carteirinha
-        </button>
+        {/* Carteirinha Digital temporarily removed */}
       </div>
 
       <main className="max-w-md mx-auto p-4 space-y-5">

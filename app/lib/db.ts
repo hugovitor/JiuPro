@@ -831,23 +831,29 @@ export const db = {
     }
   },
 
-  confirmCheckIn(academyId: string, studentId: string, status: 'Confirmado' | 'Faltou') {
+  confirmCheckIn(academyId: string, studentId: string, status: 'Confirmado' | 'Faltou', classTime?: string) {
     if (checkDemoBlock(academyId)) return
     initializeStorage()
     
     // Update check-ins list
     const allCheckins: Record<string, CheckIn[]> = JSON.parse(localStorage.getItem('jiupro_checkins') || '{}')
+    let matchedHorario = classTime || ''
     if (allCheckins[academyId]) {
-      const idx = allCheckins[academyId].findIndex(c => c.id === studentId)
+      const idx = allCheckins[academyId].findIndex(c => c.id === studentId && (!classTime || c.horario === classTime))
       if (idx !== -1) {
         allCheckins[academyId][idx].status = status
+        matchedHorario = allCheckins[academyId][idx].horario
         localStorage.setItem('jiupro_checkins', JSON.stringify(allCheckins))
       }
     }
 
     const today = new Date().toISOString().split('T')[0]
     // Supabase check-in status update
-    supabase.from('checkins').update({ status }).eq('student_id', studentId).eq('data', today).then(() => {
+    let query = supabase.from('checkins').update({ status }).eq('student_id', studentId).eq('data', today)
+    if (matchedHorario) {
+      query = query.eq('horario', matchedHorario)
+    }
+    query.then(() => {
       console.log('Sync checkin status success')
     })
 
@@ -859,11 +865,11 @@ export const db = {
         const student = students[sIdx]
         
         // Avoid duplicate presences on the same day/time
-        const alreadyRegistered = student.presencas.some(p => p.data === today)
+        const alreadyRegistered = student.presencas.some(p => p.data === today && p.horario === matchedHorario)
         if (!alreadyRegistered) {
           const newAtt = {
             data: today,
-            horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + 'h',
+            horario: matchedHorario || 'Treino',
             treino: 'Treino Validado'
           }
           student.presencas.unshift(newAtt)
@@ -893,8 +899,8 @@ export const db = {
     const student = this.getStudent(studentId)
     if (!student) return
 
-    // Avoid duplicate checkins for same student in the check-in list
-    const exists = allCheckins[academyId].some(c => c.id === studentId)
+    // Avoid duplicate checkins for same student in the same class
+    const exists = allCheckins[academyId].some(c => c.id === studentId && c.horario === classTime)
     if (!exists) {
       const today = new Date().toISOString().split('T')[0]
       allCheckins[academyId].push({
@@ -923,28 +929,42 @@ export const db = {
     }
   },
 
-  studentCancelCheckIn(academyId: string, studentId: string) {
+  studentCancelCheckIn(academyId: string, studentId: string, classTime?: string) {
     if (checkDemoBlock(academyId)) return
     initializeStorage()
     const allCheckins: Record<string, CheckIn[]> = JSON.parse(localStorage.getItem('jiupro_checkins') || '{}')
+    let matchedHorario = classTime || ''
     if (allCheckins[academyId]) {
-      allCheckins[academyId] = allCheckins[academyId].filter(c => c.id !== studentId)
+      if (classTime) {
+        allCheckins[academyId] = allCheckins[academyId].filter(c => !(c.id === studentId && c.horario === classTime))
+      } else {
+        const idx = allCheckins[academyId].findIndex(c => c.id === studentId)
+        if (idx !== -1) {
+          matchedHorario = allCheckins[academyId][idx].horario
+          allCheckins[academyId] = allCheckins[academyId].filter((_, i) => i !== idx)
+        }
+      }
       localStorage.setItem('jiupro_checkins', JSON.stringify(allCheckins))
     }
 
     const today = new Date().toISOString().split('T')[0]
+    const deletedTime = classTime || matchedHorario
     
     // Also remove the corresponding presence from the student record for today
     const students: Student[] = JSON.parse(localStorage.getItem('jiupro_students') || '[]')
     const sIdx = students.findIndex(s => s.id === studentId)
     if (sIdx !== -1) {
       const student = students[sIdx]
-      student.presencas = student.presencas.filter(p => p.data !== today)
+      student.presencas = student.presencas.filter(p => !(p.data === today && (!deletedTime || p.horario === deletedTime)))
       localStorage.setItem('jiupro_students', JSON.stringify(students))
     }
 
     // Supabase delete check-in
-    supabase.from('checkins').delete().eq('student_id', studentId).eq('data', today).then(({ error }) => {
+    let query = supabase.from('checkins').delete().eq('student_id', studentId).eq('data', today)
+    if (deletedTime) {
+      query = query.eq('horario', deletedTime)
+    }
+    query.then(({ error }) => {
       if (error) console.error('Erro ao cancelar checkin no Supabase:', error)
     })
   },
