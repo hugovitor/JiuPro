@@ -677,7 +677,6 @@ function AreaDoAlunoContent() {
       // Get check-ins for the same class on that date
       const todosAgendamentos = db.getCheckIns(student.academyId)
       const parceiros = todosAgendamentos.filter(c => 
-        c.data === ultimaPresenca.data && 
         c.horario === ultimaPresenca.horario &&
         c.id !== student.id &&
         c.status === 'Confirmado'
