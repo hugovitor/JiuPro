@@ -74,6 +74,47 @@ export default function ConfiguracoesPage() {
     }
   }
 
+  const handleDesconectarStripe = async () => {
+    if (!user) return
+    if (!confirm("Deseja realmente desconectar esta conta Stripe? Isso impedirá que os alunos paguem por cartão até que você vincule uma nova conta.")) return
+
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/academy/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          academyId: user.academyId,
+          settings: {
+            mensalidadePadrao: academy?.mensalidadePadrao || '150,00',
+            diaVencimento: academy?.diaVencimento || '10',
+            stripeConnectId: ''
+          }
+        })
+      })
+
+      if (res.ok) {
+        db.updateAcademySettings(user.academyId, {
+          mensalidadePadrao: academy?.mensalidadePadrao || '150,00',
+          diaVencimento: academy?.diaVencimento || '10',
+          stripeConnectId: ''
+        })
+        
+        await db.syncWithSupabase(user.academyId)
+        loadData(user.academyId)
+        alert('Conta Stripe desconectada com sucesso!')
+      } else {
+        alert('Erro ao desconectar conta Stripe no banco de dados.')
+      }
+    } catch (err: any) {
+      alert(`Erro ao desconectar: ${err.message}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const loadData = (academyId: string) => {
     const currentAcademy = db.getAcademy(academyId)
     if (currentAcademy) {
@@ -447,12 +488,22 @@ export default function ConfiguracoesPage() {
               </p>
 
               {academy?.stripeConnectId ? (
-                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between">
-                  <div>
-                    <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">Conta Conectada Ativa</span>
-                    <p className="font-mono text-[10px] text-emerald-700 font-bold mt-0.5">{academy.stripeConnectId}</p>
+                <div className="space-y-2">
+                  <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between">
+                    <div>
+                      <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">Conta Conectada Ativa</span>
+                      <p className="font-mono text-[10px] text-emerald-700 font-bold mt-0.5">{academy.stripeConnectId}</p>
+                    </div>
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <button
+                    type="button"
+                    onClick={handleDesconectarStripe}
+                    disabled={isLoading}
+                    className="w-full py-2 text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all cursor-pointer text-center disabled:opacity-50"
+                  >
+                    Desconectar / Trocar de Conta
+                  </button>
                 </div>
               ) : (
                 <button
