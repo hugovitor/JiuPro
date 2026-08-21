@@ -894,12 +894,17 @@ export const db = {
       if (sIdx !== -1) {
         const student = students[sIdx]
         
+        // Resolve class id to display name for attendance record
+        const classesList = this.getClasses(academyId)
+        const matchedClass = classesList.find(c => c.id === matchedHorario)
+        const displayHorario = matchedClass ? `${matchedClass.horario}h (${matchedClass.nome})` : (matchedHorario || 'Treino')
+
         // Avoid duplicate presences on the same day/time
-        const alreadyRegistered = student.presencas.some(p => p.data === today && p.horario === matchedHorario)
+        const alreadyRegistered = student.presencas.some(p => p.data === today && p.horario === displayHorario)
         if (!alreadyRegistered) {
           const newAtt = {
             data: today,
-            horario: matchedHorario || 'Treino',
+            horario: displayHorario,
             treino: 'Treino Validado'
           }
           student.presencas.unshift(newAtt)

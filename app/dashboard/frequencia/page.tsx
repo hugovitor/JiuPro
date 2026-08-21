@@ -20,7 +20,7 @@ export default function ConfirmacaoFrequenciaPage() {
     const classList = db.getClasses(academyId)
     setClasses(classList)
     if (classList.length > 0 && !treinoFiltro) {
-      setTreinoFiltro(classList[0].horario)
+      setTreinoFiltro(classList[0].id)
     }
 
     const checkinList = db.getCheckIns(academyId)
@@ -128,7 +128,7 @@ export default function ConfirmacaoFrequenciaPage() {
               className="text-xs font-bold bg-transparent border-none focus:outline-none cursor-pointer text-zinc-900"
             >
               {classes.map((cls) => (
-                <option key={cls.id} value={cls.horario}>
+                <option key={cls.id} value={cls.id}>
                   {cls.dias} — {cls.horario}h ({cls.nome})
                 </option>
               ))}

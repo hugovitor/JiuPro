@@ -1028,10 +1028,10 @@ function AreaDoAlunoContent() {
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Treinos Disponíveis</h2>
               
               {classes.map((treino) => {
-                const statusCheckin = checkins.find(c => c.id === student.id && c.horario === treino.horario)
+                const statusCheckin = checkins.find(c => c.id === student.id && c.horario === treino.id)
                 const checkInFeito = !!statusCheckin
                 const isConfirmed = statusCheckin?.status === 'Confirmado'
-                const parceiros = checkins.filter(c => c.horario === treino.horario && c.id !== student.id)
+                const parceiros = checkins.filter(c => c.horario === treino.id && c.id !== student.id)
 
                 return (
                   <div 
@@ -1059,7 +1059,7 @@ function AreaDoAlunoContent() {
 
                       <button
                         type="button"
-                        onClick={() => handleCheckInToggle(treino.horario, treino.nome)}
+                        onClick={() => handleCheckInToggle(treino.id, treino.nome)}
                         disabled={!checkInFeito && isCheckInExpired(treino.horario)}
                         className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                           checkInFeito
