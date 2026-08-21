@@ -34,6 +34,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
   const [editAlergias, setEditAlergias] = useState('')
   const [editLesoes, setEditLesoes] = useState('')
   const [editObservacoesMedicas, setEditObservacoesMedicas] = useState('')
+  const [editGrupoFamiliar, setEditGrupoFamiliar] = useState('')
 
   // Manual Attendance form states
   const [manualDate, setManualDate] = useState('')
@@ -85,6 +86,7 @@ export default function FichaAlunoPage({ params }: PageProps) {
       setEditAlergias(athlete.alergias || '')
       setEditLesoes(athlete.lesoes || '')
       setEditObservacoesMedicas(athlete.observacoesMedicas || '')
+      setEditGrupoFamiliar(athlete.grupoFamiliar || '')
       
       setManualValor(athlete.mensalidade)
 
@@ -127,7 +129,8 @@ export default function FichaAlunoPage({ params }: PageProps) {
       id: aluno.id,
       alergias: editAlergias,
       lesoes: editLesoes,
-      observacoesMedicas: editObservacoesMedicas
+      observacoesMedicas: editObservacoesMedicas,
+      grupoFamiliar: editGrupoFamiliar
     }
 
     db.saveStudent(updatedStudent)
@@ -813,6 +816,10 @@ export default function FichaAlunoPage({ params }: PageProps) {
           <div className="pt-4 border-t border-slate-100">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Raiz / Linhagem de Mestre</h3>
             <p className="text-sm font-semibold text-slate-800 mt-1">{aluno.mestreOriginal}</p>
+          </div>
+          <div className="pt-4 border-t border-slate-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Grupo Familiar / Parentesco</h3>
+            <p className="text-sm font-semibold text-slate-800 mt-1">{aluno.grupoFamiliar || 'Nenhum familiar vinculado'}</p>
           </div>
         </div>
       )}

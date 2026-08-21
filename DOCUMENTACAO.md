@@ -94,6 +94,7 @@ O modelo de dados relacional é estruturado com as seguintes tabelas no PostgreS
 * `observacoes_medicas` (TEXT): Notas médicas adicionais escritas pelos professores.
 * `mestre_original` (TEXT): Nome do mestre de linhagem original.
 * `graduado_por` (TEXT): Nome do último graduador do atleta.
+* `grupo_familiar` (TEXT): Parentesco ou vínculo familiar com outros membros (ex: "Filho de [Nome]").
 
 #### Tabela `invoices` (Mensalidades dos Atletas)
 * `id` (UUID, PK): Identificador único.

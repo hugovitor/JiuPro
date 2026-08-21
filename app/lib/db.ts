@@ -93,6 +93,7 @@ export interface Student {
   alergias?: string
   lesoes?: string
   observacoesMedicas?: string
+  grupoFamiliar?: string
 }
 
 export interface Notification {
@@ -428,7 +429,8 @@ export const db = {
             badges: s.badges || [],
             alergias: s.alergias || '',
             lesoes: s.lesoes || '',
-            observacoes_medicas: s.observacoesMedicas || ''
+            observacoes_medicas: s.observacoesMedicas || '',
+            grupo_familiar: s.grupoFamiliar || ''
           })
 
           // Invoices
@@ -537,6 +539,7 @@ export const db = {
           alergias: s.alergias || '',
           lesoes: s.lesoes || '',
           observacoesMedicas: s.observacoes_medicas || '',
+          grupoFamiliar: s.grupo_familiar || '',
           graduadoPor: 'Auto-cadastro',
           mestreOriginal: '',
           badges: s.badges || [],
@@ -746,7 +749,8 @@ export const db = {
       badges: target.badges || [],
       alergias: target.alergias || '',
       lesoes: target.lesoes || '',
-      observacoes_medicas: target.observacoesMedicas || ''
+      observacoes_medicas: target.observacoesMedicas || '',
+      grupo_familiar: target.grupoFamiliar || ''
     }).then(({ error }) => {
       if (error) console.error('Erro ao salvar atleta no Supabase:', error)
     })

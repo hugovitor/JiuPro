@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS students (
   badges TEXT[] DEFAULT '{}',
   alergias TEXT DEFAULT '',
   lesoes TEXT DEFAULT '',
-  observacoes_medicas TEXT DEFAULT ''
+  observacoes_medicas TEXT DEFAULT '',
+  grupo_familiar TEXT DEFAULT ''
 );
 
 -- 4. Faturas Financeiras

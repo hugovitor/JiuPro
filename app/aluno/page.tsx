@@ -652,6 +652,46 @@ function AreaDoAlunoContent() {
     return metaMap[faixa] || 50
   }
 
+  const getEstatisticasAluno = () => {
+    if (!student) return { total: 0, esteMes: 0, ultimoParceiro: 'Nenhum parceiro recente' }
+
+    const total = student.presencas.length
+    
+    // Count this month's presences
+    const now = new Date()
+    const currentMonth = now.getMonth() // 0-11
+    const currentYear = now.getFullYear()
+    
+    const esteMes = student.presencas.filter(p => {
+      if (!p.data) return false
+      const parts = p.data.split('-') // "YYYY-MM-DD"
+      const pYear = parseInt(parts[0])
+      const pMonth = parseInt(parts[1]) - 1
+      return pYear === currentYear && pMonth === currentMonth
+    }).length
+
+    // Find classmates from last check-in
+    let ultimoParceiro = 'Nenhum parceiro recente'
+    if (student.presencas.length > 0) {
+      const ultimaPresenca = student.presencas[student.presencas.length - 1]
+      // Get check-ins for the same class on that date
+      const todosAgendamentos = db.getCheckIns(student.academyId)
+      const parceiros = todosAgendamentos.filter(c => 
+        c.data === ultimaPresenca.data && 
+        c.horario === ultimaPresenca.horario &&
+        c.id !== student.id &&
+        c.status === 'Confirmado'
+      )
+      if (parceiros.length > 0) {
+        ultimoParceiro = parceiros[0].nome
+      }
+    }
+
+    return { total, esteMes, ultimoParceiro }
+  }
+
+  const { total: totalAulas, esteMes: aulasEsteMes, ultimoParceiro } = getEstatisticasAluno()
+
   const aulasConcluidas = student.presencas.length
   const aulasParaProximoGrau = getMetaAulas(student.faixa)
   const percentualProgresso = Math.min(
@@ -925,6 +965,28 @@ function AreaDoAlunoContent() {
                   <>Faltam apenas <span className="font-bold text-slate-700">{aulasParaProximoGrau - aulasConcluidas} presenças</span> para avaliação.</>
                 )}
               </p>
+            </div>
+
+            {/* Estatísticas Avançadas do Tatame */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200/70 shadow-sm space-y-3.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Minhas Estatísticas no Tatame</h3>
+              <div className="grid grid-cols-2 gap-3.5 text-xs">
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-150">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Presenças no Mês</span>
+                  <p className="text-lg font-black text-slate-800 mt-1">{aulasEsteMes} treinos</p>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-150">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Acumulado</span>
+                  <p className="text-lg font-black text-slate-800 mt-1">{totalAulas} aulas</p>
+                </div>
+              </div>
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-150 flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Último Colega de Treino</span>
+                  <p className="text-xs font-semibold text-slate-850 mt-0.5">{ultimoParceiro}</p>
+                </div>
+                <span className="text-base">🤝</span>
+              </div>
             </div>
 
 
