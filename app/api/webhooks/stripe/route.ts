@@ -17,7 +17,16 @@ export async function POST(req: Request) {
       console.warn('STRIPE_WEBHOOK_SECRET não está configurado. Rodando em modo de desenvolvimento sem verificação estrita.')
       event = JSON.parse(body)
     } else {
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+      try {
+        event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+      } catch (firstErr) {
+        const connectSecret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET
+        if (connectSecret) {
+          event = stripe.webhooks.constructEvent(body, sig, connectSecret)
+        } else {
+          throw firstErr
+        }
+      }
     }
   } catch (err: any) {
     console.error(`Erro de assinatura webhook Stripe: ${err.message}`)
