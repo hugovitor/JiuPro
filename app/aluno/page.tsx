@@ -1723,7 +1723,7 @@ function AreaDoAlunoContent() {
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Graus & Graduação:</span>
                     <div className="flex items-center gap-2">
-                      <BeltVisual beltName={student.faixa} degrees={student.graus} size="sm" />
+                      <BeltVisual belt={student.faixa} degrees={student.graus} size="sm" />
                       <span className="text-[10px] font-bold text-zinc-350">{student.faixa} • {student.graus}G</span>
                     </div>
                   </div>

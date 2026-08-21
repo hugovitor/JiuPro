@@ -203,7 +203,7 @@ export default function ConfirmacaoFrequenciaPage() {
                       
                       {/* Informações do Aluno com Alertas Médicos */}
                       <div className="flex items-center gap-3">
-                        <BeltVisual beltName={alunoCheckin.faixa} degrees={alunoCheckin.graus} size="xs" />
+                        <BeltVisual belt={alunoCheckin.faixa} degrees={alunoCheckin.graus} size="xs" />
                         <div>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <p className="text-xs font-bold text-zinc-950">{alunoCheckin.nome}</p>
@@ -348,7 +348,7 @@ export default function ConfirmacaoFrequenciaPage() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <BeltVisual beltName={scanResult.belt} degrees={scanResult.degrees} size="sm" />
+                  <BeltVisual belt={scanResult.belt} degrees={scanResult.degrees} size="sm" />
                   <span className="text-[10px] font-bold">{scanResult.belt} • {scanResult.degrees}G</span>
                 </div>
 
