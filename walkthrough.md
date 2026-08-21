@@ -1,24 +1,19 @@
-# Walkthrough - Cadastro Detalhado de Grade de Treinos (Turmas)
+# Walkthrough - Sincronização da Grade de Horários (Supabase)
 
-Refatoramos o formulário de cadastro de turmas no painel do professor para permitir a seleção personalizada de dias, horários e categorias dos treinos.
-
----
-
-## 🛠️ O que foi implementado:
-
-### 🥋 1. Cadastro Avançado de Turmas (`/dashboard/configuracoes`)
-* **Seleção Dinâmica de Dias (Semana):** Substituímos o campo estático de dias por botões do tipo checkbox interativos para cada dia da semana (Seg, Ter, Qua, Qui, Sex, Sáb, Dom). O professor pode marcar exatamente quais dias a turma possui treino.
-* **Categoria da Turma:** Adicionamos um menu de seleção (`select`) com categorias predefinidas mais comuns do Jiu-Jitsu para o professor escolher:
-  * *Treino Livre*
-  * *Treino Iniciante / Fundamental*
-  * *Jiu-Jitsu Infantil*
-  * *Jiu-Jitsu Adolescentes / Juvenil*
-  * *Treino Avançado*
-  * *Treino de Competição*
-* **Personalização Completa ("Outro"):** Se o professor selecionar a opção "Outro", o sistema abre automaticamente um campo de texto adicional para ele digitar o nome que desejar (ex: *"Treino NoGi"*, *"Classe Feminina"*).
-* **Horário:** O seletor de horas clássico (`input type="time"`) foi mantido para máxima precisão de horário de início.
+Corrigimos a sincronização de turmas/horários da academia no banco de dados Supabase para garantir que as classes criadas pelo professor apareçam instantaneamente no aplicativo do aluno.
 
 ---
 
-## 🧪 Verificação do Sistema
-* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `7c1e813`.
+## 🛠️ O que foi corrigido e implementado:
+
+### 🌐 1. Sincronização da Tabela `classes` com o Supabase
+* **O Problema:** Os horários de treinos criados no painel de configurações do professor eram gravados apenas no `localStorage` do navegador do professor. Quando o aluno entrava no aplicativo (/aluno) de outro dispositivo, os treinos não apareciam porque a tabela `classes` no Supabase estava vazia.
+* **A Solução:** Vinculamos as operações de controle de turmas diretamente ao banco de dados em tempo real:
+  * **Adicionar/Editar Horário (`saveClass`):** Executa um `upsert` na tabela `classes` do Supabase para registrar/atualizar o dia, horário e nome do treino na nuvem.
+  * **Remover Horário (`removeClass`):** Deleta a linha correspondente na tabela `classes` do Supabase.
+  * **Sincronização ao Carregar (`syncWithSupabase`):** No portal do aluno, sempre que a tela é carregada ou sincronizada, o sistema busca os dados atualizados das turmas do Supabase e atualiza o estado do app.
+
+---
+
+## 🧪 Verificação e Build
+* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `db5a3ee`.
