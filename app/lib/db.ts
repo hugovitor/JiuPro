@@ -1061,6 +1061,16 @@ export const db = {
       })
       localStorage.setItem('jiupro_students', JSON.stringify(students))
       this.checkAndAwardBadges(studentId)
+
+      // Sync to Supabase
+      supabase.from('attendances').insert({
+        student_id: studentId,
+        data: date,
+        horario: 'Manual',
+        treino: classTitle
+      }).then(({ error }) => {
+        if (error) console.error('Erro ao salvar presença manual no Supabase:', error)
+      })
       
       // Notify student about manual presence
       this.addNotification(
@@ -1085,6 +1095,17 @@ export const db = {
         status: 'Atrasado'
       })
       localStorage.setItem('jiupro_students', JSON.stringify(students))
+
+      // Sync to Supabase
+      supabase.from('invoices').insert({
+        student_id: studentId,
+        mes,
+        vencimento,
+        valor,
+        status: 'Atrasado'
+      }).then(({ error }) => {
+        if (error) console.error('Erro ao salvar fatura manual no Supabase:', error)
+      })
 
       // Notify student about manual invoice
       this.addNotification(
