@@ -1,19 +1,20 @@
-# Walkthrough - Remoção Dinâmica de Medalhas (Conquistas)
+# Walkthrough - Webhook Duplo Stripe (Produção)
 
-Corrigimos a validação de medalhas (badges) no Portal do Aluno para que as conquistas sejam removidas dinamicamente caso o atleta cancele/desista de uma aula e não atinja mais os critérios exigidos.
+Corrigimos a validação de assinatura de webhooks do Stripe para suportar múltiplos endpoints simultâneos no mesmo backend, permitindo transações de alunos (Connect) e assinaturas de academias (Plataforma SaaS) no ar.
 
 ---
 
 ## 🛠️ O que foi corrigido e implementado:
 
-### 🏅 1. Reavaliação Dinâmica de Medalhas
-* **O Problema:** O sistema possuía regras para acumular conquistas (ex: "Primeiro Passo" ao ter 1+ presença, "Frequência de Ferro" ao ter 3+ presenças). No entanto, o sistema apenas adicionava as medalhas e nunca as removia. Se o aluno cancelava a presença em uma aula, o número de treinos dele diminuía mas as medalhas permaneciam ativas de forma indevida.
-* **A Solução:** Refatoramos a função de reavaliação de conquistas (`checkAndAwardBadges`) no arquivo `app/lib/db.ts`:
-  * **Verificação Bidirecional:** O sistema agora verifica tanto o ganho quanto a perda. Se a contagem de presenças cair abaixo da meta da medalha (ex: de 3 treinos para 2 após desistência), a medalha correspondente é removida da array do aluno.
-  * **Integração no Cancelamento:** O método `studentCancelCheckIn` agora dispara a função `checkAndAwardBadges` imediatamente após excluir a presença, atualizando as conquistas do atleta na mesma hora.
-  * **Sincronização no Banco:** Qualquer alteração (ganho ou perda de medalha) é sincronizada em tempo real com a tabela `students` do Supabase.
+### ⚙️ 1. Validação Dual de Webhook no Backend (`/api/webhooks/stripe`)
+* **O Problema:** Como a Stripe Connect possui canais separados para a conta principal ("Sua conta" - assinaturas das academias) e subcontas ("Contas conectadas" - mensalidade de alunos), são geradas duas chaves de assinatura Webhook (`whsec_...`) diferentes. O backend do Next.js possuía apenas um leitor de chave (`STRIPE_WEBHOOK_SECRET`), o que causaria falha de assinatura (HTTP 400) em um dos dois fluxos.
+* **A Solução:** Ajustamos o construtor do webhook para realizar uma validação inteligente:
+  1. Ele tenta validar a assinatura usando a chave padrão da plataforma (`STRIPE_WEBHOOK_SECRET`).
+  2. Se falhar, ele faz um fallback e tenta validar com a chave de conexão dos alunos (`STRIPE_CONNECT_WEBHOOK_SECRET`).
+  3. Caso ambas falhem ou não existam, o erro de autenticação é lançado de forma segura.
+* **O Resultado:** Ambos os webhooks da Stripe agora podem bater no mesmo arquivo de rota e serão devidamente validados e processados!
 
 ---
 
-## 🧪 Homologação e Build de Produção
-* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `976e642`.
+## 🧪 Verificação do Build
+* O build final passou com sucesso (código `0`) e as alterações já estão publicadas em produção no GitHub no commit `d16a9a9`.
