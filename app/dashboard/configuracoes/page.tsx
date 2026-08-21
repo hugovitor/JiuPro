@@ -21,8 +21,17 @@ export default function ConfiguracoesPage() {
 
   // Estados para adicionar uma nova turma
   const [novoHorario, setNovoHorario] = useState('')
-  const [novoNomeTurma, setNovoNomeTurma] = useState('')
-  const [novosDias, setNovosDias] = useState('Seg, Qua, Sex')
+  const [novoNomeTurma, setNovoNomeTurma] = useState('Treino Livre')
+  const [customNomeTurma, setCustomNomeTurma] = useState('')
+  const [selectedDays, setSelectedDays] = useState<Record<string, boolean>>({
+    Seg: true,
+    Ter: false,
+    Qua: true,
+    Qui: false,
+    Sex: true,
+    Sáb: false,
+    Dom: false
+  })
 
   // Estados para avisos
   const [announcements, setAnnouncements] = useState<any[]>([])
@@ -150,12 +159,30 @@ export default function ConfiguracoesPage() {
   // Função para adicionar nova turma na lista
   const handleAdicionarTurma = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !novoHorario || !novoNomeTurma) return
+    if (!user || !novoHorario) return
+
+    // Calculate active days
+    const activeDays = Object.entries(selectedDays)
+      .filter(([_, active]) => active)
+      .map(([day]) => day)
+      .join(', ')
+
+    if (!activeDays) {
+      alert('Por favor, selecione pelo menos um dia da semana para o treino.')
+      return
+    }
+
+    // Determine the class name
+    const finalClassName = novoNomeTurma === 'Outro' ? customNomeTurma.trim() : novoNomeTurma
+    if (!finalClassName) {
+      alert('Por favor, defina o nome do treino.')
+      return
+    }
 
     const novaTurma = {
       horario: novoHorario,
-      nome: novoNomeTurma,
-      dias: novosDias
+      nome: finalClassName,
+      dias: activeDays
     }
 
     db.saveClass(user.academyId, novaTurma)
@@ -165,7 +192,8 @@ export default function ConfiguracoesPage() {
     setTurmas(updatedClasses.sort((a, b) => a.horario.localeCompare(b.horario)))
 
     setNovoHorario('')
-    setNovoNomeTurma('')
+    setCustomNomeTurma('')
+    setNovoNomeTurma('Treino Livre')
   }
 
   // Função para remover uma turma da grade
@@ -492,40 +520,100 @@ export default function ConfiguracoesPage() {
           </div>
 
           {/* Form Integrado: Adicionar Nova Turma */}
-          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5">
-            <h3 className="font-semibold text-zinc-900 text-sm mb-4">Adicionar Novo Horário de Treino</h3>
-            <form onSubmit={handleAdicionarTurma} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
+            <h3 className="font-semibold text-zinc-900 text-sm">Adicionar Novo Horário de Treino</h3>
+            
+            <form onSubmit={handleAdicionarTurma} className="space-y-4">
+              
+              {/* Checkboxes de Dias da Semana */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Horário
-                </label>
-                <input
-                  type="time"
-                  required
-                  value={novoHorario}
-                  onChange={(e) => setNovoHorario(e.target.value)}
-                  className="w-full px-3 py-1.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
-                />
+                <span className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                  Dias da Semana
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(selectedDays).map((day) => (
+                    <label 
+                      key={day} 
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition-all select-none ${
+                        selectedDays[day]
+                          ? 'bg-zinc-950 border-zinc-950 text-white shadow-sm'
+                          : 'bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedDays[day]}
+                        onChange={(e) => setSelectedDays({ ...selectedDays, [day]: e.target.checked })}
+                        className="sr-only"
+                      />
+                      {day}
+                    </label>
+                  ))}
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Nome da Classe / Turma
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Treino de Competição"
-                  value={novoNomeTurma}
-                  onChange={(e) => setNovoNomeTurma(e.target.value)}
-                  className="w-full px-3 py-1.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                {/* Horário */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                    Horário
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={novoHorario}
+                    onChange={(e) => setNovoHorario(e.target.value)}
+                    className="w-full px-3 py-1.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                  />
+                </div>
+
+                {/* Turma / Nome do Treino */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                    Categoria da Turma
+                  </label>
+                  <select
+                    value={novoNomeTurma}
+                    onChange={(e) => setNovoNomeTurma(e.target.value)}
+                    className="w-full px-3 py-1.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors cursor-pointer text-zinc-900"
+                  >
+                    <option value="Treino Livre">Treino Livre</option>
+                    <option value="Treino Iniciante / Fundamental">Treino Iniciante / Fundamental</option>
+                    <option value="Jiu-Jitsu Infantil">Jiu-Jitsu Infantil</option>
+                    <option value="Jiu-Jitsu Adolescentes / Juvenil">Jiu-Jitsu Adolescentes / Juvenil</option>
+                    <option value="Treino Avançado">Treino Avançado</option>
+                    <option value="Treino de Competição">Treino de Competição</option>
+                    <option value="Outro">Outro (Personalizado)...</option>
+                  </select>
+                </div>
+
+                {/* Nome personalizado (se selecionado "Outro") */}
+                {novoNomeTurma === 'Outro' ? (
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                      Nome do Treino Personalizado
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Treino NoGi"
+                      value={customNomeTurma}
+                      onChange={(e) => setCustomNomeTurma(e.target.value)}
+                      className="w-full px-3 py-1.5 mt-1.5 text-sm bg-white border border-zinc-200 rounded-lg shadow-sm focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+                    />
+                  </div>
+                ) : (
+                  <div className="hidden sm:block" />
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full px-4 py-2 text-xs font-bold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px] cursor-pointer sm:col-start-3"
+                >
+                  + Adicionar Classe
+                </button>
               </div>
-              <button
-                type="submit"
-                className="w-full px-4 py-2 text-xs font-bold text-white bg-red-600 rounded-lg shadow hover:bg-red-700 transition-colors h-[38px]"
-              >
-                + Adicionar Classe
-              </button>
+
             </form>
           </div>
 
