@@ -647,6 +647,19 @@ export const db = {
       if (notifData) {
         localStorage.setItem('jiupro_notifications', JSON.stringify(notifData))
       }
+
+      // 10. Sync Classes / Turmas
+      const { data: clsData } = await supabase.from('classes').select('*').eq('academy_id', academyId)
+      if (clsData) {
+        const turmas = JSON.parse(localStorage.getItem('jiupro_turmas') || '{}')
+        turmas[academyId] = clsData.map((c: any) => ({
+          id: c.id,
+          horario: c.horario,
+          nome: c.nome,
+          dias: c.dias
+        }))
+        localStorage.setItem('jiupro_turmas', JSON.stringify(turmas))
+      }
     } catch (e) {
       console.error(e)
     }
@@ -818,6 +831,18 @@ export const db = {
     }
 
     localStorage.setItem('jiupro_turmas', JSON.stringify(all))
+
+    // Sync to Supabase
+    supabase.from('classes').upsert({
+      id: target.id,
+      academy_id: academyId,
+      nome: target.nome,
+      horario: target.horario,
+      dias: target.dias
+    }).then(({ error }) => {
+      if (error) console.error('Erro ao salvar turma no Supabase:', error)
+    })
+
     return target
   },
 
@@ -829,6 +854,11 @@ export const db = {
       all[academyId] = all[academyId].filter(c => c.id !== classId)
       localStorage.setItem('jiupro_turmas', JSON.stringify(all))
     }
+
+    // Sync delete to Supabase
+    supabase.from('classes').delete().eq('id', classId).then(({ error }) => {
+      if (error) console.error('Erro ao deletar turma no Supabase:', error)
+    })
   },
 
   confirmCheckIn(academyId: string, studentId: string, status: 'Confirmado' | 'Faltou', classTime?: string) {
