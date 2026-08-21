@@ -992,6 +992,7 @@ export const db = {
       const student = students[sIdx]
       student.presencas = student.presencas.filter(p => !(p.data === today && (!deletedTime || p.horario === deletedTime)))
       localStorage.setItem('jiupro_students', JSON.stringify(students))
+      this.checkAndAwardBadges(studentId)
     }
 
     // Supabase delete check-in
@@ -1417,31 +1418,50 @@ export const db = {
 
     let changed = false
 
-    // Badge 1: Primeiro Passo
-    if (student.presencas.length >= 1 && !student.badges.includes('primeiro-passo')) {
+    // Badge 1: Primeiro Passo (needs >= 1 presences)
+    const hasFirstStep = student.presencas.length >= 1
+    const idxFirstStep = student.badges.indexOf('primeiro-passo')
+    if (hasFirstStep && idxFirstStep === -1) {
       student.badges.push('primeiro-passo')
       this.addNotification(studentId, 'Nova Conquista Desbloqueada!', 'Parabéns! Você ganhou a medalha "Primeiro Passo" ao concluir seu primeiro treino!')
       changed = true
+    } else if (!hasFirstStep && idxFirstStep !== -1) {
+      student.badges.splice(idxFirstStep, 1)
+      changed = true
     }
 
-    // Badge 2: Frequência de Ferro
-    if (student.presencas.length >= 3 && !student.badges.includes('frequencia-ferro')) {
+    // Badge 2: Frequência de Ferro (needs >= 3 presences)
+    const hasIronFreq = student.presencas.length >= 3
+    const idxIronFreq = student.badges.indexOf('frequencia-ferro')
+    if (hasIronFreq && idxIronFreq === -1) {
       student.badges.push('frequencia-ferro')
       this.addNotification(studentId, 'Nova Conquista Desbloqueada!', 'Incrível! Você ganhou a medalha "Frequência de Ferro" ao acumular 3 treinos!')
+      changed = true
+    } else if (!hasIronFreq && idxIronFreq !== -1) {
+      student.badges.splice(idxIronFreq, 1)
       changed = true
     }
 
     // Badge 3: Sem Kimono (NoGi)
     const hasNoGi = student.presencas.some(p => p.treino.toLowerCase().includes('nogi'))
-    if (hasNoGi && !student.badges.includes('nogi')) {
+    const idxNoGi = student.badges.indexOf('nogi')
+    if (hasNoGi && idxNoGi === -1) {
       student.badges.push('nogi')
       this.addNotification(studentId, 'Nova Conquista Desbloqueada!', 'Técnica apurada! Você ganhou a medalha "Sem Kimono" ao treinar NoGi!')
+      changed = true
+    } else if (!hasNoGi && idxNoGi !== -1) {
+      student.badges.splice(idxNoGi, 1)
       changed = true
     }
 
     if (changed) {
       students[idx] = student
       localStorage.setItem('jiupro_students', JSON.stringify(students))
+      
+      // Sync badges array to Supabase
+      supabase.from('students').update({ badges: student.badges }).eq('id', studentId).then(({ error }) => {
+        if (error) console.error('Erro ao sincronizar conquistas no Supabase:', error)
+      })
     }
   },
 
